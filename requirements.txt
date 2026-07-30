@@ -1,0 +1,20 @@
+# Núcleo de datos
+numpy==2.2.6
+pandas==2.2.3
+openpyxl==3.1.5
+scikit-learn==1.5.2
+
+# LLM — Groq (API OpenAI-compatible)
+groq==0.13.0
+python-dotenv==1.2.2
+pydantic==2.13.4
+
+# Demo / dashboard
+streamlit==1.39.0
+
+# Frontera de herramientas para el agente (MCP bonus)
+# Nota: fastmcp 3.x fuerza pydantic>=2.11 y python-dotenv 1.2.x; por eso los pines de arriba.
+fastmcp==3.4.5
+
+# Tests
+pytest==8.3.3
