@@ -25,6 +25,7 @@ _DECISION_COLUMNS = [
     "razonamiento",
     "override_guardrail",
     "modelo_usado",
+    "pasos_recomendados",
 ]
 
 
@@ -47,6 +48,7 @@ def build_dataframe(
             razonamiento=d.razonamiento or "",
             override_guardrail=d.override_guardrail or "",
             modelo_usado=d.modelo_usado or "",
+            pasos_recomendados="; ".join(d.pasos_recomendados),
         )
         rows.append(row)
     return pd.DataFrame(

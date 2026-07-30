@@ -76,3 +76,8 @@ class Decision(BaseModel):
         description="Provider:model that produced the LLM decision, e.g. "
         "'groq:llama-3.3-70b'; None for deterministic decisions.",
     )
+    pasos_recomendados: list[str] = Field(
+        default_factory=list,
+        description="Short, concrete next steps for CS on ESCALAR cases: what to check and "
+        "what specifically kept the model from reaching a verdict. Empty for APROBAR/RECHAZAR.",
+    )

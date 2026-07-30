@@ -34,6 +34,14 @@ _GPS_NO_CONFIRMADA = "no confirmada"
 _GPS_NO_CONCLUYENTE = {"parcial", "senal perdida"}
 _NON_DELIVERY_REASONS = {"orden no llego", "orden cancelada sin reembolso"}
 
+# Steps CS sees on any ESCALAR case that never got LLM-written steps: the no-LLM
+# pipeline mode, a fail-safe fallback, or a guardrail degrading an LLM verdict.
+GENERIC_ESCALATION_STEPS = [
+    "Revisar el texto del reclamo contra el motivo y el estado del GPS.",
+    "Confirmar el historial de compensaciones del usuario en los últimos 90 días.",
+    "Contrastar con soporte (fotos, chat) si el reclamo lo amerita.",
+]
+
 
 def normalize_key(text: str) -> str:
     """Normalize business text for accent-insensitive comparisons."""
@@ -116,14 +124,23 @@ def reconcile(decision: Decision, verdict: GuardrailVerdict) -> Decision:
     """Reconcile LLM output with policy, conservatively degrading to ESCALAR."""
     a, rec = verdict.action, decision.recomendacion
     tag = f"Capa0: {verdict.reason}"
+    degraded = False
 
     if a is GuardrailAction.FORBID_APPROVE and rec is Recommendation.APROBAR:
         decision.recomendacion = Recommendation.ESCALAR
         decision.override_guardrail = f"{tag} → no puede APROBAR, se ESCALA"
+        degraded = True
     elif a is GuardrailAction.FORBID_REJECT and rec is Recommendation.RECHAZAR:
         decision.recomendacion = Recommendation.ESCALAR
         decision.override_guardrail = f"{tag} → no puede RECHAZAR, se ESCALA"
+        degraded = True
     elif a is GuardrailAction.FORCE_ESCALATE and rec is not Recommendation.ESCALAR:
         decision.override_guardrail = f"{tag} → ESCALAR (era {rec.value})"
         decision.recomendacion = Recommendation.ESCALAR
+        degraded = True
+
+    if degraded and not decision.pasos_recomendados:
+        # The LLM only writes steps when it itself picks ESCALAR; here a guardrail
+        # overrode its own APROBAR/RECHAZAR, so it never wrote any.
+        decision.pasos_recomendados = GENERIC_ESCALATION_STEPS
     return decision

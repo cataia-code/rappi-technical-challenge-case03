@@ -33,6 +33,7 @@ def build_cases() -> list[dict]:
     out = []
     for _, r in df.iterrows():
         top = str(r.get("top_contribuyentes", "") or "")
+        pasos = str(r.get("pasos_recomendados", "") or "")
         out.append({
             "id": r["caso_id"],
             "ciu": r["ciudad"],
@@ -43,6 +44,7 @@ def build_cases() -> list[dict]:
             "sc": round(float(r["risk_score"]), 2) if pd.notna(r.get("risk_score")) else None,
             "res": r["resumen_cs"],
             "top": [t.strip() for t in top.split(";") if t.strip()],
+            "pasos": [p.strip() for p in pasos.split(";") if p.strip()],
             "ant": int(r["antiguedad_usuario_dias"]),
             "n90": int(r["num_compensaciones_90d"]),
             "fl": int(r["flags_fraude_previos"]),

@@ -70,3 +70,16 @@ def test_reconcile_protects_legitimate_bucket(cases_by_id):
     )
     out = reconcile(d, v)
     assert out.recomendacion is Recommendation.ESCALAR
+
+
+def test_reconcile_degradation_fills_generic_steps_when_llm_wrote_none(cases_by_id):
+    """Guardrail-forced ESCALAR still gives CS a starting point, even though the
+    LLM wrote no pasos_recomendados (it wasn't the one that picked ESCALAR)."""
+    case = cases_by_id["COMP-0011"]
+    v = evaluate_guardrail(assess(case), compute_features(case))
+    d = Decision(
+        caso_id=case.caso_id, recomendacion=Recommendation.APROBAR, confianza=0.9,
+        senales_dominantes=["x"], resumen_cs="...", pasos_recomendados=[],
+    )
+    out = reconcile(d, v)
+    assert out.pasos_recomendados

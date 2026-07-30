@@ -21,6 +21,7 @@ from pydantic import ValidationError
 from config import Settings
 from domain.models import CompensationCase, Decision, Recommendation
 from features.feature_service import (
+    GENERIC_ESCALATION_STEPS,
     compute_features,
     evaluate_guardrail,
     reconcile,
@@ -79,6 +80,7 @@ class DecisionService:
             top_contribuyentes=risk.top_contribuyentes,
             razonamiento="Ambiguo por el modelo de riesgo; escalado sin LLM (fallback).",
             override_guardrail="Fallback sin LLM: bucket AMBIGUO → ESCALAR",
+            pasos_recomendados=GENERIC_ESCALATION_STEPS,
         )
 
     def decide_llm(self, case: CompensationCase) -> Decision:
@@ -154,6 +156,7 @@ class DecisionService:
             senales_dominantes=payload.senales_dominantes[:3],
             resumen_cs=payload.resumen_cs,
             razonamiento=payload.justificacion,
+            pasos_recomendados=payload.pasos_recomendados,
         )
 
     def _route_uncertainty(self, decision: Decision) -> Decision:
@@ -165,4 +168,8 @@ class DecisionService:
                 f"(era {decision.recomendacion.value})."
             )
             decision.recomendacion = Recommendation.ESCALAR
+            if not decision.pasos_recomendados:
+                # The LLM only writes steps when it itself picks ESCALAR; here we
+                # override its own APROBAR/RECHAZAR, so it never wrote any.
+                decision.pasos_recomendados = GENERIC_ESCALATION_STEPS
         return decision

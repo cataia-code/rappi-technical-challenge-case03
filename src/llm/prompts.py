@@ -11,9 +11,11 @@ from domain.models import CompensationCase
 from features.feature_service import CaseFeatures
 from scoring.risk_service import RiskAssessment
 
-PROMPT_VERSION = "2026-07-30.v1"
+PROMPT_VERSION = "2026-07-30.v2"
 
 # --- Decision policy prompt (Spanish product prompt) -------------------------
+# Kept compact on purpose: fewer tokens in = lower cost and more throughput under
+# the provider rate limit, without dropping any rule that changes the verdict.
 SYSTEM_PROMPT = """\
 Analista de Trust & Safety de Rappi. Revisás casos AMBIGUOS de compensación (un modelo \
 de riesgo ya filtró los claros). Emitís UNA recomendación: APROBAR / RECHAZAR / ESCALAR.
@@ -27,10 +29,12 @@ Reglas:
 - APROBAR si el relato es específico y coherente y el riesgo es bajo/medio; RECHAZAR si hay \
 contradicción clara o el relato es genérico/incoherente con riesgo alto; ESCALAR si queda duda.
 - confianza: 1.0 inequívoco, ~0.5 mixto.
+- Si ESCALAR: agregá pasos_recomendados (2-4 ítems, menos de 12 palabras c/u, imperativo) — qué \
+revisar puntualmente y qué te impidió decidir. Si no es ESCALAR, dejalo vacío ([]).
 
 Respondé SOLO este JSON:
 {"justificacion":"1-2 frases basadas solo en señales observables","recomendacion":"APROBAR|RECHAZAR|ESCALAR","confianza":0.0,\
-"senales_dominantes":["s1","s2"],"resumen_cs":"una línea accionable para CS"}"""
+"senales_dominantes":["s1","s2"],"resumen_cs":"una línea accionable para CS","pasos_recomendados":[]}"""
 
 
 def build_user_prompt(

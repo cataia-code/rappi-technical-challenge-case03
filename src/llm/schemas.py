@@ -16,6 +16,10 @@ class LLMDecisionPayload(BaseModel):
     confianza: float = Field(ge=0.0, le=1.0)
     senales_dominantes: list[str] = Field(min_length=1, max_length=3)
     resumen_cs: str = Field(min_length=1)
+    pasos_recomendados: list[str] = Field(
+        default_factory=list,
+        description="Only populated when recomendacion=ESCALAR: 3-5 short, concrete next steps.",
+    )
 
     @field_validator("justificacion", "resumen_cs")
     @classmethod
@@ -32,3 +36,8 @@ class LLMDecisionPayload(BaseModel):
         if not cleaned:
             raise ValueError("missing dominant signals")
         return cleaned[:3]
+
+    @field_validator("pasos_recomendados")
+    @classmethod
+    def _steps_cleaned(cls, values: list[str]) -> list[str]:
+        return [value.strip() for value in values if value.strip()][:5]

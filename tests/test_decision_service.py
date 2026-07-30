@@ -58,6 +58,37 @@ def test_decision_service_without_llm_does_not_require_groq(monkeypatch):
     assert out.risk_bucket == "AMBIGUO"
     assert out.risk_score is not None
     assert out.top_contribuyentes
+    assert out.pasos_recomendados  # CS always gets a starting point, even without LLM
+
+
+def test_parse_valid_llm_json_with_steps():
+    svc = _service_without_providers()
+    case = load_cases()[0]
+    raw = json.dumps(
+        {
+            "justificacion": "Relato mixto, monto medio.",
+            "recomendacion": "ESCALAR",
+            "confianza": 0.5,
+            "senales_dominantes": ["riesgo medio"],
+            "resumen_cs": "Revisión humana requerida.",
+            "pasos_recomendados": ["Verificar GPS", "Confirmar historial 90d"],
+        }
+    )
+
+    out = svc._parse(case, raw)
+
+    assert out.pasos_recomendados == ["Verificar GPS", "Confirmar historial 90d"]
+
+
+def test_low_confidence_override_fills_generic_steps_when_llm_wrote_none():
+    svc = _service_without_providers()
+    d = Decision(
+        caso_id="Z", recomendacion=Recommendation.APROBAR, confianza=0.4,
+        senales_dominantes=["dudosa"], resumen_cs="...", pasos_recomendados=[],
+    )
+    out = svc._route_uncertainty(d)
+    assert out.recomendacion is Recommendation.ESCALAR
+    assert out.pasos_recomendados  # forced ESCALAR still gets actionable steps
 
 
 def test_parse_valid_llm_json():

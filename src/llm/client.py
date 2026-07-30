@@ -46,7 +46,7 @@ def _retry_after_seconds(exc: Exception, fallback: float, cap: float = 30.0) -> 
 
 
 class LLMClient:
-    def __init__(self, settings: Settings, max_tokens: int = 450):
+    def __init__(self, settings: Settings, max_tokens: int = 550):
         self.settings = settings
         self.max_tokens = max_tokens
         self._clients: dict[str, object] = {}

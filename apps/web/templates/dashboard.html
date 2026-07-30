@@ -40,7 +40,7 @@ h2.title{font-size:clamp(30px,4vw,46px);margin:14px 0 10px}
 .nav .wrap{display:flex;align-items:center;gap:18px;height:62px}
 .brand{display:flex;align-items:center;gap:10px;font-family:'Fredoka';font-weight:700;font-size:20px}
 .brand .dot{width:26px;height:26px;border-radius:50%;background:var(--rappi);display:grid;place-items:center;color:#fff;font-size:15px}
-.brand-logo{height:30px;width:auto;display:block}
+.brand-logo{height:34px;width:auto;display:block}
 .nav-links{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
 .nav-links button{font:inherit;font-size:14px;font-weight:500;color:var(--muted);text-decoration:none;
   padding:7px 12px;border-radius:99px;background:none;border:none;cursor:pointer}
@@ -228,6 +228,12 @@ table.cases tbody tr:hover{background:var(--surface-2)}
 .detail .cid{font-family:'JetBrains Mono';font-weight:600;font-size:14px;color:var(--muted)}
 .detail .dec{font-family:'Fredoka';font-size:26px;margin:2px 0 10px}
 .detail .res{background:var(--surface-2);border-radius:var(--r-md);padding:12px 14px;font-size:14px;margin-bottom:14px}
+.detail .steps{background:var(--escalar-bg);border:1px solid #eeddb0;border-radius:var(--r-md);
+  padding:12px 14px;font-size:13.5px;margin-bottom:14px;color:#6b4f00}
+.detail .steps .t{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#8a6200;
+  font-weight:600;margin:0 0 6px}
+.detail .steps ol{margin:0;padding-left:18px}
+.detail .steps li{margin:3px 0}
 .detail dl{display:grid;grid-template-columns:1fr auto;gap:7px 12px;font-size:13.5px;margin:0}
 .detail dt{color:var(--muted)}.detail dd{margin:0;font-family:'JetBrains Mono';text-align:right}
 .detail .why{margin-top:14px}
@@ -247,7 +253,7 @@ table.cases tbody tr:hover{background:var(--surface-2)}
 footer{border-top:1px solid var(--line);background:var(--surface-2);padding:44px 0;color:var(--muted);font-size:14px}
 footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:28px;flex-wrap:wrap}
 .foot-left{display:flex;align-items:center;gap:16px}
-.foot-logo{height:34px;width:auto;display:block}
+.foot-logo{height:40px;width:auto;display:block}
 .foot-left .foot-proj{font-family:'Fredoka';color:var(--ink);font-weight:600;font-size:15px;line-height:1.3}
 .foot-left .foot-proj span{display:block;font-family:'Inter';font-weight:400;color:var(--muted);font-size:13px}
 .foot-meta{text-align:right;line-height:1.55}
@@ -630,8 +636,15 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
 <script>
 const DASHBOARD_DATA = /*__DATA__*/null;
 const MODEL_DATA = /*__MODEL__*/null;
-const DEC_COLOR = {APROBAR:'#1F9D57', ESCALAR:'#E8A400', RECHAZAR:'#D93A3A'};
-const BUCKET_COLOR = {LEGITIMO:'#1F9D57', AMBIGUO:'#E8A400', FRAUDE:'#D93A3A'};
+/* Single source of truth for decision colors: read from the :root CSS tokens
+   instead of duplicating hex values here, so they can never drift apart. */
+const _rootStyle = getComputedStyle(document.documentElement);
+const DEC_COLOR = {
+  APROBAR: _rootStyle.getPropertyValue('--aprobar').trim(),
+  ESCALAR: _rootStyle.getPropertyValue('--escalar').trim(),
+  RECHAZAR: _rootStyle.getPropertyValue('--rechazar').trim(),
+};
+const BUCKET_COLOR = {LEGITIMO: DEC_COLOR.APROBAR, AMBIGUO: DEC_COLOR.ESCALAR, FRAUDE: DEC_COLOR.RECHAZAR};
 const cases = (DASHBOARD_DATA && DASHBOARD_DATA.cases) || [];
 const FEATURE_LABEL = {
   num_comp_90d:'num_compensaciones_90d', flags:'flags_fraude_previos', antiguedad:'antiguedad_usuario_dias',
@@ -822,6 +835,8 @@ function renderDetail(){
       <div class="scoremeter-pin" style="left:${Math.round(c.sc*100)}%"></div></div>
     <div style="font-size:12.5px;color:var(--muted);margin:-8px 0 12px" class="mono">risk_score ${c.sc} · bucket ${c.bkt}</div>
     <div class="res">${c.res}</div>
+    ${c.rec==='ESCALAR' && (c.pasos||[]).length ? `<div class="steps"><div class="t">Pasos recomendados para CS</div>
+      <ol>${c.pasos.map(p=>`<li>${p}</li>`).join('')}</ol></div>` : ''}
     <dl>
       <dt>Antigüedad</dt><dd>${c.ant} d</dd>
       <dt>Compensaciones 90d</dt><dd>${c.n90}</dd>
