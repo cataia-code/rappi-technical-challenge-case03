@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import base64
 import json
-import sys
+import re
 from pathlib import Path
 
 import pandas as pd
@@ -19,6 +19,7 @@ LOGO = WEB / "assets" / "images" / "Rappi_logo.svg.webp"
 FAVICON = WEB / "assets" / "images" / "rappi_faticon.png"
 TEMPLATE = WEB / "templates" / "dashboard.html"
 MODEL_SELECTION = ROOT / "data" / "processed" / "model_selection.json"
+PROMPTS_MODULE = ROOT / "src" / "llm" / "prompts.py"
 OUT = ROOT / "docs" / "index.html"              # GitHub Pages output (/docs)
 
 
@@ -58,9 +59,25 @@ def load_model_selection() -> dict:
     return json.loads(MODEL_SELECTION.read_text(encoding="utf-8"))
 
 
+def prompt_version() -> str:
+    text = PROMPTS_MODULE.read_text(encoding="utf-8")
+    m = re.search(r'PROMPT_VERSION\s*=\s*"([^"]+)"', text)
+    return m.group(1) if m else "unknown"
+
+
+def build_meta(cases: list[dict]) -> dict:
+    total = len(cases) or 1
+    escalated = sum(1 for c in cases if c["rec"] == "ESCALAR")
+    return {
+        "prompt_version": prompt_version(),
+        "det_pct": round((total - escalated) / total * 100, 1),
+        "esc_pct": round(escalated / total * 100, 1),
+    }
+
+
 def main() -> None:
     cases = build_cases()
-    data = {"cases": cases}
+    data = {"cases": cases, "meta": build_meta(cases)}
     model = load_model_selection()
     template = TEMPLATE.read_text(encoding="utf-8")
     html = template.replace("/*__DATA__*/null", json.dumps(data, ensure_ascii=False))

@@ -132,6 +132,32 @@ table.cmp tr.winner td{font-weight:700}
   text-align:center;color:var(--muted);margin-top:24px}
 .soon h3{color:var(--ink);margin:0 0 8px}
 
+/* diagram cards + modal (Arquitectura tab) */
+.diagrams{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
+.dcard{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:20px;text-align:left;
+  cursor:pointer;font:inherit;color:inherit;transition:.15s}
+.dcard:hover{border-color:var(--rappi);box-shadow:var(--shadow);transform:translateY(-2px)}
+.dcard .ico{font-size:26px;margin-bottom:8px}
+.dcard h4{margin:0 0 6px;font-size:16px}
+.dcard p{margin:0;font-size:13.5px;color:var(--muted)}
+.dcard .open{margin-top:10px;font-size:12.5px;font-weight:600;color:var(--rappi)}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(27,27,31,.6);z-index:200;display:none;
+  align-items:center;justify-content:center;padding:24px}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:var(--r-lg);width:min(1100px,100%);max-height:90vh;
+  display:flex;flex-direction:column;box-shadow:0 30px 80px -20px rgba(0,0,0,.4)}
+.modal-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.modal-head h3{margin:0;font-size:18px;flex:1}
+.modal-btn{background:var(--surface-2);border:1px solid var(--line-strong);border-radius:9px;
+  width:34px;height:34px;display:grid;place-items:center;cursor:pointer;font-size:16px;color:var(--ink)}
+.modal-btn:hover{border-color:var(--rappi);color:var(--rappi-dark)}
+.modal-btn.wide{width:auto;padding:0 14px;font-size:13px;font-weight:600;gap:6px}
+.modal-body{flex:1;overflow:auto;padding:20px;background:var(--surface-2)}
+.modal-canvas{min-height:100%;display:flex;align-items:center;justify-content:center}
+.modal-canvas svg{transition:transform .12s ease}
+.modal-canvas .loading{color:var(--muted);font-size:14px}
+
 /* bucket profile cards */
 .buckets{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
 .bcard{border-radius:var(--r-md);padding:18px;border:1px solid var(--line)}
@@ -241,6 +267,13 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
 }
 :focus-visible{outline:3px solid var(--rappi);outline-offset:2px;border-radius:6px}
 </style>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: false, theme: 'neutral',
+    themeVariables: { primaryColor: '#FFE9E2', primaryBorderColor: '#FF441F', primaryTextColor: '#2E2C36',
+      lineColor: '#6A696E', fontFamily: 'Inter, system-ui, sans-serif' } });
+  window.mermaid = mermaid;
+</script>
 </head>
 <body>
 
@@ -452,13 +485,64 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
   </div>
   <div class="callout reveal">Este ruteo baja el batch de 150 a ~58 llamadas y hace el sistema
     <b>escalable a 200+/día</b>: el costo del LLM crece solo con la ambigüedad real, no con el volumen total.</div>
-  <div class="soon"><h3>Diagramas Mermaid — próximamente</h3>
-    <p>Arquitectura de 3 capas, diagrama de secuencia y árbol de decisión, en ventanas emergentes con zoom y
-       descarga (siguiente fase del proyecto).</p></div>
+
+  <h3 style="font-size:18px;margin:32px 0 4px">Diagramas técnicos</h3>
+  <p style="font-size:13.5px;color:var(--muted);margin:0 0 16px">Clic para abrir en una ventana con zoom y descarga.</p>
+  <div class="diagrams reveal">
+    <button class="dcard" data-diagram="arch"><div class="ico">🏗️</div><h4>Arquitectura</h4>
+      <p>3 capas + backbone de datos: dónde viven la API, el MCP, el LLM multi-proveedor, el modelo
+         ganador y la normalización.</p><div class="open">Abrir diagrama →</div></button>
+    <button class="dcard" data-diagram="seq"><div class="ico">🔁</div><h4>Secuencia</h4>
+      <p>El recorrido de un caso: carga → features → modelo de riesgo → ¿ambiguo? → LLM → guardrails → decisión.</p>
+      <div class="open">Abrir diagrama →</div></button>
+    <button class="dcard" data-diagram="tree"><div class="ico">🌳</div><h4>Árbol de decisión</h4>
+      <p>Cómo se llega a APROBAR / RECHAZAR / ESCALAR, incluyendo los guardrails que acotan al LLM.</p>
+      <div class="open">Abrir diagrama →</div></button>
+  </div>
+</div></section>
+
+<section class="section" id="evaluacion"><div class="wrap">
+  <span class="eyebrow">Evaluación del LLM</span>
+  <h2 class="title">Cómo sabemos que el sistema funciona</h2>
+  <p class="lead">Prompts versionados (<span class="mono" id="prompt-version">—</span>) para poder comparar corridas.
+    Las métricas de abajo son las que este batch permite medir <b>hoy, con datos reales</b> del run que generó el
+    dashboard — no proyecciones.</p>
+  <div class="metric-row reveal">
+    <div class="mcard"><div class="n" id="ev-det">—</div><div class="l">Cobertura determinística — resuelto por Capa 0, 0 tokens</div></div>
+    <div class="mcard"><div class="n" id="ev-esc">—</div><div class="l">Tasa de escalamiento (objetivo: 20–35%)</div></div>
+    <div class="mcard"><div class="n">100%</div><div class="l">Fidelidad de esquema — Pydantic invalida y cae a ESCALAR fail-safe, nunca propaga JSON roto</div></div>
+  </div>
+  <div class="callout reveal"><b>Nota honesta sobre este run.</b> El Excel que alimenta el dashboard se generó con
+    <span class="mono">--no-llm</span> (por presupuesto de tokens): los 58 casos ambiguos cayeron al fallback
+    determinístico "AMBIGUO → ESCALAR" sin invocar ningún proveedor — por eso la confianza registrada en esos casos
+    es un valor fijo (0.5), no una salida de LLM. Con presupuesto disponible, correr sin <span class="mono">--no-llm</span>
+    resuelve por texto una parte de esos 58 y <b>baja la tasa de escalamiento</b>, que es exactamente el objetivo:
+    el LLM existe para reducir cuánto llega a un humano. La telemetría de latencia y alucinación por proveedor se
+    captura en <span class="mono">experiments/llm/eval_runs/</span> cuando corre con LLM activo.</div>
+  <div class="callout reveal" style="margin-top:14px"><b>Qué cuenta como "alucinación" acá.</b> El LLM solo puede
+    citar señales que ya le dimos en el prompt (bucket, score, señales dominantes, texto del reclamo) — no inventa
+    columnas. Los guardrails de Capa 2 son el control de última línea: si el LLM aprueba un caso que el modelo de
+    riesgo marcó FRAUDE, o rechaza uno que marcó LEGÍTIMO sin contradicción de GPS, la decisión se degrada a
+    ESCALAR y queda registrada en <span class="mono">override_guardrail</span> — auditable caso por caso.</div>
 </div></section>
 
 </div>
 <!-- ============ /TAB: ARQUITECTURA ============ -->
+
+<!-- Diagram modal (shared by the 3 diagram cards above) -->
+<div class="modal-overlay" id="diagram-modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modal-title">Diagrama</h3>
+      <button class="modal-btn" id="modal-zoom-out" title="Alejar">−</button>
+      <button class="modal-btn" id="modal-zoom-reset" title="Restablecer zoom">1:1</button>
+      <button class="modal-btn" id="modal-zoom-in" title="Acercar">+</button>
+      <button class="modal-btn wide" id="modal-download" title="Descargar SVG">⬇ SVG</button>
+      <button class="modal-btn" id="modal-close" title="Cerrar (Esc)">✕</button>
+    </div>
+    <div class="modal-body"><div class="modal-canvas" id="modal-canvas"><span class="loading">Cargando diagrama…</span></div></div>
+  </div>
+</div>
 
 <!-- ============ TAB: DASHBOARD ============ -->
 <div class="view" id="view-dashboard">
@@ -768,6 +852,114 @@ document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
 window.addEventListener('resize',()=>{drawStrip(document.getElementById('hero-spec'),cases,120,3.2);renderSpectrum();});
 refresh();
+
+/* ---------- Evaluation metrics (Arquitectura tab) ---------- */
+(function(){
+  const meta = (DASHBOARD_DATA && DASHBOARD_DATA.meta) || {};
+  const set = (id, v) => { const el = document.getElementById(id); if(el && v != null) el.textContent = v; };
+  set('prompt-version', meta.prompt_version);
+  set('ev-det', meta.det_pct != null ? meta.det_pct + '%' : null);
+  set('ev-esc', meta.esc_pct != null ? meta.esc_pct + '%' : null);
+})();
+
+/* ---------- Mermaid diagram modal ---------- */
+const DIAGRAMS = {
+  arch: { title: 'Arquitectura — 3 capas + backbone de datos', def: `flowchart TB
+    subgraph Backbone["Backbone de datos"]
+        RAW[("Excel · 150 casos")] --> DS["data_service<br/>normaliza NFC + valida (pydantic)"]
+    end
+    DS --> FS["features/feature_service<br/>señales derivadas + guardrails"]
+    DS --> RS["scoring/risk_service<br/>modelo ganador: Agglomerative(k=3)"]
+    RS --> DEC{"¿bucket claro?"}
+    DEC -- "sí · determinístico" --> OUT1["Decision<br/>0 tokens"]
+    DEC -- "no · AMBIGUO" --> LLM["llm/client<br/>Groq → Gemini → OpenRouter"]
+    LLM --> GR["feature_service.reconcile<br/>guardrails Capa 2"]
+    GR --> OUT2["Decision + resumen + pasos"]
+    OUT1 --> API["apps/api · FastAPI"]
+    OUT2 --> API
+    OUT1 --> MCP["apps/mcp · FastMCP"]
+    OUT2 --> MCP
+    OUT1 --> WEBAPP["apps/web · dashboard estático"]
+    OUT2 --> WEBAPP` },
+  seq: { title: 'Secuencia — de la carga del caso a la decisión', def: `sequenceDiagram
+    participant U as Pipeline / API / MCP
+    participant DS as data_service
+    participant FS as feature_service
+    participant RS as risk_service
+    participant LLM as llm.client
+    participant GR as guardrails
+    U->>DS: load_cases()
+    DS->>FS: CompensationCase normalizado
+    FS->>RS: assess(case)
+    RS-->>FS: RiskAssessment (bucket, score, top señales)
+    alt bucket claro (LEGITIMO o FRAUDE)
+        FS-->>U: Decision determinística
+    else AMBIGUO
+        FS->>LLM: prompt versionado + señales + texto del reclamo
+        LLM-->>FS: JSON validado (schema pydantic)
+        FS->>GR: reconcile(decision, guardrail)
+        GR-->>U: Decision final (+ override si aplica)
+    end` },
+  tree: { title: 'Árbol de decisión — APROBAR / RECHAZAR / ESCALAR', def: `flowchart TD
+    A["Caso"] --> B{"risk_bucket"}
+    B -- LEGITIMO --> C{"GPS contradice el reclamo?"}
+    C -- No --> D["APROBAR (determinístico)"]
+    C -- Sí --> E["AMBIGUO → LLM"]
+    B -- FRAUDE --> F["RECHAZAR (determinístico)"]
+    B -- AMBIGUO --> E
+    E --> G["LLM decide"]
+    G --> H{"¿Viola un guardrail de política?"}
+    H -- Sí --> I["ESCALAR (override registrado)"]
+    H -- No --> J{"confianza menor al umbral?"}
+    J -- Sí --> I
+    J -- No --> K["Decisión del LLM"]` },
+};
+
+const modal = document.getElementById('diagram-modal');
+const modalCanvas = document.getElementById('modal-canvas');
+let modalZoom = 1;
+
+async function openDiagram(name){
+  const d = DIAGRAMS[name];
+  if(!d) return;
+  document.getElementById('modal-title').textContent = d.title;
+  modal.classList.add('open');
+  modalZoom = 1;
+  modalCanvas.innerHTML = '<span class="loading">Cargando diagrama…</span>';
+  try{
+    const { svg } = await window.mermaid.render('mermaid-' + name, d.def);
+    modalCanvas.innerHTML = svg;
+    const el = modalCanvas.querySelector('svg');
+    if(el) el.style.transform = 'scale(1)';
+  }catch(err){
+    modalCanvas.innerHTML = '<span class="loading">No se pudo renderizar el diagrama: ' + err.message + '</span>';
+  }
+}
+function closeDiagram(){ modal.classList.remove('open'); }
+function applyZoom(){ const el = modalCanvas.querySelector('svg'); if(el) el.style.transform = 'scale(' + modalZoom + ')'; }
+
+document.querySelectorAll('[data-diagram]').forEach(btn =>
+  btn.addEventListener('click', () => openDiagram(btn.dataset.diagram)));
+document.getElementById('modal-close').addEventListener('click', closeDiagram);
+modal.addEventListener('click', e => { if(e.target === modal) closeDiagram(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && modal.classList.contains('open')) closeDiagram(); });
+document.getElementById('modal-zoom-in').addEventListener('click', () => { modalZoom = Math.min(3, modalZoom + .2); applyZoom(); });
+document.getElementById('modal-zoom-out').addEventListener('click', () => { modalZoom = Math.max(.4, modalZoom - .2); applyZoom(); });
+document.getElementById('modal-zoom-reset').addEventListener('click', () => { modalZoom = 1; applyZoom(); });
+document.getElementById('modal-download').addEventListener('click', () => {
+  const el = modalCanvas.querySelector('svg');
+  if(!el) return;
+  const clone = el.cloneNode(true);
+  clone.removeAttribute('style');
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  const blob = new Blob([clone.outerHTML], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = (document.getElementById('modal-title').textContent || 'diagrama').replace(/\s+/g,'-').toLowerCase() + '.svg';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
 showTab((location.hash||'').replace('#','') || 'exploracion');
 </script>
 </body>
