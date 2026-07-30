@@ -4,13 +4,10 @@ pandas==2.2.3
 openpyxl==3.1.5
 scikit-learn==1.5.2
 
-# LLM — Groq (API OpenAI-compatible)
-groq==0.13.0
+# LLM — multi-proveedor vía SDK OpenAI (Groq / Gemini / OpenRouter, todos OpenAI-compatible)
+openai==1.59.6
 python-dotenv==1.2.2
 pydantic==2.13.4
-
-# Demo / dashboard
-streamlit==1.39.0
 
 # Frontera de herramientas para el agente (MCP bonus)
 # Nota: fastmcp 3.x fuerza pydantic>=2.11 y python-dotenv 1.2.x; por eso los pines de arriba.

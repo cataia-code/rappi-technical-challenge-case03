@@ -70,3 +70,8 @@ class Decision(BaseModel):
         default=None,
         description="Si un hard-stop de Capa 0 anuló al LLM, aquí se registra el motivo.",
     )
+    modelo_usado: Optional[str] = Field(
+        default=None,
+        description="Proveedor:modelo que produjo la decisión LLM (ej. 'groq:llama-3.3-70b'); "
+        "None en decisiones determinísticas.",
+    )
