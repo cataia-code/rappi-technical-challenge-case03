@@ -20,6 +20,8 @@ FAVICON = WEB / "assets" / "images" / "rappi_faticon.png"
 TEMPLATE = WEB / "templates" / "dashboard.html"
 MODEL_SELECTION = ROOT / "data" / "processed" / "model_selection.json"
 PROMPTS_MODULE = ROOT / "src" / "llm" / "prompts.py"
+RISK_MODEL_JSON = ROOT / "src" / "scoring" / "artifacts" / "risk_model.json"
+SCORING_JS = WEB / "assets" / "js" / "scoring.js"
 OUT = ROOT / "docs" / "index.html"              # GitHub Pages output (/docs)
 
 
@@ -81,9 +83,13 @@ def main() -> None:
     cases = build_cases()
     data = {"cases": cases, "meta": build_meta(cases)}
     model = load_model_selection()
+    risk_model = json.loads(RISK_MODEL_JSON.read_text(encoding="utf-8"))
+    scoring_js = SCORING_JS.read_text(encoding="utf-8")
     template = TEMPLATE.read_text(encoding="utf-8")
     html = template.replace("/*__DATA__*/null", json.dumps(data, ensure_ascii=False))
     html = html.replace("/*__MODEL__*/null", json.dumps(model, ensure_ascii=False))
+    html = html.replace("/*__RISK_MODEL__*/null", json.dumps(risk_model, ensure_ascii=False))
+    html = html.replace("/*__SCORING_JS__*/", scoring_js)
     html = html.replace("__RAPPI_LOGO__", _data_uri(LOGO, "image/webp"))
     html = html.replace("__RAPPI_FAVICON__", _data_uri(FAVICON, "image/png"))
     OUT.parent.mkdir(parents=True, exist_ok=True)

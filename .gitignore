@@ -1,6 +1,9 @@
 # --- Secrets / local environment ---
 .env
 .env.*
+apps/web/worker/.dev.vars
+apps/web/worker/node_modules/
+apps/web/worker/.wrangler/
 
 # --- Python venv ---
 .venv/

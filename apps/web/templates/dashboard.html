@@ -132,6 +132,20 @@ table.cmp tr.winner td{font-weight:700}
   text-align:center;color:var(--muted);margin-top:24px}
 .soon h3{color:var(--ink);margin:0 0 8px}
 
+/* Demo tab: synthetic case fields + step-by-step result */
+.demo-fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px 12px;margin-top:16px}
+.dfield{background:var(--surface-2);border-radius:9px;padding:8px 10px}
+.dfield .k{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.dfield .v{font-family:'JetBrains Mono';font-weight:600;font-size:13px;color:var(--ink);word-break:break-word}
+.demo-step{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.demo-step:first-child{border-top:none}
+.demo-step .n{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--rappi-soft);
+  color:var(--rappi-dark);font-size:12px;font-weight:700;display:grid;place-items:center;font-family:'JetBrains Mono'}
+.demo-step .body{font-size:13.5px}
+.demo-step .body b{color:var(--ink)}
+.demo-note{background:var(--surface-2);border-radius:var(--r-md);padding:12px 14px;font-size:13px;
+  color:var(--muted);margin-top:12px}
+
 /* diagram cards + modal (Arquitectura tab) */
 .diagrams{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
 .dcard{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:20px;text-align:left;
@@ -608,10 +622,20 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
   <p class="lead">Generá una fila de datos aleatorios, corré el mismo pipeline que corrió sobre los 150 casos
     —normalización, modelo de riesgo en el navegador y, si el caso es ambiguo, una llamada real al LLM— y mirá
     la decisión salir en segundos.</p>
-  <div class="soon"><h3>En construcción</h3>
-    <p>Esta pestaña va a correr el modelo de riesgo directamente en el navegador (los mismos pesos que ves en
-       <b>Modelo &amp; Métricas</b>) y, para los casos ambiguos, va a llamar a un LLM real a través de un proxy
-       serverless. Todavía no está conectada — es la siguiente fase del proyecto.</p></div>
+
+  <div class="panel reveal" style="margin-top:24px">
+    <h3>Fila sintética <span id="demo-profile-tag" class="pill" style="margin-left:6px"></span></h3>
+    <div class="sub">Datos aleatorios con el mismo esquema que los 150 casos reales (<span class="mono">CompensationCase</span>).</div>
+    <div class="demo-fields" id="demo-fields"></div>
+    <div class="hero-cta" style="margin-top:18px">
+      <button class="btn btn-ghost" id="demo-regen">🔀 Regenerar</button>
+      <button class="btn btn-primary" id="demo-run">▶ Probar</button>
+    </div>
+  </div>
+
+  <div class="panel detail reveal" id="demo-result" style="margin-top:20px">
+    <div class="empty">Generá un caso y presioná Probar para ver la decisión, paso a paso.</div>
+  </div>
 </div></section>
 </div>
 <!-- ============ /TAB: DEMO ============ -->
@@ -634,8 +658,12 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
 <div id="tip"></div>
 
 <script>
+/*__SCORING_JS__*/
+</script>
+<script>
 const DASHBOARD_DATA = /*__DATA__*/null;
 const MODEL_DATA = /*__MODEL__*/null;
+const RISK_MODEL = /*__RISK_MODEL__*/null;
 /* Single source of truth for decision colors: read from the :root CSS tokens
    instead of duplicating hex values here, so they can never drift apart. */
 const _rootStyle = getComputedStyle(document.documentElement);
@@ -974,6 +1002,162 @@ document.getElementById('modal-download').addEventListener('click', () => {
   a.click();
   URL.revokeObjectURL(url);
 });
+
+/* ---------- Demo tab: synthetic case -> browser clustering -> (LLM if ambiguous) ---------- */
+/* Empty by default: no Cloudflare Worker is deployed for this build. Set this to a deployed
+   Worker URL (see apps/web/worker/) to make the "Probar" button call a real LLM for ambiguous
+   synthetic cases. Until then, the demo is honest about running the deterministic half only. */
+const DEMO_LLM_ENDPOINT = '';
+
+const DEMO_CITIES = ['CDMX', 'Bogotá', 'Medellín', 'Buenos Aires', 'Tijuana', 'Querétaro', 'São Paulo'];
+const DEMO_VERTICALS = ['Comida', 'Mercado', 'Farmacia'];
+const DEMO_GPS = ['SÍ - confirmada', 'NO confirmada', 'Señal perdida', 'Parcial'];
+const DEMO_MOTIVOS = ['Orden no llego', 'Producto incorrecto', 'Orden cancelada sin reembolso', 'Demora excesiva'];
+const DEMO_FIELD_LABELS = {
+  caso_id: 'Caso', ciudad: 'Ciudad', vertical: 'Vertical', restaurante: 'Restaurante',
+  antiguedad_usuario_dias: 'Antigüedad (d)', valor_orden_mxn: 'Valor orden',
+  compensacion_solicitada_mxn: 'Compensación pedida', num_compensaciones_90d: 'Comp. 90d',
+  monto_compensado_90d_mxn: 'Monto comp. 90d', entrega_confirmada_gps: 'GPS entrega',
+  tiempo_entrega_real_min: 'Tiempo entrega (min)', flags_fraude_previos: 'Flags fraude',
+  motivo_reclamo: 'Motivo', descripcion_reclamo: 'Descripción',
+};
+
+function _pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function _int(min, max) { return Math.floor(min + Math.random() * (max - min + 1)); }
+function _money(min, max) { return Math.round((min + Math.random() * (max - min)) * 100) / 100; }
+
+/** Generates a random CompensationCase-shaped row, biased toward one of the three
+ * outcomes so Regenerar reliably produces variety across APROBAR/RECHAZAR/ESCALAR. */
+function randomSyntheticCase() {
+  const profile = _pick(['legit', 'fraud', 'ambig']);
+  let raw;
+  if (profile === 'legit') {
+    const valor = _money(150, 700);
+    raw = {
+      antiguedad_usuario_dias: _int(400, 2200), num_compensaciones_90d: _int(0, 2),
+      monto_compensado_90d_mxn: _money(0, 300), flags_fraude_previos: 0,
+      tiempo_entrega_real_min: _int(35, 90), entrega_confirmada_gps: 'NO confirmada',
+      motivo_reclamo: 'Orden no llego', valor_orden_mxn: valor,
+      compensacion_solicitada_mxn: _money(20, valor * 0.6),
+    };
+  } else if (profile === 'fraud') {
+    const valor = _money(100, 500);
+    raw = {
+      antiguedad_usuario_dias: _int(1, 25), num_compensaciones_90d: _int(8, 14),
+      monto_compensado_90d_mxn: _money(1800, 2800), flags_fraude_previos: _int(2, 4),
+      tiempo_entrega_real_min: _int(5, 25), entrega_confirmada_gps: 'SÍ - confirmada',
+      motivo_reclamo: 'Orden no llego', valor_orden_mxn: valor,
+      compensacion_solicitada_mxn: _money(20, valor * 0.7),
+    };
+  } else {
+    const valor = _money(120, 600);
+    raw = {
+      antiguedad_usuario_dias: _int(80, 500), num_compensaciones_90d: _int(3, 6),
+      monto_compensado_90d_mxn: _money(400, 1200), flags_fraude_previos: _int(0, 1),
+      tiempo_entrega_real_min: _int(25, 55), entrega_confirmada_gps: _pick(['Parcial', 'Señal perdida']),
+      motivo_reclamo: _pick(DEMO_MOTIVOS), valor_orden_mxn: valor,
+      compensacion_solicitada_mxn: _money(20, valor * 0.6),
+    };
+  }
+  return Object.assign({
+    caso_id: 'DEMO-' + Math.random().toString(36).slice(2, 7).toUpperCase(),
+    usuario_id: 'DEMO-USER', ciudad: _pick(DEMO_CITIES), vertical: _pick(DEMO_VERTICALS),
+    restaurante: 'Demo Restaurant', descripcion_reclamo: 'Caso sintético generado para la demo en vivo.',
+    _profile: profile,
+  }, raw);
+}
+
+let demoCase = null;
+
+function renderDemoFields(raw) {
+  const order = ['caso_id', 'ciudad', 'vertical', 'restaurante', 'antiguedad_usuario_dias',
+    'valor_orden_mxn', 'compensacion_solicitada_mxn', 'num_compensaciones_90d',
+    'monto_compensado_90d_mxn', 'entrega_confirmada_gps', 'tiempo_entrega_real_min',
+    'flags_fraude_previos', 'motivo_reclamo', 'descripcion_reclamo'];
+  document.getElementById('demo-fields').innerHTML = order.map(k => {
+    let v = raw[k];
+    if (typeof v === 'number' && k.includes('mxn')) v = '$' + v.toFixed(0);
+    return `<div class="dfield"><div class="k">${DEMO_FIELD_LABELS[k] || k}</div><div class="v">${v}</div></div>`;
+  }).join('');
+  document.getElementById('demo-profile-tag').textContent = '';
+}
+
+function regenDemo() {
+  demoCase = randomSyntheticCase();
+  renderDemoFields(demoCase);
+  document.getElementById('demo-result').innerHTML =
+    '<div class="empty">Presioná Probar para correr el modelo sobre esta fila.</div>';
+}
+
+function _demoStep(n, html) {
+  return `<div class="demo-step"><span class="n">${n}</span><div class="body">${html}</div></div>`;
+}
+
+function renderDemoDecision(risk, features, decision, source) {
+  const el = document.getElementById('demo-result');
+  const color = DEC_COLOR[decision.recomendacion];
+  const stepsHtml = (decision.pasos_recomendados || []).length
+    ? `<div class="demo-note"><b>Pasos recomendados:</b><ol style="margin:6px 0 0 18px">${
+        decision.pasos_recomendados.map(p => `<li>${p}</li>`).join('')}</ol></div>` : '';
+  el.innerHTML = `
+    <div class="cid">${demoCase.caso_id} · ${demoCase.ciudad} · ${demoCase.vertical}</div>
+    <div class="dec" style="color:${color}">${decision.recomendacion}</div>
+    ${_demoStep(1, `Normalización + <span class="mono">features derivadas</span>: ratio comp/orden ${features.ratio_comp_orden}, GPS ${features.gps_contradice_reclamo ? '<b>contradice</b>' : (features.gps_corrobora_reclamo ? 'corrobora' : 'no concluyente')} el reclamo.`)}
+    ${_demoStep(2, `Modelo de riesgo (navegador): <span class="mono">risk_score ${risk.risk_score}</span>, bucket <b>${risk.resolved_bucket}</b>. Señales: ${risk.top_contribuyentes.join(', ')}.`)}
+    ${_demoStep(3, source === 'llm'
+        ? `Bucket AMBIGUO → se llamó al LLM (<span class="mono">${decision.modelo_usado || 'proveedor'}</span>).`
+        : source === 'llm-unavailable'
+        ? `Bucket AMBIGUO → correspondía llamar al LLM, pero <b>no hay proxy configurado</b> en este despliegue (ver nota abajo).`
+        : `Bucket claro → decisión <b>determinística, 0 tokens</b> (no hizo falta el LLM).`)}
+    <div class="res">${decision.resumen_cs}</div>
+    ${stepsHtml}
+    ${source === 'llm-unavailable' ? `<div class="demo-note">Para conectar un LLM real acá, desplegá el Cloudflare Worker en
+      <span class="mono">apps/web/worker/</span> y configurá <span class="mono">DEMO_LLM_ENDPOINT</span> en este archivo con su URL.
+      Mientras tanto, este caso se muestra como <b>ESCALAR</b> (el mismo fallback conservador que usa el pipeline sin LLM).</div>` : ''}`;
+}
+
+function runDemo() {
+  if (!demoCase || !window.RappiScoring || !RISK_MODEL) return;
+  const features = RappiScoring.computeFeatures(demoCase);
+  const risk = RappiScoring.assessRisk(demoCase, RISK_MODEL);
+  const guardrail = RappiScoring.evaluateGuardrail(risk, features);
+  const fast = RappiScoring.fastPathWithRisk(demoCase, risk, features);
+
+  if (fast) {
+    renderDemoDecision(risk, features, { ...fast, pasos_recomendados: [] }, 'fast-path');
+    return;
+  }
+
+  // AMBIGUO: would go to the LLM in production. Call the configured Worker if present.
+  if (!DEMO_LLM_ENDPOINT) {
+    renderDemoDecision(risk, features, {
+      recomendacion: 'ESCALAR',
+      resumen_cs: `Caso ambiguo (score ${risk.risk_score}): ${risk.top_contribuyentes.join(', ')}. Requiere revisión humana.`,
+      pasos_recomendados: [
+        'Revisar el texto del reclamo contra el motivo y el estado del GPS.',
+        'Confirmar el historial de compensaciones del usuario en los últimos 90 días.',
+      ],
+    }, 'llm-unavailable');
+    return;
+  }
+
+  document.getElementById('demo-result').innerHTML = '<div class="empty">Llamando al LLM…</div>';
+  fetch(DEMO_LLM_ENDPOINT, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ case: demoCase, features, risk, guardrail }),
+  })
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(decision => renderDemoDecision(risk, features, decision, 'llm'))
+    .catch(err => renderDemoDecision(risk, features, {
+      recomendacion: 'ESCALAR',
+      resumen_cs: `El LLM no respondió (${err.message}). Requiere revisión humana.`,
+      pasos_recomendados: ['Reintentar más tarde o revisar el caso manualmente.'],
+    }, 'llm-unavailable'));
+}
+
+document.getElementById('demo-regen').addEventListener('click', regenDemo);
+document.getElementById('demo-run').addEventListener('click', runDemo);
+regenDemo();
 
 showTab((location.hash||'').replace('#','') || 'exploracion');
 </script>
