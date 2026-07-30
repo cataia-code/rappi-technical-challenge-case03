@@ -52,11 +52,9 @@ Un solo archivo autocontenido (assets embebidos en base64), con 5 pestañas:
 - **Dashboard** — los 150 casos, filtrables, con el detalle de cada decisión y —para los
   escalados— los pasos concretos que el LLM (o el fallback) recomienda revisar.
 - **Demo** — genera un caso sintético y corre el modelo de riesgo **en el navegador** (mismos
-  pesos que Modelo & Métricas); si el caso es ambiguo, intenta una llamada real a un LLM vía un
-  Cloudflare Worker (código en `apps/web/worker/`, **no desplegado** por defecto — ver esa
-  carpeta para desplegarlo con tus propias API keys). Sin el Worker desplegado, el demo sigue
-  siendo 100% funcional: muestra el mismo aviso honesto que usaría en producción cuando el LLM
-  no está disponible, en vez de fingir una respuesta.
+  pesos que Modelo & Métricas); si el caso es ambiguo, llama a un LLM real vía Cloudflare Worker:
+  `https://rappi-caso03-llm-proxy.rappi-caso03-demo.workers.dev`. Las API keys viven como
+  Worker secrets, nunca en el HTML público.
 
 ## Organización del repo
 
@@ -172,9 +170,8 @@ RECHAZAR 30 (20.0%) · ESCALAR 58 (38.7%)**. Con presupuesto LLM disponible, cor
 - Etiquetar a mano ~30 casos para medir precisión de RECHAZAR y afinar cortes.
 - Persistir el modelo de riesgo y reentrenarlo con feedback de los CS (aprendizaje continuo).
 - Caché de decisiones + batching de tokens para exprimir el rate limit.
-- Desplegar el Cloudflare Worker (`apps/web/worker/`) para que el demo llame a un LLM real de
-  punta a punta, y agregar telemetría real de latencia/alucinación por proveedor (hoy el batch
-  de referencia corrió con `--no-llm`, así que esas métricas no existen todavía — ver
+- Agregar telemetría real de latencia/alucinación por proveedor al Worker desplegado (el batch de
+  referencia corrió con `--no-llm`, así que esas métricas no existen todavía — ver
   `docs/evaluacion_modelo.md`).
 - Sincronizar automáticamente el prompt entre `llm/prompts.py` y `apps/web/worker/index.js` (hoy
   es una copia manual con un aviso en el código; un JSON/JS compartido lo eliminaría).

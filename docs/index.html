@@ -1173,10 +1173,9 @@ document.getElementById('modal-download').addEventListener('click', () => {
 });
 
 /* ---------- Demo tab: synthetic case -> browser clustering -> (LLM if ambiguous) ---------- */
-/* Empty by default: no Cloudflare Worker is deployed for this build. Set this to a deployed
-   Worker URL (see apps/web/worker/) to make the "Probar" button call a real LLM for ambiguous
-   synthetic cases. Until then, the demo is honest about running the deterministic half only. */
-const DEMO_LLM_ENDPOINT = '';
+/* Cloudflare Worker endpoint for ambiguous synthetic cases. API keys live server-side
+   as Worker secrets; never put them in this public dashboard. */
+const DEMO_LLM_ENDPOINT = 'https://rappi-caso03-llm-proxy.rappi-caso03-demo.workers.dev';
 
 const DEMO_CITIES = ['CDMX', 'Bogotá', 'Medellín', 'Buenos Aires', 'Tijuana', 'Querétaro', 'São Paulo'];
 const DEMO_VERTICALS = ['Comida', 'Mercado', 'Farmacia'];

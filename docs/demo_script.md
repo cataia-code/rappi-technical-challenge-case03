@@ -46,12 +46,8 @@
 - Clic en **Probar** con un caso que dé bucket claro (APROBAR o RECHAZAR): señalar que el
   clustering corrió **en el navegador**, 0 llamadas de red, mismos pesos que la tab Modelo.
 - Regenerar hasta obtener un caso AMBIGUO y Probar: mostrar el paso a paso (normalización → riesgo
-  → ruteo). Si el Worker de Cloudflare **no está desplegado**, decirlo abiertamente: "acá llamaría
-  a un LLM real vía un proxy serverless; el código está listo en `apps/web/worker/`, no lo
-  desplegamos porque necesita una cuenta y keys propias — mientras tanto cae al mismo fallback
-  conservador que usa el pipeline batch." Esto es más creíble que fingir una respuesta.
-- (Si el Worker SÍ está desplegado para esta sesión: mostrar el `modelo_usado` en la respuesta y
-  explicar el fallback multi-proveedor.)
+  → ruteo). En ambiguos, el botón **Probar** llama al Worker desplegado y debe mostrar
+  `modelo_usado` en la respuesta; explicar que las keys quedan server-side como Worker secrets.
 
 ## 6. Cierre — preguntas de diseño esperadas (tener la respuesta lista, no leerla)
 - **"¿Por qué no LLM para todo?"** → costo/latencia/auditabilidad; los datos ya separan un núcleo
@@ -65,4 +61,4 @@
 - **"¿Cómo saben que el JS de la demo no miente sobre cómo decide?"** → test de paridad real
   (`tests/test_scoring_js_parity.py`) que corre Node y compara contra Python, caso por caso.
 - **"¿Qué harían con más tiempo?"** → ver la sección "Con más tiempo" del `README.md` (etiquetado
-  manual, telemetría real de LLM, desplegar el Worker, sincronizar el prompt automáticamente).
+  manual, telemetría real de LLM, rate limiting del Worker, sincronizar el prompt automáticamente).

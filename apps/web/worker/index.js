@@ -155,7 +155,7 @@ function reconcileWithGuardrail(decision, risk, features) {
 }
 
 const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*', // tighten to your Pages origin before production use
+  'Access-Control-Allow-Origin': 'https://cataia-code.github.io',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
