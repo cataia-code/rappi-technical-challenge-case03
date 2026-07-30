@@ -1,6 +1,6 @@
-"""Inyecta los 150 resultados en index.template.html -> index.html (autocontenido).
+"""Inyecta los 150 resultados en index.template.html -> docs/index.html (autocontenido).
 
-Correr: python docs/build_page.py   (tras cada corrida del pipeline)
+Correr: python apps/web/build_page.py   (tras cada corrida del pipeline)
 """
 from __future__ import annotations
 
@@ -11,10 +11,12 @@ from pathlib import Path
 
 import pandas as pd
 
-DOCS = Path(__file__).resolve().parent
-XLSX = DOCS.parent / "data" / "output" / "salida_150.xlsx"
-LOGO = DOCS.parent / "Rappi_logo.svg.webp"
-FAVICON = DOCS.parent / "rappi_faticon.png"
+WEB = Path(__file__).resolve().parent          # apps/web (fuente: template + assets JSON)
+ROOT = WEB.parents[1]                           # raíz del proyecto
+XLSX = ROOT / "data" / "output" / "salida_150.xlsx"
+LOGO = ROOT / "Rappi_logo.svg.webp"
+FAVICON = ROOT / "rappi_faticon.png"
+OUT = ROOT / "docs" / "index.html"              # salida servida por GitHub Pages (/docs)
 
 
 def _data_uri(path: Path, mime: str) -> str:
@@ -52,12 +54,13 @@ def build_cases() -> list[dict]:
 def main() -> None:
     cases = build_cases()
     data = {"cases": cases}
-    template = (DOCS / "index.template.html").read_text(encoding="utf-8")
+    template = (WEB / "index.template.html").read_text(encoding="utf-8")
     html = template.replace("/*__DATA__*/null", json.dumps(data, ensure_ascii=False))
     html = html.replace("__RAPPI_LOGO__", _data_uri(LOGO, "image/webp"))
     html = html.replace("__RAPPI_FAVICON__", _data_uri(FAVICON, "image/png"))
-    (DOCS / "index.html").write_text(html, encoding="utf-8")
-    print(f"index.html generado con {len(cases)} casos.")
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    OUT.write_text(html, encoding="utf-8")
+    print(f"{OUT} generado con {len(cases)} casos.")
 
 
 if __name__ == "__main__":

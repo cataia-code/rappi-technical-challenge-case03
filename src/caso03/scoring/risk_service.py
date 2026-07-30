@@ -8,7 +8,7 @@ Carga los parámetros ajustados (risk_model.json) y evalúa cada caso con SOLO n
   ambigüedad → se resuelve como AMBIGUO (escalar).
 - top_contribuyentes: las señales que más empujan el riesgo (el "por qué" para CS).
 
-Ajustar el modelo: python analysis/fit_risk_model.py
+Ajustar el modelo: python -m caso03.scoring.train_risk_model
 """
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ import numpy as np
 
 from caso03.domain.models import CompensationCase
 
-_ARTIFACT = Path(__file__).resolve().parents[1] / "artifacts" / "risk_model.json"
+_ARTIFACT = Path(__file__).resolve().parent / "artifacts" / "risk_model.json"
 
 # Frase legible por señal según la dirección de su contribución al riesgo
 _PHRASES = {

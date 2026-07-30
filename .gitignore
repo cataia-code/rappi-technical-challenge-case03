@@ -16,6 +16,9 @@ __pycache__/
 data/output/*
 !data/output/.gitkeep
 
+# --- Duplicado del dataset en raíz (la copia canónica vive en data/raw/) ---
+/Rappi_AI_Builder_Challenge_Dataset.xlsx
+
 # --- OS / IDE ---
 .DS_Store
 Thumbs.db

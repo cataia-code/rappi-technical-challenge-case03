@@ -3,13 +3,13 @@
 Eje de abuso = las 5 señales top por eta² (poder discriminante empírico):
     num_comp_90d, flags, tiempo_entrega, antiguedad, monto_comp_90d
 
-Exporta (sin pickle, solo params) a src/caso03/artifacts/risk_model.json:
+Exporta (sin pickle, solo params) a src/caso03/scoring/artifacts/risk_model.json:
 - orden de features, media/desvío del scaler, signo (orientación a "fraude"),
 - pesos eta² normalizados,
 - centroides KMeans (espacio estandarizado) y mapeo cluster→bucket,
 - cortes del abuse_index para bucketing por score, y min/max para escala 0-1.
 
-Reproducible (random_state fijo). Correr: python analysis/fit_risk_model.py
+Reproducible (random_state fijo). Correr: python -m caso03.scoring.train_risk_model
 """
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "src"))
 from caso03.services.data_service import load_cases  # noqa: E402
 
@@ -32,7 +32,7 @@ from caso03.services.data_service import load_cases  # noqa: E402
 FEATURES = ["num_comp_90d", "flags", "tiempo_entrega", "antiguedad", "monto_comp_90d"]
 SIGNS = {"num_comp_90d": +1, "flags": +1, "tiempo_entrega": -1,
          "antiguedad": -1, "monto_comp_90d": +1}
-ARTIFACT = ROOT / "src" / "caso03" / "artifacts" / "risk_model.json"
+ARTIFACT = Path(__file__).resolve().parent / "artifacts" / "risk_model.json"
 
 
 def _matrix() -> pd.DataFrame:

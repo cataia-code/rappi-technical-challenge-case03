@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 
 from caso03.services.data_service import load_cases  # noqa: E402

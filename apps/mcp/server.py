@@ -3,14 +3,14 @@
 Misma frontera que la referencia air_travel (AI Agent → MCP → SDK/servicio), pero
 sin infra pesada: el tool llama en-proceso al DecisionService sobre los datos locales.
 
-Correr:  python mcp/server.py         (stdio, para un cliente MCP)
+Correr:  python apps/mcp/server.py    (stdio, para un cliente MCP)
 """
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from fastmcp import FastMCP  # noqa: E402
 

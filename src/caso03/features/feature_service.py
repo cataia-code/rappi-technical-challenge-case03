@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 from caso03.domain.models import CompensationCase, Decision, Recommendation
 
 if TYPE_CHECKING:
-    from caso03.services.risk_service import RiskAssessment
+    from caso03.scoring.risk_service import RiskAssessment
 
 # --- Umbrales de contexto para el prompt (NO deciden; la decisión usa el risk_model) ---
 # Booleanos informativos que se pasan al LLM como pistas; los cortes que DECIDEN son

@@ -20,13 +20,13 @@ from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from caso03.config import Settings
 from caso03.domain.models import CompensationCase, Decision, Recommendation
-from caso03.services.feature_service import (
+from caso03.features.feature_service import (
     CaseFeatures,
     compute_features,
     evaluate_guardrail,
     reconcile,
 )
-from caso03.services.risk_service import RiskAssessment, assess
+from caso03.scoring.risk_service import RiskAssessment, assess
 
 
 def _retry_after_seconds(exc: RateLimitError, fallback: float, cap: float = 30.0) -> float:
