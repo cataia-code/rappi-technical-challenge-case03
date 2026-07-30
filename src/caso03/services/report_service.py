@@ -1,9 +1,9 @@
-"""report_service — Capa 2: persiste el output revisable por el agente CS.
+"""Reporting service for CS-reviewable outputs.
 
-Genera un Excel con dos hojas:
-- 'Casos': los 150 casos originales + la decisión del agente (recomendación,
-  confianza, señales dominantes, resumen y trazas de auditoría).
-- 'Resumen': el reparto de decisiones para validar la calibración de un vistazo.
+Generates an Excel workbook with two sheets:
+- 'Casos': original cases plus agent decision, confidence, dominant signals,
+  summary, and audit traces.
+- 'Resumen': decision distribution for quick calibration checks.
 """
 from __future__ import annotations
 

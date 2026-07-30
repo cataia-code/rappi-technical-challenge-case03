@@ -1,15 +1,14 @@
-"""risk_service — Capa 0 data-driven: score de riesgo híbrido (score + clustering).
+"""Data-driven risk scoring: hybrid score plus clustering.
 
-Carga los parámetros ajustados (risk_model.json) y evalúa cada caso con SOLO numpy:
-- risk_score 0-1 (interpretable), derivado del eje de abuso ponderado por eta².
-- score_bucket: bucket según los cortes del score.
-- cluster_bucket: bucket por label entrenado para casos conocidos o centroide proxy
-  para casos nuevos/ad-hoc.
-- agreement: si ambos coinciden. El DESACUERDO es la señal más honesta de
-  ambigüedad → se resuelve como AMBIGUO (escalar).
-- top_contribuyentes: las señales que más empujan el riesgo (el "por qué" para CS).
+Loads fitted parameters from risk_model.json and evaluates each case with numpy:
+- risk_score 0-1, derived from the eta2-weighted abuse axis.
+- score_bucket from abuse-index cuts.
+- cluster_bucket from the exact training label for known cases or centroid proxy
+  for new/ad-hoc cases.
+- agreement between both views; disagreement is treated as ambiguity.
+- top_contribuyentes: dominant risk contributors shown to CS.
 
-Ajustar el modelo: python -m caso03.scoring.train_risk_model
+Fit the model with: python -m caso03.scoring.train_risk_model
 """
 from __future__ import annotations
 
@@ -24,7 +23,7 @@ from caso03.domain.models import CompensationCase
 
 _ARTIFACT = Path(__file__).resolve().parent / "artifacts" / "risk_model.json"
 
-# Frase legible por señal según la dirección de su contribución al riesgo
+# Human-readable phrases by feature and contribution direction.
 _PHRASES = {
     "num_comp_90d": ("muchas compensaciones en 90d", "pocas compensaciones en 90d"),
     "flags": ("flags de fraude previos", "sin flags de fraude"),
@@ -36,9 +35,9 @@ _PHRASES = {
 
 @dataclass(frozen=True)
 class RiskAssessment:
-    risk_score: float           # 0-1 (mayor = más riesgo de fraude)
-    score_bucket: str           # LEGITIMO | AMBIGUO | FRAUDE (por cortes del score)
-    cluster_bucket: str         # LEGITIMO | AMBIGUO | FRAUDE (label entrenado o proxy)
+    risk_score: float           # 0-1, higher means higher fraud risk.
+    score_bucket: str           # LEGITIMO | AMBIGUO | FRAUDE from score cuts.
+    cluster_bucket: str         # LEGITIMO | AMBIGUO | FRAUDE from label/proxy.
     agreement: bool
     top_contribuyentes: list[str]
 
@@ -83,8 +82,8 @@ def assess(case: CompensationCase) -> RiskAssessment:
     else:
         score_bucket = "FRAUDE"
 
-    # Para los 150 casos del dataset usamos el label exacto del modelo entrenado.
-    # Para casos nuevos/ad-hoc, caemos al centroide proxy más cercano.
+    # Known dataset cases use the exact trained model label. New/ad-hoc cases
+    # fall back to the nearest centroid proxy.
     training_buckets = p.get("training_case_bucket", {})
     if case.caso_id in training_buckets:
         cluster_bucket = training_buckets[case.caso_id]
@@ -93,11 +92,11 @@ def assess(case: CompensationCase) -> RiskAssessment:
         nearest = int(np.argmin(((centroids - z) ** 2).sum(axis=1)))
         cluster_bucket = p["cluster_to_bucket"][str(nearest)]
 
-    # score 0-1
+    # 0-1 score.
     lo, hi = p["abuse_index_min"], p["abuse_index_max"]
     risk_score = float(np.clip((abuse_index - lo) / (hi - lo), 0.0, 1.0))
 
-    # top contribuyentes (por magnitud de contribución ponderada)
+    # Top contributors by weighted contribution magnitude.
     contrib = oriented * weights
     order = np.argsort(-np.abs(contrib))
     top = []

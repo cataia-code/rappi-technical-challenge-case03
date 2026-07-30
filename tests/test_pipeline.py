@@ -1,4 +1,4 @@
-"""Tests de resiliencia del pipeline batch."""
+"""Tests for batch pipeline resilience."""
 from pathlib import Path
 
 from caso03 import pipeline
@@ -7,12 +7,12 @@ from caso03.services.data_service import load_cases
 from caso03.services.decision_service import DecisionService
 
 
-def test_safe_decide_llm_conserva_scoring_en_fail_safe():
+def test_safe_decide_llm_preserves_scoring_in_fail_safe():
     svc = DecisionService(use_llm=False)
     case = {c.caso_id: c for c in load_cases()}["COMP-0012"]
 
     def _boom(_case):
-        raise RuntimeError("fallo simulado")
+        raise RuntimeError("simulated failure")
 
     svc.decide_llm = _boom
 
@@ -25,7 +25,7 @@ def test_safe_decide_llm_conserva_scoring_en_fail_safe():
     assert out.override_guardrail == "Fail-safe LLM: RuntimeError"
 
 
-def test_pipeline_no_llm_produce_150_decisiones_con_scoring(monkeypatch, tmp_path):
+def test_pipeline_no_llm_produces_150_scored_decisions(monkeypatch, tmp_path):
     captured = {}
 
     def _write_excel(df, path=None):
@@ -48,7 +48,7 @@ def test_pipeline_no_llm_produce_150_decisiones_con_scoring(monkeypatch, tmp_pat
     }
 
 
-def test_pipeline_limit_cero_genera_reporte_vacio_valido(monkeypatch, tmp_path):
+def test_pipeline_zero_limit_generates_valid_empty_report(monkeypatch, tmp_path):
     captured = {}
 
     def _write_excel(df, path=None):

@@ -1,6 +1,7 @@
-"""Inyecta los 150 resultados en index.template.html -> docs/index.html (autocontenido).
+"""Inject the 150 case results into index.template.html -> docs/index.html.
 
-Correr: python apps/web/build_page.py   (tras cada corrida del pipeline)
+Run after each pipeline execution:
+    python apps/web/build_page.py
 """
 from __future__ import annotations
 
@@ -11,12 +12,12 @@ from pathlib import Path
 
 import pandas as pd
 
-WEB = Path(__file__).resolve().parent          # apps/web (fuente: template + assets JSON)
-ROOT = WEB.parents[1]                           # raíz del proyecto
+WEB = Path(__file__).resolve().parent          # apps/web
+ROOT = WEB.parents[1]                           # project root
 XLSX = ROOT / "data" / "output" / "salida_150.xlsx"
-LOGO = ROOT / "Rappi_logo.svg.webp"
-FAVICON = ROOT / "rappi_faticon.png"
-OUT = ROOT / "docs" / "index.html"              # salida servida por GitHub Pages (/docs)
+LOGO = ROOT / "docs" / "assets" / "images" / "Rappi_logo.svg.webp"
+FAVICON = ROOT / "docs" / "assets" / "images" / "rappi_faticon.png"
+OUT = ROOT / "docs" / "index.html"              # GitHub Pages output (/docs)
 
 
 def _data_uri(path: Path, mime: str) -> str:
@@ -60,7 +61,7 @@ def main() -> None:
     html = html.replace("__RAPPI_FAVICON__", _data_uri(FAVICON, "image/png"))
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(html, encoding="utf-8")
-    print(f"{OUT} generado con {len(cases)} casos.")
+    print(f"{OUT} generated with {len(cases)} cases.")
 
 
 if __name__ == "__main__":

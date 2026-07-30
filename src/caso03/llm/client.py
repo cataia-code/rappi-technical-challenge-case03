@@ -1,14 +1,13 @@
-"""client — cliente LLM multi-proveedor con fallback en cascada.
+"""Multi-provider LLM client with cascading fallback.
 
-Groq, Gemini y OpenRouter exponen endpoints OpenAI-compatible, así que un solo
-SDK (openai) los cubre variando base_url + api_key + modelo.
+Groq, Gemini, and OpenRouter expose OpenAI-compatible endpoints, so the OpenAI
+SDK can cover all three by changing base_url, api_key, and model.
 
-Estrategia: recorre los proveedores disponibles (con API key) en el orden de
-LLM_PROVIDER_ORDER. Ante rate-limit agotado o error de un proveedor, pasa al
-siguiente — así el batch no se cae si Groq agota su cuota diaria. Cada respuesta
-registra qué modelo la produjo (para trazabilidad y para mostrarlo en la web).
+Strategy: iterate over configured providers in LLM_PROVIDER_ORDER. When a
+provider fails or rate-limits, try the next one so the batch does not fail.
+Each response records the provider and model for traceability.
 
-Import perezoso de `openai`: no es requerido en modo --no-llm.
+The `openai` import is lazy; --no-llm mode does not require it.
 """
 from __future__ import annotations
 
@@ -17,7 +16,7 @@ from dataclasses import dataclass
 
 from caso03.config import Settings
 
-# Endpoints OpenAI-compatible por proveedor
+# OpenAI-compatible endpoints by provider.
 _BASE_URLS = {
     "groq": "https://api.groq.com/openai/v1",
     "gemini": "https://generativelanguage.googleapis.com/v1beta/openai/",
@@ -28,15 +27,15 @@ _BASE_URLS = {
 @dataclass(frozen=True)
 class LLMResponse:
     content: str
-    model_used: str  # ej. "groq:llama-3.3-70b-versatile"
+    model_used: str  # Example: "groq:llama-3.3-70b-versatile"
 
 
 class AllProvidersFailed(RuntimeError):
-    """Ningún proveedor configurado pudo responder."""
+    """No configured provider produced a successful response."""
 
 
 def _retry_after_seconds(exc: Exception, fallback: float, cap: float = 30.0) -> float:
-    """Extrae retry-after del 429 (segundos) + buffer; si no está, usa fallback."""
+    """Extract retry-after seconds from a 429 response, otherwise use fallback."""
     try:
         ra = exc.response.headers.get("retry-after")  # type: ignore[attr-defined]
         if ra is not None:
@@ -53,7 +52,7 @@ class LLMClient:
         self._clients: dict[str, object] = {}
 
     def _client_for(self, name: str, api_key: str):
-        from openai import OpenAI  # import perezoso
+        from openai import OpenAI  # lazy import
         if name not in self._clients:
             self._clients[name] = OpenAI(api_key=api_key, base_url=_BASE_URLS[name])
         return self._clients[name]
@@ -64,13 +63,13 @@ class LLMClient:
         providers = self.settings.iter_providers()
         if not providers:
             raise AllProvidersFailed(
-                "No hay ningún proveedor LLM configurado (falta API key)."
+                "No LLM provider is configured; at least one API key is required."
             )
         last_exc: Exception | None = None
         for name, api_key, model in providers:
             try:
                 return self._call(name, api_key, model, system, user, retries_per_provider)
-            except Exception as exc:  # rate-limit agotado o error del proveedor
+            except Exception as exc:  # provider error or exhausted rate limit
                 last_exc = exc
                 continue
         raise AllProvidersFailed(f"Todos los proveedores fallaron: {last_exc!r}")
@@ -78,13 +77,13 @@ class LLMClient:
     def _call(self, name, api_key, model, system, user, retries) -> LLMResponse:
         from openai import RateLimitError
         client = self._client_for(name, api_key)
-        for intento in range(retries):
+        for attempt in range(retries):
             try:
                 resp = client.chat.completions.create(
                     model=model,
                     temperature=self.settings.temperature,
                     response_format={"type": "json_object"},
-                    max_tokens=self.max_tokens,  # acota output -> menos tokens, más throughput
+                    max_tokens=self.max_tokens,  # constrain output for better throughput
                     messages=[
                         {"role": "system", "content": system},
                         {"role": "user", "content": user},
@@ -95,7 +94,7 @@ class LLMClient:
                     model_used=f"{name}:{model}",
                 )
             except RateLimitError as exc:
-                if intento == retries - 1:
+                if attempt == retries - 1:
                     raise
-                time.sleep(_retry_after_seconds(exc, fallback=2 ** intento))
+                time.sleep(_retry_after_seconds(exc, fallback=2 ** attempt))
         raise RuntimeError("unreachable")

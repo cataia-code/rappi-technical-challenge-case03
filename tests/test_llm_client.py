@@ -1,4 +1,4 @@
-"""Tests del cliente LLM multi-proveedor: fallback en cascada y trazabilidad."""
+"""Tests for multi-provider LLM fallback and traceability."""
 import pytest
 
 from caso03.config import Settings
@@ -31,10 +31,10 @@ class _FakeClient:
         self.chat = type("Chat", (), {"completions": _FakeCompletions(behavior)})()
 
 
-def test_fallback_pasa_al_siguiente_proveedor(monkeypatch):
+def test_fallback_moves_to_next_provider(monkeypatch):
     client = LLMClient(_settings(("groq", "gemini")))
     fakes = {
-        "groq": _FakeClient(RuntimeError("groq caído")),
+        "groq": _FakeClient(RuntimeError("groq down")),
         "gemini": _FakeClient('{"ok": 1}'),
     }
     monkeypatch.setattr(client, "_client_for", lambda name, api_key: fakes[name])
@@ -42,9 +42,9 @@ def test_fallback_pasa_al_siguiente_proveedor(monkeypatch):
     resp = client.complete("sys", "usr")
 
     assert resp.content == '{"ok": 1}'
-    assert resp.model_used == "gemini:gemm"  # registra qué modelo respondió
+    assert resp.model_used == "gemini:gemm"
 
 
-def test_sin_proveedores_configurados_lanza():
+def test_no_configured_providers_raises():
     with pytest.raises(AllProvidersFailed):
         LLMClient(_settings(())).complete("s", "u")

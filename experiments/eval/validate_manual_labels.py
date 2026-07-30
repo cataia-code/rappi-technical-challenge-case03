@@ -1,8 +1,8 @@
-"""Calcula métricas del agente contra una muestra etiquetada manualmente.
+"""Compute agent metrics against a manually labeled sample.
 
-Entrada esperada: data/labels/manual_30.csv con `caso_id` y `etiqueta_manual`
-completada como APROBAR, RECHAZAR o ESCALAR. Si solo existe la plantilla, primero
-hay que copiarla a manual_30.csv y completarla con criterio humano.
+Expected input: data/labels/manual_30.csv with `caso_id` and `etiqueta_manual`
+filled as APROBAR, RECHAZAR, or ESCALAR. If only the template exists, copy it
+to manual_30.csv and complete it manually first.
 """
 from __future__ import annotations
 
@@ -42,16 +42,16 @@ def _agent_decisions() -> pd.DataFrame:
 def main() -> None:
     if not LABELS.exists():
         raise SystemExit(
-            "No existe data/labels/manual_30.csv. Generá la plantilla con "
-            "python analysis/prepare_manual_label_sample.py, copiala a manual_30.csv "
-            "y completá etiqueta_manual."
+            "data/labels/manual_30.csv does not exist. Generate the template with "
+            "python experiments/eval/prepare_manual_label_sample.py, copy it to "
+            "manual_30.csv, and fill etiqueta_manual."
         )
 
     labels = pd.read_csv(LABELS)
     labels["etiqueta_manual"] = labels["etiqueta_manual"].astype(str).str.strip().str.upper()
     invalid = sorted(set(labels["etiqueta_manual"]) - VALID_LABELS)
     if invalid:
-        raise SystemExit(f"Etiquetas inválidas: {invalid}. Usá {sorted(VALID_LABELS)}.")
+        raise SystemExit(f"Invalid labels: {invalid}. Use {sorted(VALID_LABELS)}.")
 
     df = _agent_decisions().merge(
         labels[["caso_id", "etiqueta_manual"]],
@@ -59,7 +59,7 @@ def main() -> None:
         how="inner",
     )
     if df.empty:
-        raise SystemExit("No hay casos etiquetados que crucen con el dataset.")
+        raise SystemExit("No labeled cases match the dataset.")
 
     reject_mask = df["recomendacion_agente"] == "RECHAZAR"
     reject_precision = (
@@ -72,16 +72,16 @@ def main() -> None:
         & (df["etiqueta_manual"] == "APROBAR")
     ]
 
-    print(f"Casos evaluados: {len(df)}")
+    print(f"Evaluated cases: {len(df)}")
     print(f"Exact match: {(df['recomendacion_agente'] == df['etiqueta_manual']).mean():.2%}")
-    print(f"Precisión RECHAZAR: {reject_precision:.2%}")
-    print(f"Falsos rechazos: {len(false_rejects)}")
-    print(f"Tasa ESCALAR agente: {(df['recomendacion_agente'] == 'ESCALAR').mean():.2%}")
-    print("\nMatriz agente vs manual:")
+    print(f"RECHAZAR precision: {reject_precision:.2%}")
+    print(f"False rejects: {len(false_rejects)}")
+    print(f"Agent ESCALAR rate: {(df['recomendacion_agente'] == 'ESCALAR').mean():.2%}")
+    print("\nAgent vs manual matrix:")
     print(pd.crosstab(df["recomendacion_agente"], df["etiqueta_manual"]).to_string())
-    print("\nReparto por ciudad:")
+    print("\nDistribution by city:")
     print(pd.crosstab(df["ciudad"], df["recomendacion_agente"]).to_string())
-    print("\nReparto por vertical:")
+    print("\nDistribution by vertical:")
     print(pd.crosstab(df["vertical"], df["recomendacion_agente"]).to_string())
 
 

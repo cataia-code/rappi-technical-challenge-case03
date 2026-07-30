@@ -1,9 +1,9 @@
-"""Servidor MCP — expone el agente de decisión como herramienta (bonus).
+"""MCP server exposing the decision agent as tools.
 
-Misma frontera que la referencia air_travel (AI Agent → MCP → SDK/servicio), pero
-sin infra pesada: el tool llama en-proceso al DecisionService sobre los datos locales.
+This keeps the AI Agent -> MCP -> service boundary without additional
+infrastructure: tools call DecisionService in-process over local data.
 
-Correr:  python apps/mcp/server.py    (stdio, para un cliente MCP)
+Run with: python apps/mcp/server.py
 """
 from __future__ import annotations
 
@@ -24,20 +24,20 @@ _cases = {c.caso_id: c for c in load_cases()}
 
 
 @mcp.tool
-def revisar_caso(caso_id: str) -> dict:
-    """Revisa un caso existente del dataset por su ID (ej. 'COMP-0011').
+def review_case(caso_id: str) -> dict:
+    """Review an existing dataset case by ID, e.g. 'COMP-0011'.
 
-    Devuelve recomendación (APROBAR/RECHAZAR/ESCALAR), risk_score, bucket,
-    señales que más pesan y un resumen accionable para el agente CS.
+    Returns recommendation, risk_score, bucket, dominant signals, and an
+    actionable CS summary.
     """
     case = _cases.get(caso_id)
     if case is None:
-        return {"error": f"caso_id '{caso_id}' no encontrado"}
+        return {"error": f"caso_id '{caso_id}' not found"}
     return _svc.decide(case).model_dump()
 
 
 @mcp.tool
-def revisar_datos(
+def review_payload(
     antiguedad_usuario_dias: int,
     ciudad: str,
     vertical: str,
@@ -54,10 +54,9 @@ def revisar_datos(
     usuario_id: str = "AD-HOC",
     restaurante: str = "N/D",
 ) -> dict:
-    """Revisa un caso ARBITRARIO a partir de sus señales (narrativa de producción).
+    """Review an arbitrary case from its observable signals.
 
-    Permite scorear un caso nuevo que no está en el dataset — como lo haría el
-    agente en vivo a 200+/día.
+    This scores a new case outside the dataset, matching the live-agent flow.
     """
     case = CompensationCase(
         caso_id=caso_id, usuario_id=usuario_id, antiguedad_usuario_dias=antiguedad_usuario_dias,

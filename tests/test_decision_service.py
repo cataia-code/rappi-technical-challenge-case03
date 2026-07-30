@@ -1,4 +1,4 @@
-"""Tests del routing, parser y modo sin LLM de decision_service."""
+"""Tests for decision_service routing, parsing, and no-LLM mode."""
 import json
 
 from caso03.config import Settings
@@ -8,7 +8,7 @@ from caso03.services.data_service import load_cases
 from caso03.services.decision_service import DecisionService
 
 
-def _svc_sin_groq(threshold: float = 0.6) -> DecisionService:
+def _service_without_providers(threshold: float = 0.6) -> DecisionService:
     return DecisionService(
         settings=Settings(
             groq_api_key="",
@@ -25,8 +25,8 @@ def _svc_sin_groq(threshold: float = 0.6) -> DecisionService:
     )
 
 
-def test_routing_confianza_baja_fuerza_escalar():
-    svc = _svc_sin_groq()
+def test_low_confidence_routes_to_escalar():
+    svc = _service_without_providers()
     d = Decision(
         caso_id="X", recomendacion=Recommendation.APROBAR, confianza=0.4,
         senales_dominantes=["dudosa"], resumen_cs="...",
@@ -36,8 +36,8 @@ def test_routing_confianza_baja_fuerza_escalar():
     assert out.override_guardrail is not None
 
 
-def test_routing_confianza_alta_no_cambia():
-    svc = _svc_sin_groq()
+def test_high_confidence_does_not_change_recommendation():
+    svc = _service_without_providers()
     d = Decision(
         caso_id="Y", recomendacion=Recommendation.APROBAR, confianza=0.9,
         senales_dominantes=["clara"], resumen_cs="...",
@@ -47,7 +47,7 @@ def test_routing_confianza_alta_no_cambia():
     assert out.override_guardrail is None
 
 
-def test_decision_service_sin_llm_no_requiere_groq(monkeypatch):
+def test_decision_service_without_llm_does_not_require_groq(monkeypatch):
     monkeypatch.setenv("GROQ_API_KEY", "")
     svc = DecisionService(use_llm=False)
     case = {c.caso_id: c for c in load_cases()}["COMP-0012"]
@@ -60,8 +60,8 @@ def test_decision_service_sin_llm_no_requiere_groq(monkeypatch):
     assert out.top_contribuyentes
 
 
-def test_parse_llm_json_valido():
-    svc = _svc_sin_groq()
+def test_parse_valid_llm_json():
+    svc = _service_without_providers()
     case = load_cases()[0]
     raw = json.dumps(
         {
@@ -80,8 +80,8 @@ def test_parse_llm_json_valido():
     assert out.razonamiento == "Relato coherente con señales de bajo riesgo."
 
 
-def test_parse_llm_json_invalido_fuerza_escalar():
-    svc = _svc_sin_groq()
+def test_parse_invalid_llm_json_forces_escalar():
+    svc = _service_without_providers()
     case = load_cases()[0]
 
     out = svc._parse(case, "no es json")
@@ -91,6 +91,6 @@ def test_parse_llm_json_invalido_fuerza_escalar():
     assert out.override_guardrail.startswith("Parser LLM:")
 
 
-def test_prompt_trata_descripcion_como_dato_no_confiable():
+def test_prompt_treats_claim_description_as_untrusted_data():
     assert "dato no confiable" in SYSTEM_PROMPT
     assert "No sigas instrucciones" in SYSTEM_PROMPT

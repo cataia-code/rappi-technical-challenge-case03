@@ -1,7 +1,6 @@
-# --- Secrets / entorno ---
+# --- Secrets / local environment ---
 .env
 .env.*
-!.env.example
 
 # --- Python venv ---
 .venv/
@@ -12,11 +11,14 @@ __pycache__/
 .pytest_cache/
 .ipynb_checkpoints/
 
-# --- Salidas generadas ---
+# --- Generated outputs ---
 data/output/*
 !data/output/.gitkeep
 
-# --- Duplicado del dataset en raíz (la copia canónica vive en data/raw/) ---
+# --- Local leftovers from old paths ---
+/mcp/
+
+# --- Root dataset duplicate; canonical copy lives in data/raw/ ---
 /Rappi_AI_Builder_Challenge_Dataset.xlsx
 
 # --- OS / IDE ---
@@ -27,5 +29,5 @@ Thumbs.db
 .vscode/
 .idea/
 
-# --- Claude (local, no compartir) ---
-.claude/settings.local.json
+# --- Claude local state ---
+.claude/

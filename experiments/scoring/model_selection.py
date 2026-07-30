@@ -1,15 +1,16 @@
-"""Selección de modelo de clustering para el backbone de riesgo.
+"""Clustering model selection for the risk backbone.
 
-Compara matrices numéricas vs numéricas+categóricas y varios algoritmos no
-supervisados. El reto define 3 buckets latentes, así que la regla de selección
-prefiere soluciones con 3 clusters efectivos; dentro de ellas gana mayor
-silhouette. Si ninguna produce 3 clusters, gana mayor silhouette global.
+Compares numeric and numeric+categorical matrices across several unsupervised
+algorithms. The challenge defines 3 latent buckets, so the selection rule
+prefers solutions with 3 effective clusters; within those, the highest
+silhouette wins. If no valid 3-cluster solution exists, the global highest
+silhouette wins.
 
-Salida:
-- data/processed/model_selection.json: métricas comparativas + ganador + datos
-  livianos para gráficas web (barras, PCA 2D, pesos eta²).
+Output:
+- data/processed/model_selection.json: comparative metrics, winner, and compact
+  chart data for the web (bars, PCA 2D, eta2 weights).
 
-Correr desde la raíz:
+Run from the repository root:
     ./.venv/Scripts/python.exe experiments/scoring/model_selection.py
 """
 from __future__ import annotations
@@ -225,7 +226,7 @@ def _choose_winner(rows: list[dict]) -> dict:
     preferred = [row for row in scored if row["effective_clusters"] == 3]
     candidates = preferred or scored
     if not candidates:
-        raise RuntimeError("Ningún modelo generó clusters válidos.")
+        raise RuntimeError("No model produced valid clusters.")
     return max(candidates, key=lambda row: row["silhouette"])
 
 
@@ -271,8 +272,9 @@ def main() -> None:
     charts = _chart_payload(df, winner_spec, {**winner, "all_rows": rows})
     payload = {
         "selection_rule": (
-            "Preferir 3 clusters efectivos por definición del reto; desempatar por "
-            "mayor silhouette. Si no hay 3 clusters válidos, usar mayor silhouette global."
+            "Prefer 3 effective clusters because the challenge defines 3 latent "
+            "buckets; break ties by highest silhouette. If no valid 3-cluster "
+            "solution exists, use the global highest silhouette."
         ),
         "winner": payload_winner,
         "results": [{k: v for k, v in row.items() if k != "labels"} for row in rows],
@@ -284,7 +286,7 @@ def main() -> None:
     table = pd.DataFrame(payload["results"]).sort_values(
         ["effective_clusters", "silhouette"], ascending=[True, False]
     )
-    print("Top modelos con 3 clusters efectivos:")
+    print("Top models with 3 effective clusters:")
     cols = [
         "matrix",
         "algorithm",
@@ -301,7 +303,7 @@ def main() -> None:
         .head(10)
         .to_string(index=False)
     )
-    print("\nGanador:")
+    print("\nWinner:")
     print(json.dumps(payload_winner, indent=2, ensure_ascii=False))
     print(f"\nJSON: {OUT}")
 

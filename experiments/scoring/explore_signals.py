@@ -1,14 +1,14 @@
-"""Análisis no supervisado: dejar que los datos digan qué señales pesan y dónde cortar.
+"""Unsupervised analysis: let the data determine signal weight and thresholds.
 
-No hay etiquetas (recomendacion_agente vacío), pero el reto afirma que los 150 casos
-están en 3 buckets latentes (fraude / legítimo / ambiguo). Estrategia:
+There are no labels, but the challenge states that the 150 cases contain three
+latent buckets: fraud, legitimate, and ambiguous. Strategy:
 
-1. Construir la matriz de señales.
-2. Ver correlaciones (redundancia entre señales).
-3. Recuperar los 3 buckets con KMeans (features estandarizadas).
-4. Rankear cada señal por su poder discriminante (eta² = varianza entre-cluster /
-   varianza total) → "qué pesa más", derivado de los datos, no asertado.
-5. Leer los centroides por cluster → de ahí salen los umbrales.
+1. Build the signal matrix.
+2. Inspect correlations and signal redundancy.
+3. Recover 3 buckets with KMeans over standardized features.
+4. Rank signals by discriminative power (eta2 = between-cluster variance /
+   total variance).
+5. Read cluster centroids to infer thresholds.
 """
 from __future__ import annotations
 
@@ -52,7 +52,7 @@ def build_matrix() -> pd.DataFrame:
 
 
 def eta_squared(values: np.ndarray, labels: np.ndarray) -> float:
-    """Proporción de varianza explicada por el cluster (0..1). Poder discriminante."""
+    """Share of variance explained by clusters (0..1)."""
     grand = values.mean()
     ss_total = ((values - grand) ** 2).sum()
     ss_between = sum(
@@ -67,7 +67,7 @@ def main() -> None:
     feats = df.columns.tolist()
 
     print("=" * 70)
-    print("1) CORRELACIÓN entre señales (Pearson)")
+    print("1) Signal correlation (Pearson)")
     print("=" * 70)
     print(df.corr(numeric_only=True).round(2).to_string())
 
@@ -77,29 +77,29 @@ def main() -> None:
     df_lab = df.assign(cluster=labels)
 
     print("\n" + "=" * 70)
-    print(f"2) KMeans k=3 | silhouette={silhouette_score(X, labels):.3f} | tamaños:")
+    print(f"2) KMeans k=3 | silhouette={silhouette_score(X, labels):.3f} | sizes:")
     print("=" * 70)
     print(df_lab.cluster.value_counts().sort_index().to_string())
 
     print("\n" + "=" * 70)
-    print("3) PERFIL de cada cluster (media por señal)")
+    print("3) Cluster profile (feature means)")
     print("=" * 70)
     profile = df_lab.groupby("cluster")[feats].mean().round(2)
     print(profile.T.to_string())
 
     print("\n" + "=" * 70)
-    print("4) QUÉ PESA MÁS — poder discriminante (eta²), rankeado")
+    print("4) Ranked discriminative power (eta2)")
     print("=" * 70)
     etas = {f: eta_squared(df[f].values.astype(float), labels) for f in feats}
     rank = pd.Series(etas).sort_values(ascending=False).round(3)
     print(rank.to_string())
 
     print("\n" + "=" * 70)
-    print("5) UMBRALES sugeridos por los centroides (top señales)")
+    print("5) Centroid-suggested thresholds (top signals)")
     print("=" * 70)
     for f in rank.head(5).index:
         vals = profile[f].sort_values()
-        print(f"  {f:20s} centroides por cluster (ordenados): {vals.to_dict()}")
+        print(f"  {f:20s} ordered cluster centroids: {vals.to_dict()}")
 
 
 if __name__ == "__main__":

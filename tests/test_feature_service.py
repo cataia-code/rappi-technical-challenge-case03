@@ -1,4 +1,4 @@
-"""Tests de Capa 0: features derivadas, modelo de riesgo y guardrails híbridos."""
+"""Tests for derived features, risk model, and hybrid guardrails."""
 import pytest
 
 from caso03.domain.models import Decision, Recommendation
@@ -17,39 +17,39 @@ def cases_by_id():
     return {c.caso_id: c for c in load_cases()}
 
 
-# --- Features derivadas (cross-check GPS) ------------------------------------
-def test_gps_contradice_en_caso_fraude(cases_by_id):
+# --- Derived features: GPS cross-checks --------------------------------------
+def test_gps_contradicts_fraud_case(cases_by_id):
     f = compute_features(cases_by_id["COMP-0011"])
     assert f.gps_contradice_reclamo is True
 
 
-def test_gps_no_contradice_producto_incorrecto(cases_by_id):
+def test_gps_does_not_contradict_wrong_product_case(cases_by_id):
     f = compute_features(cases_by_id["COMP-0012"])
     assert f.gps_contradice_reclamo is False
 
 
-# --- Modelo de riesgo (data-driven) ------------------------------------------
-def test_risk_buckets_de_los_anclas(cases_by_id):
+# --- Data-driven risk model --------------------------------------------------
+def test_anchor_risk_buckets(cases_by_id):
     assert assess(cases_by_id["COMP-0011"]).resolved_bucket == "FRAUDE"
     assert assess(cases_by_id["COMP-0001"]).resolved_bucket == "LEGITIMO"
     assert assess(cases_by_id["COMP-0012"]).resolved_bucket == "AMBIGUO"
 
 
-# --- Guardrails guiados por bucket -------------------------------------------
-def test_guardrail_fraude_prohibe_aprobar(cases_by_id):
+# --- Bucket-driven guardrails ------------------------------------------------
+def test_fraud_guardrail_forbids_approval(cases_by_id):
     case = cases_by_id["COMP-0011"]
     v = evaluate_guardrail(assess(case), compute_features(case))
     assert v.action is GuardrailAction.FORBID_APPROVE
 
 
-def test_guardrail_legitimo_prohibe_rechazar(cases_by_id):
+def test_legitimate_guardrail_forbids_rejection(cases_by_id):
     case = cases_by_id["COMP-0001"]
     v = evaluate_guardrail(assess(case), compute_features(case))
     assert v.action is GuardrailAction.FORBID_REJECT
 
 
-def test_reconcile_degrada_aprobar_en_fraude(cases_by_id):
-    """Aunque el LLM apruebe con alta confianza, Capa 0 lo baja a ESCALAR."""
+def test_reconcile_degrades_approval_on_fraud_bucket(cases_by_id):
+    """Even a high-confidence LLM approval is degraded by layer 0."""
     case = cases_by_id["COMP-0011"]
     v = evaluate_guardrail(assess(case), compute_features(case))
     d = Decision(
@@ -61,7 +61,7 @@ def test_reconcile_degrada_aprobar_en_fraude(cases_by_id):
     assert "no puede APROBAR" in out.override_guardrail
 
 
-def test_reconcile_protege_legitimo(cases_by_id):
+def test_reconcile_protects_legitimate_bucket(cases_by_id):
     case = cases_by_id["COMP-0001"]
     v = evaluate_guardrail(assess(case), compute_features(case))
     d = Decision(

@@ -19,7 +19,8 @@ Fecha de corte: 2026-07-30. Repo remoto: `https://github.com/cataia-code/rappi-t
 - **Pipeline**: `PYTHONPATH=src ./.venv/Scripts/python.exe -m caso03.pipeline [--no-llm] [--limit N] [--workers K]`.
 - **Build de la web**: `./.venv/Scripts/python.exe apps/web/build_page.py` → genera `docs/index.html` (autocontenido; GitHub Pages sirve desde `/docs`).
 - **Secretos**: `.env` está gitignored. **Nunca** commitear API keys. El repo es **público**.
-- **Idioma del producto**: español (UI, prompts, docstrings). Código/commits en inglés.
+- **Idioma del producto**: español para UI, prompts y mensajes finales al usuario.
+  Código, nombres internos, docstrings, comentarios y commits en inglés.
 - **NO revertir** ediciones externas previas (defensas de prompt-injection, etc.).
 
 ### Acciones pendientes del USUARIO (no las puede hacer el agente)
@@ -76,15 +77,22 @@ src/caso03/
     report_service.py       # build_dataframe/build_summary/write_excel (+ col modelo_usado)
 apps/
   web/{build_page.py, index.template.html}   # build -> docs/index.html
-  mcp/server.py             # FastMCP (revisar_caso / revisar_datos)
+  mcp/server.py             # FastMCP (review_case / review_payload)
   api/                      # VACÍO — crear FastAPI en Fase 6
+challenge/
+  Rappi_AI_Builder_Challenge.pdf
 experiments/
   scoring/{explore_signals.py, model_selection.py}
   eval/{prepare_manual_label_sample.py, validate_manual_labels.py}
   llm/{prompt_versions,sample_outputs,eval_runs}/   # dirs vacíos
 data/{raw,interim,processed,output,labels}/
   processed/model_selection.json       # metricas, PCA y pesos del modelo ganador
-docs/{index.html (generado), politicas_decision.md, HANDOFF_PLAN.md}
+docs/
+  index.html (generado), politicas_decision.md, HANDOFF_PLAN.md
+  assets/images/{Rappi_logo.svg.webp, rappi_faticon.png}
+  planning/executive_plan.md
+poc/
+  README.md                  # prototipos aislados; NO mover aquí el motor productivo
 notebooks/  scripts/        # VACÍOS — poblar en Fases 2/7
 tests/  (22 tests verdes)
 ```
@@ -268,7 +276,7 @@ abuse_index_min, abuse_index_max
 ### FASE 7 — Tests, docs, build final, verificación
 **Tareas**:
 1. Tests: `test_api.py` (FastAPI TestClient), `test_mcp.py` (import/smoke), paridad scoring, y ampliar `test_llm_client.py` (retry por RateLimitError). Todos verdes.
-2. Docs: `README.md` (1 página actualizada: nuevo layout, cómo correr, multi-proveedor, demo), `docs/demo_script.md` (guion de la presentación de 30 min), `scripts/*.ps1` (`run_pipeline.ps1`, `run_api.ps1`, `run_mcp.ps1`, `build_page.ps1`, `validate_output.py`). Actualizar `PLAN_EJECUTIVO_CASO03.md` o marcarlo histórico.
+2. Docs: `README.md` (1 página actualizada: nuevo layout, cómo correr, multi-proveedor, demo), `docs/demo_script.md` (guion de la presentación de 30 min), `scripts/*.ps1` (`run_pipeline.ps1`, `run_api.ps1`, `run_mcp.ps1`, `build_page.ps1`, `validate_output.py`). Mantener `docs/planning/executive_plan.md` alineado o marcarlo histórico.
 3. Build final `apps/web/build_page.py` → recorrer 5 pestañas, 3 modales Mermaid, correr demo contra `wrangler dev`.
 4. Verificación end-to-end (§6). Commit `docs:`/`test:`/`chore:` y push final.
 

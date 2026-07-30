@@ -1,7 +1,7 @@
-"""schemas — contrato de salida del LLM (validación estricta con Pydantic).
+"""Strict Pydantic contract for LLM output.
 
-El LLM devuelve JSON; este esquema lo valida antes de que toque la lógica de
-negocio. Si no valida, decision_service cae a ESCALAR (fail-safe).
+The LLM returns JSON; this schema validates it before it reaches business logic.
+Invalid payloads fail safe to ESCALAR in decision_service.
 """
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ class LLMDecisionPayload(BaseModel):
     def _text_not_blank(cls, value: str) -> str:
         value = value.strip()
         if not value:
-            raise ValueError("campo vacío")
+            raise ValueError("empty field")
         return value
 
     @field_validator("senales_dominantes")
@@ -30,5 +30,5 @@ class LLMDecisionPayload(BaseModel):
     def _signals_not_blank(cls, values: list[str]) -> list[str]:
         cleaned = [value.strip() for value in values if value.strip()]
         if not cleaned:
-            raise ValueError("sin señales dominantes")
+            raise ValueError("missing dominant signals")
         return cleaned[:3]

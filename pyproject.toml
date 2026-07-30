@@ -1,7 +1,7 @@
 [project]
 name = "caso03-compensaciones"
 version = "0.1.0"
-description = "Rappi AI Builder — Caso 03: agente de revisión de compensaciones (Trust & Safety)"
+description = "Rappi AI Builder - Case 03 compensation review agent (Trust & Safety)"
 requires-python = ">=3.10"
 
 [tool.pytest.ini_options]

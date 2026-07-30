@@ -1,15 +1,15 @@
-"""Ajusta el modelo de riesgo híbrido ganador y exporta sus parámetros a JSON.
+"""Fit the winning hybrid risk model and export its parameters to JSON.
 
-Eje de abuso = las 5 señales top por eta2:
+Abuse axis = top 5 eta2 signals:
     num_comp_90d, flags, tiempo_entrega, antiguedad, monto_comp_90d
 
-El ganador de `experiments/scoring/model_selection.py` es Agglomerative(k=3) sobre
-la matriz numérica. Como ese algoritmo no tiene `predict()` nativo, para inferencia
-se exportan centroides proxy por cluster y `risk_service` asigna nuevos casos al
-centroide más cercano en el mismo espacio estandarizado.
+The winner from `experiments/scoring/model_selection.py` is Agglomerative(k=3)
+over the numeric matrix. Since this algorithm has no native `predict()`, the
+artifact exports centroid proxies and `risk_service` assigns new cases to the
+nearest centroid in the same standardized space.
 
-Exporta, sin pickle, a src/caso03/scoring/artifacts/risk_model.json.
-Correr: python -m caso03.scoring.train_risk_model
+Exports JSON only, no pickle, to src/caso03/scoring/artifacts/risk_model.json.
+Run with: python -m caso03.scoring.train_risk_model
 """
 from __future__ import annotations
 
@@ -122,12 +122,12 @@ def main() -> None:
     ARTIFACT.write_text(json.dumps(params, indent=2, ensure_ascii=False), encoding="utf-8")
 
     print("Modelo ganador: Agglomerative(k=3) + nearest-centroid proxy")
-    print("Pesos eta2 (normalizados):")
+    print("Normalized eta2 weights:")
     for feature, weight in sorted(zip(FEATURES, weights), key=lambda item: -item[1]):
         print(f"  {feature:16s} {weight:.3f}")
-    print("\nMapeo cluster->bucket:", cluster_to_bucket)
-    print("Tamaños:", pd.Series(labels).map(cluster_to_bucket).value_counts().to_dict())
-    print(f"Cortes de score (abuse_index): {cuts[0]:.3f} | {cuts[1]:.3f}")
+    print("\nCluster->bucket map:", cluster_to_bucket)
+    print("Bucket sizes:", pd.Series(labels).map(cluster_to_bucket).value_counts().to_dict())
+    print(f"Score cuts (abuse_index): {cuts[0]:.3f} | {cuts[1]:.3f}")
     print(f"Rango abuse_index: [{abuse_index.min():.3f}, {abuse_index.max():.3f}]")
     print(f"\nArtefacto: {ARTIFACT}")
 

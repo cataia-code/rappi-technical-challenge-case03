@@ -1,17 +1,16 @@
-"""decision_service — Capa 1: motor de decisión para casos ambiguos.
+"""Decision service for ambiguous compensation cases.
 
-Toma un CompensationCase, evalúa señales observables y devuelve una Decision
-validada (APROBAR / RECHAZAR / ESCALAR) con justificación auditable.
+Takes a CompensationCase, evaluates observable signals, and returns a validated,
+auditable Decision.
 
-Orquesta las piezas del paquete llm/ (cliente multi-proveedor, prompts versionados,
-esquema de salida). El fast-path resuelve determinísticamente los buckets claros y
-solo llama al LLM en los casos ambiguos.
+It orchestrates the llm package (multi-provider client, versioned prompts, output
+schema). The fast path resolves clear buckets deterministically and calls the LLM
+only for ambiguous cases.
 
-Controles de rigor:
-- temperature=0 y JSON mode  -> reproducibilidad.
-- Routing de incertidumbre: si la confianza < umbral, se enruta a ESCALAR
-  (política "no forzar binario donde no lo hay").
-- Capa 0 (guardrails) tiene la última palabra sobre la salida del LLM.
+Rigor controls:
+- temperature=0 and JSON mode for reproducibility.
+- uncertainty routing sends low-confidence non-ESCALAR answers to ESCALAR.
+- layer-0 guardrails have the final word over LLM output.
 """
 from __future__ import annotations
 
@@ -41,14 +40,14 @@ class DecisionService:
     ):
         self.settings = settings or Settings.from_env(require_llm=False)
         self._client: LLMClient | None = None
-        # fast_path: decidir LEGÍTIMO/FRAUDE de forma determinística y llamar al
-        # LLM SOLO en los casos ambiguos (ahorra ~60% de llamadas y de tokens).
+        # Fast path resolves clear LEGITIMO/FRAUDE cases deterministically and
+        # calls the LLM only for ambiguous cases.
         self.fast_path = fast_path
         self.use_llm = use_llm
 
-    # --- API pública ---------------------------------------------------------
+    # --- public API ----------------------------------------------------------
     def decide(self, case: CompensationCase) -> Decision:
-        """Entrada única (uso por caso / MCP): fast-path si aplica, si no LLM."""
+        """Single entry point for per-case and MCP usage."""
         if self.fast_path:
             fast = self.fast_decision(case)
             if fast is not None:
@@ -58,13 +57,13 @@ class DecisionService:
         return self.decide_llm(case)
 
     def fast_decision(self, case: CompensationCase) -> Decision | None:
-        """Decisión determinística (sin LLM) si el score la determina; None si no."""
+        """Return a deterministic decision when the score is conclusive."""
         features = compute_features(case)
         risk = assess(case)
         return self._fast_path(case, features, risk)
 
     def escalate_without_llm(self, case: CompensationCase) -> Decision:
-        """Fallback sin LLM: los ambiguos se ESCALAN (default seguro para ambigüedad)."""
+        """No-LLM fallback: ambiguous cases are escalated."""
         risk = assess(case)
         return Decision(
             caso_id=case.caso_id,
@@ -83,7 +82,7 @@ class DecisionService:
         )
 
     def decide_llm(self, case: CompensationCase) -> Decision:
-        """Camino LLM para los casos que el score no determina (ambiguos)."""
+        """LLM path for cases that the score cannot resolve."""
         features = compute_features(case)
         risk = assess(case)
         resp = self._llm().complete(SYSTEM_PROMPT, build_user_prompt(case, features, risk))
@@ -93,17 +92,17 @@ class DecisionService:
         decision.risk_bucket = risk.resolved_bucket
         decision.top_contribuyentes = risk.top_contribuyentes
         decision = self._route_uncertainty(decision)
-        # Capa 0 tiene la última palabra: acota la salida del LLM a la política.
+        # Layer 0 has the final word and constrains LLM output to policy.
         return reconcile(decision, evaluate_guardrail(risk, features))
 
-    # --- internos ------------------------------------------------------------
+    # --- internals -----------------------------------------------------------
     def _llm(self) -> LLMClient:
         if self._client is None:
             self._client = LLMClient(self.settings)
         return self._client
 
     def _fast_path(self, case, features, risk) -> Decision | None:
-        """Decisión determinística para buckets claros; None si hay que llamar al LLM."""
+        """Return a deterministic decision for clear buckets, else None."""
         b = risk.resolved_bucket
         if b == "LEGITIMO" and not features.gps_contradice_reclamo:
             return self._deterministic(
@@ -117,7 +116,7 @@ class DecisionService:
                 f"Alto riesgo (score {risk.risk_score}): "
                 f"{', '.join(risk.top_contribuyentes)}. Señales de abuso; no proceder.",
             )
-        return None  # AMBIGUO (o legítimo con GPS que contradice) -> al LLM
+        return None  # AMBIGUO, or LEGITIMO with GPS contradiction, goes to LLM.
 
     def _deterministic(self, case, risk, rec, confianza, resumen) -> Decision:
         return Decision(
@@ -158,7 +157,7 @@ class DecisionService:
         )
 
     def _route_uncertainty(self, decision: Decision) -> Decision:
-        """Si la confianza es baja y no es ya ESCALAR, enruta a ESCALAR."""
+        """Route low-confidence non-ESCALAR decisions to ESCALAR."""
         thr = self.settings.confidence_escalate_threshold
         if decision.recomendacion is not Recommendation.ESCALAR and decision.confianza < thr:
             decision.override_guardrail = (

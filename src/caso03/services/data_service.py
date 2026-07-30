@@ -1,10 +1,8 @@
-"""data_service — la costura del SDK (acceso a datos).
+"""Data access boundary for the decision engine.
 
-Es el ÚNICO punto que sabe de dónde vienen los datos. Hoy: un Excel local.
-Mañana, sin tocar el núcleo de decisión, se puede reemplazar por una llamada
-a una FastAPI o a un tool MCP (misma firma: devuelve list[CompensationCase]).
-Ese desacople es la frontera que muestra la referencia air_travel — aquí
-vive en-proceso en vez de en un microservicio.
+This is the only module that knows where data comes from. Today it reads a
+local Excel file. Later it can be replaced by a FastAPI call or MCP tool without
+touching the decision core, as long as it returns list[CompensationCase].
 """
 from __future__ import annotations
 
@@ -16,7 +14,7 @@ import pandas as pd
 from caso03.config import HEADER_ROW, RAW_DATA, SHEET_NAME
 from caso03.domain.models import CompensationCase
 
-# Columnas numéricas que deben forzarse a número (el Excel las trae como object)
+# Numeric columns that Excel may load as object and must be coerced.
 _NUM_INT = [
     "antiguedad_usuario_dias",
     "num_compensaciones_90d",
@@ -31,17 +29,17 @@ _NUM_FLOAT = [
 
 
 def _norm_text(value: object) -> str:
-    """Normaliza texto a Unicode NFC y colapsa espacios.
+    """Normalize text to Unicode NFC and trim whitespace.
 
-    Los datos vienen en Unicode correcto (ej. 'Señal perdida'); el '�' que se
-    ve en consola es un artefacto de display de Windows, no corrupción. Aun así
-    normalizamos para que los match por GPS/motivo sean robustos.
+    The dataset is valid Unicode; mojibake seen in some Windows consoles is a
+    display issue, not data corruption. Normalization keeps GPS/reason matching
+    robust across sources.
     """
     return unicodedata.normalize("NFC", str(value)).strip()
 
 
 def load_cases(path: Path = RAW_DATA) -> list[CompensationCase]:
-    """Lee el dataset y devuelve casos normalizados y validados."""
+    """Read the dataset and return normalized, validated cases."""
     df = pd.read_excel(path, sheet_name=SHEET_NAME, header=HEADER_ROW)
     df = df.dropna(how="all")
 

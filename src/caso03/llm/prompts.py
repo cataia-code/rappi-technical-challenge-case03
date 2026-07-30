@@ -1,9 +1,9 @@
-"""prompts — prompts versionados del motor de decisión (Capa 1).
+"""Versioned prompts for the LLM decision layer.
 
-Fuente única del texto que ve el LLM. Versionar el prompt (PROMPT_VERSION) permite
-auditar qué versión produjo cada decisión y comparar corridas en experiments/llm.
+This is the single source of text sent to the LLM. PROMPT_VERSION makes each
+decision auditable and allows run-to-run comparisons in experiments/llm.
 
-El demo en vivo (Cloudflare Worker) espeja SYSTEM_PROMPT y esta misma versión.
+The live demo Cloudflare Worker must mirror SYSTEM_PROMPT and this version.
 """
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from caso03.scoring.risk_service import RiskAssessment
 
 PROMPT_VERSION = "2026-07-30.v1"
 
-# --- Política de decisión (T&S) — AJUSTABLE ----------------------------------
+# --- Decision policy prompt (Spanish product prompt) -------------------------
 SYSTEM_PROMPT = """\
 Analista de Trust & Safety de Rappi. Revisás casos AMBIGUOS de compensación (un modelo \
 de riesgo ya filtró los claros). Emitís UNA recomendación: APROBAR / RECHAZAR / ESCALAR.
@@ -36,7 +36,7 @@ Respondé SOLO este JSON:
 def build_user_prompt(
     case: CompensationCase, f: CaseFeatures, risk: RiskAssessment
 ) -> str:
-    """Arma el prompt de usuario: features de Capa 0 + señales + texto del reclamo."""
+    """Build the user prompt from layer-0 features, signals, and claim text."""
     return (
         f"CASO {case.caso_id}\n"
         f"[MODELO DE RIESGO — derivado de los datos]\n"

@@ -1,7 +1,7 @@
 # Plan Ejecutivo — Caso 03: Automatización de Revisión de Compensaciones
 
 > Rappi AI Solution Builder · Trust & Safety · Agente de decisión APROBAR / RECHAZAR / ESCALAR
-> Stack elegido: **LLM acotado con JSON validado** + guardrails determinísticos · Demo: **Streamlit + export Excel/CSV**
+> Stack elegido: **LLM multi-proveedor con JSON validado** + guardrails determinísticos · Demo: **web estática + MCP/API + export Excel**
 
 ---
 
@@ -127,26 +127,26 @@ Cada caso muestra: semáforo (verde/rojo/ámbar), **las 2–3 señales que domin
 - **Fase 1 — Políticas + validación manual (1 día):** cerrar matriz de decisión y umbrales, etiquetar ~30 casos a mano como ground-truth y calibrar el umbral de confianza→ESCALAR. *Entrega:* `docs/politicas_decision.md` + set etiquetado.
 - **Fase 2 — Implementar el agente (1,5 días):** Capa 0 (features + guardrails), Capa 1 (prompt con salida JSON validada + reintentos), Capa 2 (señales dominantes + resumen). Correr los 150 casos → Excel/CSV enriquecido. *Entrega:* agente end-to-end.
 - **Fase 3 — Testing + edge cases + docs (1 día):** validar contra el set etiquetado, probar edge cases (GPS "Señal perdida"/"Parcial", monto máximo, usuario nuevo), test de determinismo, README de 1 página. *Entrega:* métricas + doc.
-- **Fase 4 — Demo + pulido (0,5 día):** dashboard **Streamlit** (tabla filtrable + detalle por caso + botón export), ensayo de la corrida en vivo. *Entrega:* demo desplegable.
+- **Fase 4 — Demo + pulido (0,5 día):** web estática en `docs/` (tabla filtrable + detalle por caso + export), MCP en `apps/mcp/` y superficie API en `apps/api/`. *Entrega:* demo desplegable.
 
 ---
 
 ## 10. Archivos a crear (fase de build, tras aprobación)
 
 ```
-caso03/
-  data/                       # dataset original + salida enriquecida
-  src/
-    load.py                   # lectura + normalización de encoding (mojibake)
-    features.py               # Capa 0: features derivadas + hard-stops
-    agent.py                  # Capa 1: prompt, llamada LLM, validación JSON
-    schema.py                 # esquema de salida {recomendacion, confianza, senales, resumen}
-    run_batch.py              # corre los 150 casos → Excel/CSV
-  app/streamlit_app.py        # Capa 2: dashboard de revisión + export
-  docs/
-    politicas_decision.md     # criterios y manejo de ambigüedad
-    README.md                 # 1 página: qué construí, decisiones, qué mejoraría
-  tests/test_features.py      # guardrails y features determinísticas
+src/caso03/
+  services/data_service.py    # lectura + normalización de encoding
+  features/feature_service.py # Capa 0: features derivadas + guardrails
+  llm/                        # Capa 1: prompt, cliente multi-proveedor, schema JSON
+  scoring/                    # modelo de riesgo data-driven + artefacto JSON
+  pipeline.py                 # corre los 150 casos → Excel
+apps/
+  web/                        # Capa 2: dashboard estático + build a docs/index.html
+  mcp/                        # servidor FastMCP
+  api/                        # superficie FastAPI prevista
+docs/
+  politicas_decision.md       # criterios y manejo de ambigüedad
+tests/                        # guardrails, scoring, LLM client y pipeline
 ```
 Reutilizar: `pandas` para I/O, la matriz de §5 como fuente única de umbrales (constantes en `features.py`), y los 3 casos ancla de §3 como fixtures de test.
 
@@ -158,5 +158,5 @@ Reutilizar: `pandas` para I/O, la matriz de §5 como fuente única de umbrales (
 2. Chequear reparto de decisiones (≈45/25/30) y que ningún caso quede `PENDIENTE`.
 3. Correr `tests/` — guardrails de Capa 0 y determinismo (misma entrada → misma salida).
 4. Validar contra el set de ~30 casos etiquetados: precisión de RECHAZAR ≥90%, concordancia global.
-5. `streamlit run caso03/app/streamlit_app.py` → revisar 5 casos (uno por decisión) y exportar Excel. **Prueba de "5 segundos":** ¿el CS entiende cada decisión con el semáforo + 2–3 señales + resumen, sin abrir el detalle?
+5. `.\.venv\Scripts\python.exe apps\web\build_page.py` → abrir `docs/index.html` y revisar 5 casos (uno por decisión). **Prueba de "5 segundos":** ¿el CS entiende cada decisión con el semáforo + 2–3 señales + resumen, sin abrir el detalle?
 6. Ensayo de demo en vivo sobre el dataset completo.

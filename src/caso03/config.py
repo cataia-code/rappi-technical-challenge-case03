@@ -1,10 +1,10 @@
-"""Configuración central: carga .env y expone settings tipados.
+"""Central configuration: load .env and expose typed settings.
 
-Punto único de verdad para credenciales y parámetros del motor de decisión.
-Nunca hardcodear API keys: siempre vía entorno (.env, gitignored).
+Single source of truth for credentials and decision-engine parameters.
+Never hardcode API keys; always load them from the environment.
 
-Multi-proveedor: Groq, Gemini y OpenRouter (todos OpenAI-compatible). El orden de
-fallback lo define LLM_PROVIDER_ORDER; solo se usan los proveedores con API key.
+Multi-provider support: Groq, Gemini, and OpenRouter are OpenAI-compatible.
+LLM_PROVIDER_ORDER defines fallback order; providers without API keys are skipped.
 """
 from __future__ import annotations
 
@@ -14,14 +14,14 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# Raíz del proyecto = dos niveles arriba de este archivo (src/caso03/config.py)
+# Project root = two levels above this file (src/caso03/config.py).
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 load_dotenv(PROJECT_ROOT / ".env")
 
 RAW_DATA = PROJECT_ROOT / "data" / "raw" / "Rappi_AI_Builder_Challenge_Dataset.xlsx"
 OUTPUT_DIR = PROJECT_ROOT / "data" / "output"
 SHEET_NAME = "Caso3_Compensaciones"
-HEADER_ROW = 1  # el encabezado real está en la fila 1 (fila 0 es el título)
+HEADER_ROW = 1  # The real header is row 1; row 0 is the sheet title.
 
 
 @dataclass(frozen=True)
@@ -60,14 +60,14 @@ class Settings:
         )
         if require_llm and not settings.iter_providers():
             raise RuntimeError(
-                "No hay API keys de LLM configuradas. Completá al menos una "
-                "(GROQ_API_KEY / GEMINI_API_KEY / OPENROUTER_API_KEY) en .env, "
-                "o ejecutá el pipeline con --no-llm."
+                "No LLM API keys are configured. Set at least one of "
+                "GROQ_API_KEY / GEMINI_API_KEY / OPENROUTER_API_KEY in .env, "
+                "or run the pipeline with --no-llm."
             )
         return settings
 
     def iter_providers(self) -> list[tuple[str, str, str]]:
-        """Proveedores configurados como (nombre, api_key, modelo), en orden de fallback."""
+        """Configured providers as (name, api_key, model), in fallback order."""
         table = {
             "groq": (self.groq_api_key, self.groq_model),
             "gemini": (self.gemini_api_key, self.gemini_model),

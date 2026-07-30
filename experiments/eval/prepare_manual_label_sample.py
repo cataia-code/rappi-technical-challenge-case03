@@ -1,8 +1,8 @@
-"""Genera una plantilla de 30 casos para etiquetado humano.
+"""Generate a 30-case template for human labeling.
 
-La muestra toma 10 casos por bucket de riesgo (LEGITIMO, AMBIGUO, FRAUDE), repartidos
-por score para cubrir casos fáciles y de frontera. La columna `etiqueta_manual` queda
-vacía a propósito: debe completarla un revisor humano con APROBAR/RECHAZAR/ESCALAR.
+The sample takes 10 cases per risk bucket and spreads them across the score
+range to cover easy and borderline cases. The `etiqueta_manual` column is
+intentionally empty and must be filled by a human reviewer.
 """
 from __future__ import annotations
 
@@ -62,7 +62,7 @@ def main() -> None:
     sample = sample.sort_values(["risk_bucket", "risk_score", "caso_id"])
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     sample.to_csv(OUTPUT, index=False, encoding="utf-8-sig")
-    print(f"Plantilla generada: {OUTPUT}")
+    print(f"Template generated: {OUTPUT}")
     print(sample["risk_bucket"].value_counts().to_string())
 
 

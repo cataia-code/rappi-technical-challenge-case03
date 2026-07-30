@@ -44,10 +44,13 @@ src/caso03/        Código productivo: dominio, features, scoring, LLM, servicio
 apps/web/         Web estática y builder de `docs/index.html`.
 apps/mcp/         Servidor FastMCP para exponer revisión de casos como tool.
 apps/api/         Superficie FastAPI prevista para la demo/API.
+challenge/        Enunciado original del reto y anexos de entrada.
+config/           Plantillas de configuración local, sin secretos reales.
 experiments/      POC y experimentación: scoring, evaluación manual y pruebas LLM.
 notebooks/        Notebooks de exploración, selección de modelo y evaluación.
 data/             raw/interim/processed/output/labels con datasets y artefactos derivados.
-docs/             GitHub Pages, políticas y handoff técnico.
+docs/             GitHub Pages, assets del sitio, políticas, handoff y planeación.
+poc/              Prototipos aislados; no contiene el motor productivo.
 scripts/          Automatizaciones operativas futuras.
 tests/            Pruebas unitarias e integración del pipeline.
 ```
@@ -68,7 +71,7 @@ nunca supera `valor_orden`. Detalle en `experiments/scoring/model_selection.py`.
 py -3.10 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 
-# 2. Credenciales: copiar .env.example -> .env y poner las API keys disponibles
+# 2. Credenciales: copiar config\env.example -> .env y poner las API keys disponibles
 #    (GROQ_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY). El modo --no-llm no consume tokens.
 
 # 3. Seleccionar y ajustar el modelo de riesgo
