@@ -44,6 +44,8 @@ Fecha de corte: 2026-07-30. Repo remoto: `https://github.com/cataia-code/rappi-t
 - `31f405b chore: baseline import of case 03 compensation agent`
 - `a1770d1 refactor: restructure into src/apps/experiments layout`
 - `846279d feat: multi-provider LLM client with fallback`
+- `6219338 docs: add technical handoff plan`
+- Fase 2 core: seleccion/adopcion del modelo ganador (ver `git log` tras el commit final de esta fase).
 
 ### Fase 1b — abstracción multi-proveedor
 - Cerrada localmente en `846279d feat: multi-provider LLM client with fallback`.
@@ -62,7 +64,7 @@ src/caso03/
   features/feature_service.py   # compute_features + guardrails (evaluate_guardrail/reconcile)
   scoring/
     risk_service.py         # assess(case) -> RiskAssessment  (inferencia SOLO numpy)
-    train_risk_model.py     # (ex analysis/fit_risk_model.py) — SE REESCRIBE en Fase 2
+    train_risk_model.py     # entrena Agglomerative(k=3) ganador + exporta risk_model.json
     artifacts/risk_model.json
   llm/
     prompts.py              # PROMPT_VERSION + SYSTEM_PROMPT + build_user_prompt()
@@ -77,10 +79,11 @@ apps/
   mcp/server.py             # FastMCP (revisar_caso / revisar_datos)
   api/                      # VACÍO — crear FastAPI en Fase 6
 experiments/
-  scoring/explore_signals.py
+  scoring/{explore_signals.py, model_selection.py}
   eval/{prepare_manual_label_sample.py, validate_manual_labels.py}
   llm/{prompt_versions,sample_outputs,eval_runs}/   # dirs vacíos
 data/{raw,interim,processed,output,labels}/
+  processed/model_selection.json       # metricas, PCA y pesos del modelo ganador
 docs/{index.html (generado), politicas_decision.md, HANDOFF_PLAN.md}
 notebooks/  scripts/        # VACÍOS — poblar en Fases 2/7
 tests/  (22 tests verdes)
@@ -105,16 +108,20 @@ Duplicado del dataset en raíz: **untracked/ignorado** (sigue en disco porque es
 2. Estandariza: `z = (x - scaler_mean) / scaler_scale`.
 3. `abuse_index = (z * signs) @ weights`.
 4. `score_bucket`: por `score_cuts=[c0,c1]` → `<c0` LEGITIMO, `<c1` AMBIGUO, else FRAUDE.
-5. `cluster_bucket`: centroide KMeans más cercano (argmin dist² a `centroids`), mapeado por `cluster_to_bucket`.
+5. `cluster_bucket`: para los 150 casos conocidos usa el label exacto entrenado por
+   Agglomerative(k=3); para casos nuevos/ad-hoc usa el centroide proxy más cercano.
 6. `risk_score = clip((abuse_index - abuse_index_min)/(max-min), 0, 1)` redondeado a 2.
 7. `resolved_bucket = score_bucket if (score_bucket==cluster_bucket) else "AMBIGUO"`  ← **el desacuerdo entre ambos métodos = señal de ambigüedad → al LLM**.
 8. `top_contribuyentes`: top-3 por `|oriented*weights|`, frase por dirección (`_PHRASES`).
 
-`risk_model.json` (schema actual — **cambiará en Fase 2** al adoptar el ganador; hoy es KMeans-5-numérico):
+`risk_model.json` (schema actual — Fase 2 core):
 ```
+model_version, training_algorithm="agglomerative",
+inference_strategy="nearest_centroid_proxy", matrix="numeric", n_clusters=3,
 features[5], signs{}, scaler_mean[5], scaler_scale[5], weights[5], eta2{},
-centroids[3][5], cluster_to_bucket{"0":"LEGITIMO","1":"FRAUDE","2":"AMBIGUO"},
-score_cuts[2], abuse_index_min, abuse_index_max
+cluster_to_bucket{"1":"LEGITIMO","2":"AMBIGUO","0":"FRAUDE"},
+training_case_cluster{}, training_case_bucket{}, centroids[3][5], score_cuts[2],
+abuse_index_min, abuse_index_max
 ```
 > **La ruta del artefacto** en `risk_service.py` es `Path(__file__).parent/"artifacts"/"risk_model.json"` (junto al módulo, en `scoring/artifacts/`). Cachéada con `@lru_cache`.
 
@@ -136,8 +143,8 @@ score_cuts[2], abuse_index_min, abuse_index_max
 > está verde, (b) su verificación específica pasa, (c) hay commit + push. No arrastrar deuda.
 
 ### FASE 1 — Restructura + multi-proveedor + limpieza  ✅
-- **Estado**: cerrada localmente. Falta push si el repo remoto aún no refleja `a1770d1` y `846279d`.
-- **DoD**: 22 tests verdes; commits listos para push.
+- **Estado**: cerrada y pusheada a `origin/main` (`a1770d1`, `846279d`, `6219338`).
+- **DoD**: 22 tests verdes; web build verificado.
 
 ---
 
@@ -145,6 +152,17 @@ score_cuts[2], abuse_index_min, abuse_index_max
 **Objetivo**: comparar algoritmos de clustering con y sin categóricas codificadas, elegir el mejor por métricas, **adoptarlo como productivo**, re-exportar `risk_model.json`, re-correr los 150, y exportar datos de gráficos para la web.
 
 **Empezar cuando**: Fase 1 commiteada.
+
+**Estado actual (2026-07-30): Fase 2 core implementada.**
+- `experiments/scoring/model_selection.py` compara KMeans, Gaussian Mixture,
+  AgglomerativeClustering y DBSCAN sobre matriz numérica y mixta.
+- Ganador adoptado: **AgglomerativeClustering(k=3)** sobre matriz numérica
+  (`silhouette=0.462`, Davies-Bouldin `0.810`, Calinski-Harabasz `212.85`).
+- Reparto exacto por cluster entrenado: **LEGITIMO 62 / AMBIGUO 58 / FRAUDE 30**.
+- `train_risk_model.py` exporta `model_version="2026-07-30.agglomerative-v1"` y
+  `risk_service.assess` usa label exacto para casos conocidos + proxy por centroide para casos nuevos.
+- Pipeline `--no-llm`, build web y `pytest -q` ya pasaron con 22 tests.
+- Pendientes de Fase 2 ampliada: notebooks formales y graficos SVG multi-tab en la web (Fase 3).
 
 **Tareas técnicas**:
 1. Añadir a `requirements.txt`: `matplotlib` (solo notebooks/experimentos) y `scipy` si hace falta. Instalar en venv.
@@ -164,10 +182,12 @@ score_cuts[2], abuse_index_min, abuse_index_max
 6. `notebooks/00_data_exploration.ipynb`…`04_evaluation.ipynb`: exploración, feature analysis (incl. categóricas), experimentos de clustering, prompt tests, evaluación. Usar `NotebookEdit`.
 7. Re-correr pipeline con LLM si hay presupuesto, o `--no-llm` como fallback: `PYTHONPATH=src python -m caso03.pipeline` → `data/output/salida_150.xlsx`. Rebuild web.
 
-**GOTCHAS de Fase 2 (romperán tests — hay que actualizarlos)**:
-- `tests/test_pipeline.py::test_pipeline_no_llm_produce_150_decisiones_con_scoring` **assert exacto `{APROBAR:60, ESCALAR:59, RECHAZAR:31}`** — cambiará. Actualizar al nuevo reparto (o afirmar suma=150 y rangos).
-- `tests/test_feature_service.py::test_risk_buckets_de_los_anclas` asume `COMP-0011=FRAUDE, COMP-0001=LEGITIMO, COMP-0012=AMBIGUO`. Verificar/actualizar contra el nuevo modelo.
-- Guardrails (`evaluate_guardrail`) dependen del bucket; revisar que sigan coherentes.
+**GOTCHAS de Fase 2**:
+- `tests/test_pipeline.py::test_pipeline_no_llm_produce_150_decisiones_con_scoring`
+  ya fue actualizado al reparto `{APROBAR:62, ESCALAR:58, RECHAZAR:30}`.
+- `tests/test_feature_service.py::test_risk_buckets_de_los_anclas` sigue verde con
+  `COMP-0011=FRAUDE`, `COMP-0001=LEGITIMO`, `COMP-0012=AMBIGUO`.
+- Guardrails (`evaluate_guardrail`) dependen del bucket; seguir revisando al cambiar prompts/LLM.
 
 **DoD Fase 2**: `model_selection.py` corre e imprime métricas; `risk_model.json` regenerado por el ganador; `assess` consistente; 150 recomputados; tests actualizados y verdes; JSON de gráficos generado; notebooks commiteados. Commit `feat: model selection + adopt winning clustering model` (+ `test:` para asserts).
 

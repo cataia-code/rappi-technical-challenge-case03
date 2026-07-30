@@ -275,16 +275,16 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
   <p class="lead">El scoring resuelve de forma determinística lo que los datos ya separan. El LLM se reserva
     para lo que el score no puede determinar: los casos ambiguos, donde hay que leer el texto del reclamo.</p>
   <div class="flow reveal">
-    <div class="layer det"><span class="badge">61% de los casos</span>
+    <div class="layer det"><span class="badge">92/150 casos</span>
       <div class="tag">Capa 0 · determinística</div>
       <h3>Modelo de riesgo</h3>
       <p>Score 0–1 ponderado por la importancia real de cada señal (eta²) + clustering. Clasifica
          legítimo / ambiguo / fraude. 100% reproducible y auditable.</p></div>
     <div class="layer"><span class="badge">solo ambiguos</span>
       <div class="tag">Capa 1 · interpretativa</div>
-      <h3>Razonamiento LLM</h3>
-      <p>Groq (Llama&nbsp;3.3) con chain-of-thought. Recibe el bucket + el texto del reclamo y desambigua
-         por coherencia. Solo se invoca cuando el score no alcanza.</p></div>
+      <h3>LLM con JSON validado</h3>
+      <p>Fallback multi-proveedor (Groq/Gemini/OpenRouter). Recibe el bucket + el texto del reclamo
+         como dato no confiable y desambigua por coherencia. Solo se invoca cuando el score no alcanza.</p></div>
     <div class="layer"><span class="badge">política</span>
       <div class="tag">Capa 2 · guardrails</div>
       <h3>Reconciliación</h3>
@@ -301,8 +301,8 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
   <span class="eyebrow">Lo más importante · cómo se decidió el scoring</span>
   <h2 class="title">No inventamos umbrales. Los sacamos de los datos.</h2>
   <p class="lead">El dataset no viene etiquetado, pero el reto afirma que los 150 casos están en 3 grupos latentes.
-    Los recuperamos con clustering no supervisado (KMeans, silhouette&nbsp;0.28) y medimos qué señal separa
-    realmente cada grupo con <b>eta²</b> (varianza explicada). Eso —no la intuición— define pesos y cortes.</p>
+    Comparamos KMeans, Gaussian Mixture, Agglomerative y DBSCAN; ganó Agglomerative(k=3) sobre matriz numérica
+    (silhouette&nbsp;0.462). Eso —no la intuición— define el modelo productivo, pesos y cortes.</p>
 
   <div class="two-col">
     <div>
@@ -310,20 +310,20 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
       <p style="font-size:13.5px;color:var(--muted);margin:0 0 16px">Las 5 señales fuertes están correlacionadas: son un mismo <b>eje de abuso</b>.</p>
       <div class="bars" id="eta-bars"></div>
       <div class="callout" style="margin-top:20px">Dos correcciones que impusieron los datos:
-        <b>el tiempo de entrega</b> resultó una de las señales más fuertes (fraude entrega en ~31&nbsp;min, legítimo en ~83),
-        y <b>el GPS</b> —que parecía clave— resultó secundario (eta² 0.17), útil solo como desempate.</div>
+        <b>la reincidencia y flags previos</b> son las señales más separadoras, y <b>el GPS</b> —que parecía clave—
+        resultó secundario: útil como desempate, no como señal primaria.</div>
     </div>
     <div>
       <h3 style="font-size:18px;margin:0 0 4px">Los 3 grupos que estaban en los datos</h3>
       <p style="font-size:13.5px;color:var(--muted);margin:0 0 16px">Perfil promedio por señal. Los cortes del score salen del punto medio entre grupos vecinos.</p>
       <div class="buckets">
-        <div class="bcard leg"><h4>Legítimo</h4><div class="cnt">60</div>
+        <div class="bcard leg"><h4>Legítimo</h4><div class="cnt">62</div>
           <dl><dt>Antigüedad</dt><dd>1111 d</dd><dt>Comp. 90d</dt><dd>0.97</dd><dt>Flags</dt><dd>0.02</dd>
               <dt>Entrega</dt><dd>83 min</dd><dt>Monto 90d</dt><dd>$202</dd></dl></div>
-        <div class="bcard amb"><h4>Ambiguo</h4><div class="cnt">59</div>
+        <div class="bcard amb"><h4>Ambiguo</h4><div class="cnt">58</div>
           <dl><dt>Antigüedad</dt><dd>263 d</dd><dt>Comp. 90d</dt><dd>4.12</dd><dt>Flags</dt><dd>1.00</dd>
               <dt>Entrega</dt><dd>56 min</dd><dt>Monto 90d</dt><dd>$598</dd></dl></div>
-        <div class="bcard fra"><h4>Fraude</h4><div class="cnt">31</div>
+        <div class="bcard fra"><h4>Fraude</h4><div class="cnt">30</div>
           <dl><dt>Antigüedad</dt><dd>23 d</dd><dt>Comp. 90d</dt><dd>8.77</dd><dt>Flags</dt><dd>2.84</dd>
               <dt>Entrega</dt><dd>31 min</dd><dt>Monto 90d</dt><dd>$1774</dd></dl></div>
       </div>
@@ -335,7 +335,7 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
 <section class="section section-2" id="llm"><div class="wrap">
   <span class="eyebrow">Cuándo se usa el LLM</span>
   <h2 class="title">Solo donde aporta juicio</h2>
-  <p class="lead">Gastar un LLM en los 150 casos sería caro, lento y menos auditable. El score ya resuelve el 61%.
+  <p class="lead">Gastar un LLM en los 150 casos sería caro, lento y menos auditable. El score ya resuelve 92 casos.
     El LLM entra únicamente en los ambiguos, para leer algo que los números no ven: el relato del reclamo.</p>
   <div class="route reveal">
     <div class="rcard a"><div class="ico">🟢</div><h4>Legítimo → sin LLM</h4>
@@ -346,7 +346,7 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
       <p>El score no alcanza. El LLM lee la <code>descripcion_reclamo</code>, evalúa coherencia con motivo y GPS,
          y decide o escala. Si sigue sin quedar claro → revisión humana.</p></div>
   </div>
-  <div class="callout reveal">Este ruteo baja el batch de 150 a ~59 llamadas y hace el sistema
+  <div class="callout reveal">Este ruteo baja el batch de 150 a ~58 llamadas y hace el sistema
     <b>escalable a 200+/día</b>: el costo del LLM crece solo con la ambigüedad real, no con el volumen total.</div>
 </div></section>
 
@@ -400,7 +400,7 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
     <img class="foot-logo" src="__RAPPI_LOGO__" alt="Rappi">
     <div class="foot-proj">AI Platform &amp; Innovation
       <span>Caso 03 — Automatización de revisión de compensaciones</span>
-      <span>Stack: Python · Groq (Llama 3.3) · scikit-learn · Streamlit · FastMCP</span>
+      <span>Stack: Python · LLM multi-proveedor · scikit-learn · web estática · FastMCP</span>
     </div>
   </div>
   <div class="foot-meta">
@@ -418,11 +418,10 @@ const DEC_COLOR = {APROBAR:'#1F9D57', ESCALAR:'#E8A400', RECHAZAR:'#D93A3A'};
 const cases = (DASHBOARD_DATA && DASHBOARD_DATA.cases) || [];
 
 /* eta² bars (data-derived importance) */
-const ETA = [['num_compensaciones_90d',0.79],['flags_fraude_previos',0.74],['tiempo_entrega',0.73],
-  ['antiguedad',0.72],['monto_compensado_90d',0.72],['valor_orden',0.48],['ratio_comp/orden',0.40],
-  ['gps_contradice',0.17],['gps_corrobora',0.02]];
+const ETA = [['num_compensaciones_90d',0.214],['flags_fraude_previos',0.203],['antiguedad',0.196],
+  ['monto_compensado_90d',0.194],['tiempo_entrega',0.193]];
 (function(){const el=document.getElementById('eta-bars');el.innerHTML=ETA.map(([n,v])=>{
-  const weak=v<0.5?'weak':'';return `<div class="bar-row ${weak}"><span class="lab">${n}</span>
+  const weak=v<0.08?'weak':'';return `<div class="bar-row ${weak}"><span class="lab">${n}</span>
     <span class="bar-track"><span class="bar-fill" style="width:${Math.round(v*100)}%"></span></span>
     <span class="val">${v.toFixed(2)}</span></div>`;}).join('');})();
 

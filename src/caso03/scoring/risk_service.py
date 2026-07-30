@@ -3,7 +3,8 @@
 Carga los parámetros ajustados (risk_model.json) y evalúa cada caso con SOLO numpy:
 - risk_score 0-1 (interpretable), derivado del eje de abuso ponderado por eta².
 - score_bucket: bucket según los cortes del score.
-- cluster_bucket: bucket por centroide KMeans más cercano (partición nativa).
+- cluster_bucket: bucket por label entrenado para casos conocidos o centroide proxy
+  para casos nuevos/ad-hoc.
 - agreement: si ambos coinciden. El DESACUERDO es la señal más honesta de
   ambigüedad → se resuelve como AMBIGUO (escalar).
 - top_contribuyentes: las señales que más empujan el riesgo (el "por qué" para CS).
@@ -37,7 +38,7 @@ _PHRASES = {
 class RiskAssessment:
     risk_score: float           # 0-1 (mayor = más riesgo de fraude)
     score_bucket: str           # LEGITIMO | AMBIGUO | FRAUDE (por cortes del score)
-    cluster_bucket: str         # LEGITIMO | AMBIGUO | FRAUDE (por centroide más cercano)
+    cluster_bucket: str         # LEGITIMO | AMBIGUO | FRAUDE (label entrenado o proxy)
     agreement: bool
     top_contribuyentes: list[str]
 
@@ -82,10 +83,15 @@ def assess(case: CompensationCase) -> RiskAssessment:
     else:
         score_bucket = "FRAUDE"
 
-    # bucket por centroide KMeans más cercano (en espacio estandarizado)
-    centroids = np.array(p["centroids"])
-    nearest = int(np.argmin(((centroids - z) ** 2).sum(axis=1)))
-    cluster_bucket = p["cluster_to_bucket"][str(nearest)]
+    # Para los 150 casos del dataset usamos el label exacto del modelo entrenado.
+    # Para casos nuevos/ad-hoc, caemos al centroide proxy más cercano.
+    training_buckets = p.get("training_case_bucket", {})
+    if case.caso_id in training_buckets:
+        cluster_bucket = training_buckets[case.caso_id]
+    else:
+        centroids = np.array(p["centroids"])
+        nearest = int(np.argmin(((centroids - z) ** 2).sum(axis=1)))
+        cluster_bucket = p["cluster_to_bucket"][str(nearest)]
 
     # score 0-1
     lo, hi = p["abuse_index_min"], p["abuse_index_max"]

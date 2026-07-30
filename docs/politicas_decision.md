@@ -9,7 +9,7 @@ criterios **derivados de los datos** (no asertados) y cómo maneja la ambigüeda
 
 ```
 Capa 0  risk_service   → modelo de riesgo DERIVADO de los datos (score + cluster)  [determinístico]
-Capa 1  decision_service → LLM (Groq, JSON validado) evalúa bucket + texto  [interpretativo]
+Capa 1  decision_service → LLM multi-proveedor, JSON validado, evalúa bucket + texto  [interpretativo]
 Capa 2  feature_service.reconcile → guardrails de política acotan la salida del LLM  [determinístico]
 ```
 
@@ -22,19 +22,21 @@ la salida respete la política aunque el LLM se equivoque.
 ## 2. Qué señales importan — derivado de los datos, no asertado
 
 No hay etiquetas. El reto afirma que los 150 casos están en 3 buckets latentes
-(fraude / legítimo / ambiguo). Los recuperamos con **KMeans k=3** sobre las señales
-estandarizadas (`analysis/explore_signals.py`): silhouette 0.28, reparto natural
-**LEGÍTIMO 60 / AMBIGUO 59 / FRAUDE 31** (40/39/21%).
+(fraude / legítimo / ambiguo). Comparamos KMeans, Gaussian Mixture,
+Agglomerative y DBSCAN sobre matriz numérica y numérica+categórica
+(`experiments/scoring/model_selection.py`). Ganó **AgglomerativeClustering k=3**
+sobre señales numéricas estandarizadas: silhouette 0.462, reparto natural
+**LEGÍTIMO 62 / AMBIGUO 58 / FRAUDE 30** (41/39/20%).
 
 **Poder discriminante por señal (eta² = varianza explicada por el cluster):**
 
 | Señal | eta² | Lectura |
 |---|---|---|
-| `num_compensaciones_90d` | 0.79 | reincidencia — la más separadora |
-| `flags_fraude_previos` | 0.74 | abuso verificado |
-| `tiempo_entrega_real_min` | 0.73 | fraude entrega ~31 min, legítimo ~83 min |
-| `antiguedad_usuario_dias` | 0.72 | cuenta nueva = riesgo |
-| `monto_compensado_90d` | 0.72 | exposición acumulada |
+| `num_compensaciones_90d` | 0.214 | reincidencia — la más separadora |
+| `flags_fraude_previos` | 0.203 | abuso verificado |
+| `antiguedad_usuario_dias` | 0.196 | cuenta nueva = riesgo |
+| `monto_compensado_90d` | 0.194 | exposición acumulada |
+| `tiempo_entrega_real_min` | 0.193 | entregas atípicamente rápidas elevan riesgo |
 | `valor_orden` / `ratio` | 0.48 / 0.40 | secundarias |
 | `gps_contradice` | 0.17 | **específica, no primaria** (solo en 32% del cluster fraude) |
 | `gps_corrobora` | 0.02 | prácticamente inútil |
@@ -55,18 +57,19 @@ Las 5 señales top están fuertemente correlacionadas → forman **un solo eje d
 
 ## 3. Modelo de riesgo híbrido (Capa 0)
 
-Ajustado una vez (`analysis/fit_risk_model.py`) y exportado a
-`src/caso03/artifacts/risk_model.json` (sin pickle — solo parámetros; la inferencia
-usa solo numpy). Combina **dos vistas** del mismo eje de abuso:
+Ajustado con `experiments/scoring/model_selection.py` y
+`python -m caso03.scoring.train_risk_model`; exportado a
+`src/caso03/scoring/artifacts/risk_model.json` (sin pickle — solo parámetros; la
+inferencia usa solo numpy). Combina **dos vistas** del mismo eje de abuso:
 
 1. **Score de riesgo (0-1):** suma ponderada por eta² de las 5 señales estandarizadas
    y orientadas a "fraude" (tiempo_entrega y antigüedad invertidas). Los **cortes**
    salen de los puntos medios entre los centroides de clusters adyacentes.
-2. **Cluster KMeans:** asigna el bucket por centroide más cercano (usa la estructura
-   multivariante completa).
+2. **Cluster ganador:** Agglomerative(k=3) asigna los 150 casos conocidos por su label
+   exacto entrenado. Para casos nuevos/ad-hoc se usa un centroide proxy por cluster.
 
 **Regla híbrida:** si score y cluster **coinciden** → ese bucket. Si **no coinciden**
-(2/150 casos) → se resuelve como **AMBIGUO**. El desacuerdo entre ambas vistas es la
+(1/150 casos) → se resuelve como **AMBIGUO**. El desacuerdo entre ambas vistas es la
 señal más honesta de incertidumbre.
 
 Cada caso reporta `top_contribuyentes`: las señales que más empujaron el score (el
@@ -110,8 +113,8 @@ aporta valor real; si el texto no desambigua, escala con el contexto ya procesad
 
 ## 6. Métricas de éxito y monitoreo
 
-- **Reparto objetivo** ≈ 45/25/30 (APROBAR/RECHAZAR/ESCALAR). Alarma si ESCALAR > 35%
-  (satura al equipo) o < 10% (fuerza binarios).
+- **Reparto objetivo** ≈ 45/25/30 (APROBAR/RECHAZAR/ESCALAR). El backbone sin LLM
+  queda en 41/20/39; el LLM debe bajar ESCALAR por debajo de 35% sin forzar binarios.
 - **Precisión de RECHAZAR** ≥ 90% (priorizamos no rechazar legítimos).
 - **Determinismo:** la Capa 0 es 100% determinística; el output se **persiste una vez**
   (Excel), congelando la variación del LLM.

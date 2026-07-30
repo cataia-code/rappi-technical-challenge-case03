@@ -1,0 +1,2384 @@
+{
+  "selection_rule": "Preferir 3 clusters efectivos por definición del reto; desempatar por mayor silhouette. Si no hay 3 clusters válidos, usar mayor silhouette global.",
+  "winner": {
+    "matrix": "numeric",
+    "algorithm": "agglomerative",
+    "k": 3,
+    "eps": null,
+    "effective_clusters": 3,
+    "noise_points": 0,
+    "cluster_sizes": {
+      "0": 30,
+      "1": 62,
+      "2": 58
+    },
+    "bucket_map": {
+      "1": "LEGITIMO",
+      "2": "AMBIGUO",
+      "0": "FRAUDE"
+    },
+    "silhouette": 0.46172572516745825,
+    "davies_bouldin": 0.8101539773386038,
+    "calinski_harabasz": 212.85013218880485
+  },
+  "results": [
+    {
+      "matrix": "numeric",
+      "algorithm": "kmeans",
+      "k": 2,
+      "eps": null,
+      "effective_clusters": 2,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 115,
+        "1": 35
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0",
+        "1": "CLUSTER_1"
+      },
+      "silhouette": 0.48661599910453807,
+      "davies_bouldin": 0.7810744086648398,
+      "calinski_harabasz": 161.46436593950588
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "gaussian_mixture",
+      "k": 2,
+      "eps": null,
+      "effective_clusters": 2,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 119,
+        "1": 31
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0",
+        "1": "CLUSTER_1"
+      },
+      "silhouette": 0.5045038328172143,
+      "davies_bouldin": 0.7387841044735836,
+      "calinski_harabasz": 157.35491863081313
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "agglomerative",
+      "k": 2,
+      "eps": null,
+      "effective_clusters": 2,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 88,
+        "1": 62
+      },
+      "bucket_map": {
+        "1": "CLUSTER_0",
+        "0": "CLUSTER_1"
+      },
+      "silhouette": 0.43611325537318596,
+      "davies_bouldin": 0.8295287713982611,
+      "calinski_harabasz": 159.51863493025562
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "kmeans",
+      "k": 3,
+      "eps": null,
+      "effective_clusters": 3,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 60,
+        "1": 31,
+        "2": 59
+      },
+      "bucket_map": {
+        "0": "LEGITIMO",
+        "2": "AMBIGUO",
+        "1": "FRAUDE"
+      },
+      "silhouette": 0.4617209839570084,
+      "davies_bouldin": 0.8095457716646638,
+      "calinski_harabasz": 214.49967630036878
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "gaussian_mixture",
+      "k": 3,
+      "eps": null,
+      "effective_clusters": 3,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 62,
+        "1": 31,
+        "2": 57
+      },
+      "bucket_map": {
+        "0": "LEGITIMO",
+        "2": "AMBIGUO",
+        "1": "FRAUDE"
+      },
+      "silhouette": 0.4592939488988454,
+      "davies_bouldin": 0.813669017343161,
+      "calinski_harabasz": 213.23842912815127
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "agglomerative",
+      "k": 3,
+      "eps": null,
+      "effective_clusters": 3,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 30,
+        "1": 62,
+        "2": 58
+      },
+      "bucket_map": {
+        "1": "LEGITIMO",
+        "2": "AMBIGUO",
+        "0": "FRAUDE"
+      },
+      "silhouette": 0.46172572516745825,
+      "davies_bouldin": 0.8101539773386038,
+      "calinski_harabasz": 212.85013218880485
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "kmeans",
+      "k": 4,
+      "eps": null,
+      "effective_clusters": 4,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 12,
+        "1": 60,
+        "2": 59,
+        "3": 19
+      },
+      "bucket_map": {
+        "1": "CLUSTER_0",
+        "2": "CLUSTER_1",
+        "0": "CLUSTER_2",
+        "3": "CLUSTER_3"
+      },
+      "silhouette": 0.4513432674333313,
+      "davies_bouldin": 0.9255432149716127,
+      "calinski_harabasz": 178.2776368125799
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "gaussian_mixture",
+      "k": 4,
+      "eps": null,
+      "effective_clusters": 4,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 57,
+        "1": 18,
+        "2": 13,
+        "3": 62
+      },
+      "bucket_map": {
+        "3": "CLUSTER_0",
+        "0": "CLUSTER_1",
+        "2": "CLUSTER_2",
+        "1": "CLUSTER_3"
+      },
+      "silhouette": 0.44460626012161225,
+      "davies_bouldin": 0.9508666989337438,
+      "calinski_harabasz": 175.50157204343165
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "agglomerative",
+      "k": 4,
+      "eps": null,
+      "effective_clusters": 4,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 62,
+        "1": 11,
+        "2": 58,
+        "3": 19
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0",
+        "2": "CLUSTER_1",
+        "1": "CLUSTER_2",
+        "3": "CLUSTER_3"
+      },
+      "silhouette": 0.45712744426583696,
+      "davies_bouldin": 0.8991440564234715,
+      "calinski_harabasz": 177.03126134774297
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "kmeans",
+      "k": 5,
+      "eps": null,
+      "effective_clusters": 5,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 12,
+        "1": 29,
+        "2": 19,
+        "3": 33,
+        "4": 57
+      },
+      "bucket_map": {
+        "3": "CLUSTER_0",
+        "1": "CLUSTER_1",
+        "4": "CLUSTER_2",
+        "0": "CLUSTER_3",
+        "2": "CLUSTER_4"
+      },
+      "silhouette": 0.36612523966688904,
+      "davies_bouldin": 1.0375140826645886,
+      "calinski_harabasz": 168.37296407895167
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "gaussian_mixture",
+      "k": 5,
+      "eps": null,
+      "effective_clusters": 5,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 57,
+        "1": 19,
+        "2": 12,
+        "3": 43,
+        "4": 19
+      },
+      "bucket_map": {
+        "4": "CLUSTER_0",
+        "3": "CLUSTER_1",
+        "0": "CLUSTER_2",
+        "2": "CLUSTER_3",
+        "1": "CLUSTER_4"
+      },
+      "silhouette": 0.37144354248810657,
+      "davies_bouldin": 1.0046830711099457,
+      "calinski_harabasz": 163.82901963827314
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "agglomerative",
+      "k": 5,
+      "eps": null,
+      "effective_clusters": 5,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 58,
+        "1": 11,
+        "2": 42,
+        "3": 19,
+        "4": 20
+      },
+      "bucket_map": {
+        "4": "CLUSTER_0",
+        "2": "CLUSTER_1",
+        "0": "CLUSTER_2",
+        "1": "CLUSTER_3",
+        "3": "CLUSTER_4"
+      },
+      "silhouette": 0.3803317909934469,
+      "davies_bouldin": 0.9819161427959425,
+      "calinski_harabasz": 163.61664657763103
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "kmeans",
+      "k": 6,
+      "eps": null,
+      "effective_clusters": 6,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 19,
+        "1": 35,
+        "2": 42,
+        "3": 18,
+        "4": 11,
+        "5": 25
+      },
+      "bucket_map": {
+        "5": "CLUSTER_0",
+        "1": "CLUSTER_1",
+        "2": "CLUSTER_2",
+        "3": "CLUSTER_3",
+        "4": "CLUSTER_4",
+        "0": "CLUSTER_5"
+      },
+      "silhouette": 0.3203093495704083,
+      "davies_bouldin": 1.1387296849586221,
+      "calinski_harabasz": 157.54931117586193
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "gaussian_mixture",
+      "k": 6,
+      "eps": null,
+      "effective_clusters": 6,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 28,
+        "1": 21,
+        "2": 10,
+        "3": 43,
+        "4": 19,
+        "5": 29
+      },
+      "bucket_map": {
+        "4": "CLUSTER_0",
+        "3": "CLUSTER_1",
+        "0": "CLUSTER_2",
+        "5": "CLUSTER_3",
+        "2": "CLUSTER_4",
+        "1": "CLUSTER_5"
+      },
+      "silhouette": 0.2649897097935378,
+      "davies_bouldin": 1.3131897447778302,
+      "calinski_harabasz": 142.49895474021372
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "agglomerative",
+      "k": 6,
+      "eps": null,
+      "effective_clusters": 6,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 42,
+        "1": 11,
+        "2": 40,
+        "3": 19,
+        "4": 20,
+        "5": 18
+      },
+      "bucket_map": {
+        "4": "CLUSTER_0",
+        "0": "CLUSTER_1",
+        "2": "CLUSTER_2",
+        "5": "CLUSTER_3",
+        "1": "CLUSTER_4",
+        "3": "CLUSTER_5"
+      },
+      "silhouette": 0.30733205524437124,
+      "davies_bouldin": 1.1400177049150189,
+      "calinski_harabasz": 151.991277563079
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 0.5,
+      "effective_clusters": 9,
+      "noise_points": 67,
+      "cluster_sizes": {
+        "-1": 67,
+        "0": 15,
+        "1": 14,
+        "2": 15,
+        "3": 5,
+        "4": 6,
+        "5": 11,
+        "6": 7,
+        "7": 7,
+        "8": 3
+      },
+      "bucket_map": {
+        "8": "CLUSTER_0",
+        "5": "CLUSTER_1",
+        "1": "CLUSTER_2",
+        "2": "CLUSTER_3",
+        "3": "CLUSTER_4",
+        "0": "CLUSTER_5",
+        "6": "CLUSTER_6",
+        "7": "CLUSTER_7",
+        "4": "CLUSTER_8"
+      },
+      "silhouette": -0.018389955408484825,
+      "davies_bouldin": 1.7015317321194068,
+      "calinski_harabasz": 18.023113037612777
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 0.75,
+      "effective_clusters": 5,
+      "noise_points": 26,
+      "cluster_sizes": {
+        "-1": 26,
+        "0": 63,
+        "1": 25,
+        "2": 17,
+        "3": 13,
+        "4": 6
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0",
+        "3": "CLUSTER_1",
+        "1": "CLUSTER_2",
+        "2": "CLUSTER_3",
+        "4": "CLUSTER_4"
+      },
+      "silhouette": 0.2771700940993972,
+      "davies_bouldin": 1.2557263157343244,
+      "calinski_harabasz": 98.6966360606097
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 1.0,
+      "effective_clusters": 2,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 143,
+        "1": 7
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0",
+        "1": "CLUSTER_1"
+      },
+      "silhouette": 0.27960751037909903,
+      "davies_bouldin": 0.7672392345140571,
+      "calinski_harabasz": 17.6157512117179
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 1.25,
+      "effective_clusters": 1,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 150
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0"
+      },
+      "silhouette": null,
+      "davies_bouldin": null,
+      "calinski_harabasz": null
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 1.5,
+      "effective_clusters": 1,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 150
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0"
+      },
+      "silhouette": null,
+      "davies_bouldin": null,
+      "calinski_harabasz": null
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 1.75,
+      "effective_clusters": 1,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 150
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0"
+      },
+      "silhouette": null,
+      "davies_bouldin": null,
+      "calinski_harabasz": null
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 2.0,
+      "effective_clusters": 1,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 150
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0"
+      },
+      "silhouette": null,
+      "davies_bouldin": null,
+      "calinski_harabasz": null
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 2.25,
+      "effective_clusters": 1,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 150
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0"
+      },
+      "silhouette": null,
+      "davies_bouldin": null,
+      "calinski_harabasz": null
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 2.5,
+      "effective_clusters": 1,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 150
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0"
+      },
+      "silhouette": null,
+      "davies_bouldin": null,
+      "calinski_harabasz": null
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 2.75,
+      "effective_clusters": 1,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 150
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0"
+      },
+      "silhouette": null,
+      "davies_bouldin": null,
+      "calinski_harabasz": null
+    },
+    {
+      "matrix": "numeric",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 3.0,
+      "effective_clusters": 1,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 150
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0"
+      },
+      "silhouette": null,
+      "davies_bouldin": null,
+      "calinski_harabasz": null
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "kmeans",
+      "k": 2,
+      "eps": null,
+      "effective_clusters": 2,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 113,
+        "1": 37
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0",
+        "1": "CLUSTER_1"
+      },
+      "silhouette": 0.3592940555642209,
+      "davies_bouldin": 1.0560122851888105,
+      "calinski_harabasz": 93.91363809841768
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "gaussian_mixture",
+      "k": 2,
+      "eps": null,
+      "effective_clusters": 2,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 98,
+        "1": 52
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0",
+        "1": "CLUSTER_1"
+      },
+      "silhouette": 0.27477355583322294,
+      "davies_bouldin": 1.3489439062178583,
+      "calinski_harabasz": 74.17868931324456
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "agglomerative",
+      "k": 2,
+      "eps": null,
+      "effective_clusters": 2,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 120,
+        "1": 30
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0",
+        "1": "CLUSTER_1"
+      },
+      "silhouette": 0.38310676311809877,
+      "davies_bouldin": 0.9672637504946494,
+      "calinski_harabasz": 90.560835970388
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "kmeans",
+      "k": 3,
+      "eps": null,
+      "effective_clusters": 3,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 59,
+        "1": 31,
+        "2": 60
+      },
+      "bucket_map": {
+        "2": "LEGITIMO",
+        "0": "AMBIGUO",
+        "1": "FRAUDE"
+      },
+      "silhouette": 0.2820468786978298,
+      "davies_bouldin": 1.3426599020005536,
+      "calinski_harabasz": 91.00750741477178
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "gaussian_mixture",
+      "k": 3,
+      "eps": null,
+      "effective_clusters": 3,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 51,
+        "1": 31,
+        "2": 68
+      },
+      "bucket_map": {
+        "2": "LEGITIMO",
+        "0": "AMBIGUO",
+        "1": "FRAUDE"
+      },
+      "silhouette": 0.25431832346058597,
+      "davies_bouldin": 1.431956438744155,
+      "calinski_harabasz": 83.1685678939261
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "agglomerative",
+      "k": 3,
+      "eps": null,
+      "effective_clusters": 3,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 30,
+        "1": 60,
+        "2": 60
+      },
+      "bucket_map": {
+        "1": "LEGITIMO",
+        "2": "AMBIGUO",
+        "0": "FRAUDE"
+      },
+      "silhouette": 0.2820927394508405,
+      "davies_bouldin": 1.3351644020391833,
+      "calinski_harabasz": 90.46155055857136
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "kmeans",
+      "k": 4,
+      "eps": null,
+      "effective_clusters": 4,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 59,
+        "1": 12,
+        "2": 60,
+        "3": 19
+      },
+      "bucket_map": {
+        "2": "CLUSTER_0",
+        "0": "CLUSTER_1",
+        "1": "CLUSTER_2",
+        "3": "CLUSTER_3"
+      },
+      "silhouette": 0.2575745318812009,
+      "davies_bouldin": 1.464367796958999,
+      "calinski_harabasz": 68.09241337622475
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "gaussian_mixture",
+      "k": 4,
+      "eps": null,
+      "effective_clusters": 4,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 51,
+        "1": 12,
+        "2": 68,
+        "3": 19
+      },
+      "bucket_map": {
+        "2": "CLUSTER_0",
+        "0": "CLUSTER_1",
+        "1": "CLUSTER_2",
+        "3": "CLUSTER_3"
+      },
+      "silhouette": 0.2330549070549037,
+      "davies_bouldin": 1.52636636874842,
+      "calinski_harabasz": 62.14898250683983
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "agglomerative",
+      "k": 4,
+      "eps": null,
+      "effective_clusters": 4,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 60,
+        "1": 11,
+        "2": 60,
+        "3": 19
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0",
+        "2": "CLUSTER_1",
+        "1": "CLUSTER_2",
+        "3": "CLUSTER_3"
+      },
+      "silhouette": 0.260793882357156,
+      "davies_bouldin": 1.4360034250623865,
+      "calinski_harabasz": 67.54696117563206
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "kmeans",
+      "k": 5,
+      "eps": null,
+      "effective_clusters": 5,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 57,
+        "1": 16,
+        "2": 38,
+        "3": 24,
+        "4": 15
+      },
+      "bucket_map": {
+        "3": "CLUSTER_0",
+        "2": "CLUSTER_1",
+        "0": "CLUSTER_2",
+        "4": "CLUSTER_3",
+        "1": "CLUSTER_4"
+      },
+      "silhouette": 0.19705717521367924,
+      "davies_bouldin": 1.7496268665917298,
+      "calinski_harabasz": 57.133985204096774
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "gaussian_mixture",
+      "k": 5,
+      "eps": null,
+      "effective_clusters": 5,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 53,
+        "1": 12,
+        "2": 32,
+        "3": 19,
+        "4": 34
+      },
+      "bucket_map": {
+        "4": "CLUSTER_0",
+        "2": "CLUSTER_1",
+        "0": "CLUSTER_2",
+        "1": "CLUSTER_3",
+        "3": "CLUSTER_4"
+      },
+      "silhouette": 0.15655807211160477,
+      "davies_bouldin": 1.9428911330051162,
+      "calinski_harabasz": 53.248780635020516
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "agglomerative",
+      "k": 5,
+      "eps": null,
+      "effective_clusters": 5,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 60,
+        "1": 29,
+        "2": 31,
+        "3": 19,
+        "4": 11
+      },
+      "bucket_map": {
+        "1": "CLUSTER_0",
+        "2": "CLUSTER_1",
+        "0": "CLUSTER_2",
+        "4": "CLUSTER_3",
+        "3": "CLUSTER_4"
+      },
+      "silhouette": 0.16974547965247497,
+      "davies_bouldin": 1.915648864054998,
+      "calinski_harabasz": 55.06461204373314
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "kmeans",
+      "k": 6,
+      "eps": null,
+      "effective_clusters": 6,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 32,
+        "1": 12,
+        "2": 29,
+        "3": 29,
+        "4": 29,
+        "5": 19
+      },
+      "bucket_map": {
+        "3": "CLUSTER_0",
+        "0": "CLUSTER_1",
+        "2": "CLUSTER_2",
+        "4": "CLUSTER_3",
+        "1": "CLUSTER_4",
+        "5": "CLUSTER_5"
+      },
+      "silhouette": 0.15045436814843896,
+      "davies_bouldin": 2.0827807731888957,
+      "calinski_harabasz": 50.08108727368115
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "gaussian_mixture",
+      "k": 6,
+      "eps": null,
+      "effective_clusters": 6,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 21,
+        "1": 12,
+        "2": 30,
+        "3": 19,
+        "4": 36,
+        "5": 32
+      },
+      "bucket_map": {
+        "4": "CLUSTER_0",
+        "2": "CLUSTER_1",
+        "0": "CLUSTER_2",
+        "5": "CLUSTER_3",
+        "1": "CLUSTER_4",
+        "3": "CLUSTER_5"
+      },
+      "silhouette": 0.1013410782455861,
+      "davies_bouldin": 2.6416533287225827,
+      "calinski_harabasz": 42.640794834140735
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "agglomerative",
+      "k": 6,
+      "eps": null,
+      "effective_clusters": 6,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 31,
+        "1": 29,
+        "2": 36,
+        "3": 19,
+        "4": 11,
+        "5": 24
+      },
+      "bucket_map": {
+        "1": "CLUSTER_0",
+        "0": "CLUSTER_1",
+        "5": "CLUSTER_2",
+        "2": "CLUSTER_3",
+        "4": "CLUSTER_4",
+        "3": "CLUSTER_5"
+      },
+      "silhouette": 0.12751789950156042,
+      "davies_bouldin": 2.250231547306696,
+      "calinski_harabasz": 47.64268014413132
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 0.5,
+      "effective_clusters": 0,
+      "noise_points": 150,
+      "cluster_sizes": {
+        "-1": 150
+      },
+      "bucket_map": {},
+      "silhouette": null,
+      "davies_bouldin": null,
+      "calinski_harabasz": null
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 0.75,
+      "effective_clusters": 0,
+      "noise_points": 150,
+      "cluster_sizes": {
+        "-1": 150
+      },
+      "bucket_map": {},
+      "silhouette": null,
+      "davies_bouldin": null,
+      "calinski_harabasz": null
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 1.0,
+      "effective_clusters": 1,
+      "noise_points": 146,
+      "cluster_sizes": {
+        "-1": 146,
+        "0": 4
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0"
+      },
+      "silhouette": -0.00026108852530582307,
+      "davies_bouldin": 1.0647474826152865,
+      "calinski_harabasz": 4.5146905453893025
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 1.25,
+      "effective_clusters": 2,
+      "noise_points": 138,
+      "cluster_sizes": {
+        "-1": 138,
+        "0": 8,
+        "1": 4
+      },
+      "bucket_map": {
+        "1": "CLUSTER_0",
+        "0": "CLUSTER_1"
+      },
+      "silhouette": -0.018585235966788384,
+      "davies_bouldin": 1.3233677460407778,
+      "calinski_harabasz": 5.7218323872533015
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 1.5,
+      "effective_clusters": 5,
+      "noise_points": 112,
+      "cluster_sizes": {
+        "-1": 112,
+        "0": 18,
+        "1": 5,
+        "2": 7,
+        "3": 5,
+        "4": 3
+      },
+      "bucket_map": {
+        "4": "CLUSTER_0",
+        "3": "CLUSTER_1",
+        "0": "CLUSTER_2",
+        "2": "CLUSTER_3",
+        "1": "CLUSTER_4"
+      },
+      "silhouette": -0.0650518264684802,
+      "davies_bouldin": 1.2601479450334365,
+      "calinski_harabasz": 9.688039282530005
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 1.75,
+      "effective_clusters": 6,
+      "noise_points": 18,
+      "cluster_sizes": {
+        "-1": 18,
+        "0": 100,
+        "1": 8,
+        "2": 13,
+        "3": 4,
+        "4": 5,
+        "5": 2
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0",
+        "4": "CLUSTER_1",
+        "5": "CLUSTER_2",
+        "3": "CLUSTER_3",
+        "1": "CLUSTER_4",
+        "2": "CLUSTER_5"
+      },
+      "silhouette": 0.016485202582583066,
+      "davies_bouldin": 1.6584105561221438,
+      "calinski_harabasz": 17.787138429137908
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 2.0,
+      "effective_clusters": 2,
+      "noise_points": 3,
+      "cluster_sizes": {
+        "-1": 3,
+        "0": 120,
+        "1": 27
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0",
+        "1": "CLUSTER_1"
+      },
+      "silhouette": 0.2998898688333218,
+      "davies_bouldin": 1.9104176464514235,
+      "calinski_harabasz": 40.60015304120192
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 2.25,
+      "effective_clusters": 1,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 150
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0"
+      },
+      "silhouette": null,
+      "davies_bouldin": null,
+      "calinski_harabasz": null
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 2.5,
+      "effective_clusters": 1,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 150
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0"
+      },
+      "silhouette": null,
+      "davies_bouldin": null,
+      "calinski_harabasz": null
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 2.75,
+      "effective_clusters": 1,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 150
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0"
+      },
+      "silhouette": null,
+      "davies_bouldin": null,
+      "calinski_harabasz": null
+    },
+    {
+      "matrix": "numeric_categorical",
+      "algorithm": "dbscan",
+      "k": null,
+      "eps": 3.0,
+      "effective_clusters": 1,
+      "noise_points": 0,
+      "cluster_sizes": {
+        "0": 150
+      },
+      "bucket_map": {
+        "0": "CLUSTER_0"
+      },
+      "silhouette": null,
+      "davies_bouldin": null,
+      "calinski_harabasz": null
+    }
+  ],
+  "charts": {
+    "winner_weights": {
+      "num_comp_90d": 0.21421092424098923,
+      "flags": 0.20292166143115517,
+      "antiguedad": 0.19599795268690537,
+      "monto_comp_90d": 0.19401313073142767,
+      "tiempo_entrega": 0.19285633090952264
+    },
+    "pca": [
+      {
+        "caso_id": "COMP-0001",
+        "x": -1.6682870097234437,
+        "y": 0.9848937034847837,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0002",
+        "x": -0.17695613332241264,
+        "y": -0.7534497387255759,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0003",
+        "x": 0.2092397577893935,
+        "y": -0.4492486862489084,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0004",
+        "x": -2.3094395220168678,
+        "y": 0.09665148667140948,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0005",
+        "x": -2.1656660209484984,
+        "y": 0.6556604643573001,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0006",
+        "x": -2.1986494601555875,
+        "y": 0.7710650657750432,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0007",
+        "x": -0.8355544458703348,
+        "y": -0.21102268814374198,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0008",
+        "x": -0.9123036528531743,
+        "y": -0.802295709968196,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0009",
+        "x": 0.18316817640968283,
+        "y": -0.8513908645295021,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0010",
+        "x": -2.73751819133227,
+        "y": 0.866784915626834,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0011",
+        "x": 3.1771342595756624,
+        "y": -0.2511243739369816,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0012",
+        "x": 0.32051618210519905,
+        "y": -0.5279157181792337,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0013",
+        "x": -2.126231460264356,
+        "y": -0.32782909577431474,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0014",
+        "x": 0.6163183957425057,
+        "y": -0.5853853258560274,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0015",
+        "x": -1.517841528807596,
+        "y": -0.00798710479651746,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0016",
+        "x": 0.9336812771836729,
+        "y": -0.4258217862294169,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0017",
+        "x": 0.5373701458623413,
+        "y": -0.4956715345067493,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0018",
+        "x": 2.8272372949614613,
+        "y": 0.3108792525205914,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0019",
+        "x": 2.771688889292534,
+        "y": 0.02859686471025107,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0020",
+        "x": -1.5862492151493046,
+        "y": -0.41023047843130506,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0021",
+        "x": 0.31712186379961044,
+        "y": -0.45206486673214386,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0022",
+        "x": -0.0007231150731991511,
+        "y": -0.5343011144958019,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0023",
+        "x": 3.6143671564667876,
+        "y": 1.1366951683716209,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0024",
+        "x": -1.055602613833717,
+        "y": -0.7913953323666765,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0025",
+        "x": 0.8341030078257311,
+        "y": -0.06340792783989567,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0026",
+        "x": 3.147871827708887,
+        "y": -0.5014658897067548,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0027",
+        "x": 3.051506121336947,
+        "y": 1.2191592236683555,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0028",
+        "x": 1.4423351759872933,
+        "y": -0.38965099297552475,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0029",
+        "x": 3.2083250849192653,
+        "y": 1.0485294781092684,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0030",
+        "x": -2.018501298964944,
+        "y": 0.5342272983850465,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0031",
+        "x": -1.3221527818625363,
+        "y": 0.31118213574579584,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0032",
+        "x": -0.17729255975666477,
+        "y": -0.36968440387710416,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0033",
+        "x": -2.3061864958776215,
+        "y": -0.19465372252326188,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0034",
+        "x": 0.8673429687301095,
+        "y": 0.0072375162686571315,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0035",
+        "x": -2.137865252065324,
+        "y": -0.0905198441734935,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0036",
+        "x": 0.27563069506412197,
+        "y": -0.13996405378137494,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0037",
+        "x": -2.194404976803001,
+        "y": 1.3470468138205345,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0038",
+        "x": -2.1229025714601835,
+        "y": 0.4645578332871597,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0039",
+        "x": -1.2273375901069317,
+        "y": 0.30248122578384445,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0040",
+        "x": 0.3303619630939491,
+        "y": -0.5195784400042809,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0041",
+        "x": -2.228017371890304,
+        "y": 1.2696900567583973,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0042",
+        "x": -0.429966169175799,
+        "y": -0.9800447416523926,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0043",
+        "x": -2.0614927835430987,
+        "y": 1.4006958550661759,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0044",
+        "x": -1.5228318824347815,
+        "y": -0.72393277579355,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0045",
+        "x": -2.0525082140350515,
+        "y": 1.144190078334327,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0046",
+        "x": 3.7615916464334243,
+        "y": 0.7511869514970314,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0047",
+        "x": 0.5523044160138386,
+        "y": -0.202086903306574,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0048",
+        "x": -2.127182530438515,
+        "y": 1.0647081510479333,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0049",
+        "x": 0.8081791647693182,
+        "y": -0.12193089991943785,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0050",
+        "x": 0.07946039899785182,
+        "y": -0.09097741988030732,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0051",
+        "x": -1.704178872197119,
+        "y": 0.10513680048456059,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0052",
+        "x": -0.11967298943718573,
+        "y": -0.9332291615970938,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0053",
+        "x": -2.3905109556188493,
+        "y": 0.3968296809506258,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0054",
+        "x": 1.2866851986772108,
+        "y": -0.33817382687080566,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0055",
+        "x": 1.0167815707005938,
+        "y": -0.6366159452376285,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0056",
+        "x": 0.24943990590333934,
+        "y": -0.8469191031388317,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0057",
+        "x": -0.46981197519996065,
+        "y": -0.3952330856281799,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0058",
+        "x": 2.7084764038584073,
+        "y": -0.44593569153056645,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0059",
+        "x": 0.6627423596512076,
+        "y": -0.09431811226833246,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0060",
+        "x": 0.7303908535688491,
+        "y": -0.5763027351007776,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0061",
+        "x": 3.5531353401188523,
+        "y": 0.4678249957197295,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0062",
+        "x": 3.461539015373752,
+        "y": -0.12360973834430557,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0063",
+        "x": 1.19469143359056,
+        "y": -0.5318104122287151,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0064",
+        "x": -0.14598844173690623,
+        "y": -0.954883266009191,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0065",
+        "x": 0.4102873859979011,
+        "y": -0.37182176955514534,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0066",
+        "x": -1.73457011820986,
+        "y": 0.11398028221984283,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0067",
+        "x": -2.71236136759452,
+        "y": 0.8362166427644266,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0068",
+        "x": 3.2006633641348663,
+        "y": 1.206195302619271,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0069",
+        "x": -2.2236044749988166,
+        "y": 0.31885728268229363,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0070",
+        "x": -2.0648366068536856,
+        "y": 1.2309668591600267,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0071",
+        "x": 0.6156505332692045,
+        "y": -0.20674913886935747,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0072",
+        "x": -1.5302043976214201,
+        "y": 0.5184894504438354,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0073",
+        "x": -2.0847794857265467,
+        "y": 1.0472772070200553,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0074",
+        "x": 0.061835055496506794,
+        "y": -0.7334166214926282,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0075",
+        "x": -2.4141890532758747,
+        "y": 0.5984181282515322,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0076",
+        "x": -2.063562160646232,
+        "y": -0.8884039481157103,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0077",
+        "x": -2.662859519201482,
+        "y": 0.8511699263583861,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0078",
+        "x": 0.394670303535834,
+        "y": -0.32942848048664375,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0079",
+        "x": 3.5062691626297604,
+        "y": 1.0998097862187943,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0080",
+        "x": 0.45584289311579257,
+        "y": -0.08452281819150002,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0081",
+        "x": 0.12282385153065387,
+        "y": -0.4256160654683454,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0082",
+        "x": -2.2510887878418595,
+        "y": 0.9490214881342177,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0083",
+        "x": -1.5786954498583987,
+        "y": -0.8083113164766392,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0084",
+        "x": 2.924098947542428,
+        "y": 0.9744653753432629,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0085",
+        "x": -1.894325269147454,
+        "y": -0.46666365060720016,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0086",
+        "x": -1.9966088731335818,
+        "y": 0.37967298204296135,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0087",
+        "x": 4.103590578039854,
+        "y": 1.0499020501697678,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0088",
+        "x": -1.4884304994282191,
+        "y": -0.5180816930280631,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0089",
+        "x": 1.2617105550558565,
+        "y": 0.03593060676280808,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0090",
+        "x": -1.8129376100336956,
+        "y": -0.41931429580764207,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0091",
+        "x": 0.1484612335107353,
+        "y": -0.37128897622232343,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0092",
+        "x": 0.13462682010835772,
+        "y": -0.47539436472126234,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0093",
+        "x": 0.6317562645505299,
+        "y": -0.2902165721403167,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0094",
+        "x": -1.9796300214412879,
+        "y": 0.11291481663312448,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0095",
+        "x": 2.784204318605531,
+        "y": -0.233211431881377,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0096",
+        "x": -1.5618671383165115,
+        "y": 0.6618310127617929,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0097",
+        "x": -0.033779353042952584,
+        "y": -0.954130592854074,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0098",
+        "x": -0.3381189089765083,
+        "y": -0.9680525882768614,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0099",
+        "x": 1.9211908783104537,
+        "y": -0.21721103657383808,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0100",
+        "x": 1.0748135961580105,
+        "y": -0.5039730766864814,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0101",
+        "x": 0.1824322976801574,
+        "y": -0.09333900618265485,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0102",
+        "x": -1.8469911371013752,
+        "y": -0.23775517227054224,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0103",
+        "x": -1.5287839342465532,
+        "y": -0.5014552741782696,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0104",
+        "x": -2.4085014417079966,
+        "y": 0.7141817812384981,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0105",
+        "x": 3.5647819040553785,
+        "y": 0.538189292224853,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0106",
+        "x": 0.8135536600593422,
+        "y": -0.4166481150035766,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0107",
+        "x": 0.04030858635331138,
+        "y": -0.7436137823773049,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0108",
+        "x": 0.254142656622424,
+        "y": -0.3778090042808229,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0109",
+        "x": -0.08810369141288756,
+        "y": -0.7934930603128744,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0110",
+        "x": 0.9280194572661087,
+        "y": -0.43605818216913944,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0111",
+        "x": 2.3475429090309308,
+        "y": 0.29896754015198596,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0112",
+        "x": -2.3621702263332165,
+        "y": 0.39015670954358295,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0113",
+        "x": 3.3341040206373367,
+        "y": 0.9236300609544581,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0114",
+        "x": 2.798737416033738,
+        "y": -0.47230621804973566,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0115",
+        "x": 3.221160409101681,
+        "y": 1.0136190330065862,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0116",
+        "x": 2.6556849378204532,
+        "y": -0.735839011300923,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0117",
+        "x": -0.21068610307770622,
+        "y": -0.6837929013135339,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0118",
+        "x": -1.8899457723822464,
+        "y": 0.3697383834810844,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0119",
+        "x": -1.2683029552790153,
+        "y": -0.6716875081437615,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0120",
+        "x": -1.5318928755448156,
+        "y": -0.18625253165174074,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0121",
+        "x": -0.18813674484195464,
+        "y": -0.8672450614386695,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0122",
+        "x": -1.9157500044311386,
+        "y": 1.351267261778694,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0123",
+        "x": -2.4578200578112983,
+        "y": 0.8423462908742472,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0124",
+        "x": 0.34235771557758393,
+        "y": -0.5517978642014955,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0125",
+        "x": 0.6515574363994725,
+        "y": -0.19741181511281977,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0126",
+        "x": 3.245361775496326,
+        "y": 0.5155228839097106,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0127",
+        "x": 3.5442209126845494,
+        "y": 1.1423797639857978,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0128",
+        "x": -1.1933920321561342,
+        "y": -0.8833399809152255,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0129",
+        "x": -2.281886188916411,
+        "y": -0.8578303798338028,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0130",
+        "x": -1.8580697169113967,
+        "y": -0.5594585962689569,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0131",
+        "x": 0.06262675551251393,
+        "y": -0.5593350659379884,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0132",
+        "x": -1.7385154835954013,
+        "y": 0.6564114896805173,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0133",
+        "x": -2.026520158027347,
+        "y": -0.5618052654574003,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0134",
+        "x": -1.2296135619498294,
+        "y": -0.06405031384464607,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0135",
+        "x": 2.7707142113985443,
+        "y": -0.19034098830827062,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0136",
+        "x": 3.569445747762087,
+        "y": 0.7004822394448835,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0137",
+        "x": -1.7641315751173146,
+        "y": 0.6208082267833416,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0138",
+        "x": 3.4308295645129903,
+        "y": 1.2639874116435577,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0139",
+        "x": 0.15612052312127375,
+        "y": -0.29355331347195834,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0140",
+        "x": -1.4320290809147402,
+        "y": -0.0828870581613398,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0141",
+        "x": -2.074513192684059,
+        "y": 0.26036296017468025,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0142",
+        "x": 2.4634201033483656,
+        "y": -0.4250075665417327,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0143",
+        "x": 0.4274903042461146,
+        "y": -0.141775217506203,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0144",
+        "x": -2.6339318591662084,
+        "y": 0.5956271633050125,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0145",
+        "x": 2.7284919482052374,
+        "y": 0.3657495664169612,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0146",
+        "x": 0.6891345321979665,
+        "y": -0.2751355316518699,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0147",
+        "x": -1.932150734036205,
+        "y": 0.8966403010124261,
+        "cluster": 1,
+        "bucket": "LEGITIMO"
+      },
+      {
+        "caso_id": "COMP-0148",
+        "x": 3.105688862983489,
+        "y": -0.20217740264873996,
+        "cluster": 0,
+        "bucket": "FRAUDE"
+      },
+      {
+        "caso_id": "COMP-0149",
+        "x": 0.8157577214827014,
+        "y": -0.6248628925414423,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      },
+      {
+        "caso_id": "COMP-0150",
+        "x": -0.28880435774500807,
+        "y": -1.0351625448002337,
+        "cluster": 2,
+        "bucket": "AMBIGUO"
+      }
+    ],
+    "silhouette_by_k": [
+      {
+        "matrix": "numeric",
+        "algorithm": "kmeans",
+        "k": 2,
+        "silhouette": 0.48661599910453807
+      },
+      {
+        "matrix": "numeric",
+        "algorithm": "gaussian_mixture",
+        "k": 2,
+        "silhouette": 0.5045038328172143
+      },
+      {
+        "matrix": "numeric",
+        "algorithm": "agglomerative",
+        "k": 2,
+        "silhouette": 0.43611325537318596
+      },
+      {
+        "matrix": "numeric",
+        "algorithm": "kmeans",
+        "k": 3,
+        "silhouette": 0.4617209839570084
+      },
+      {
+        "matrix": "numeric",
+        "algorithm": "gaussian_mixture",
+        "k": 3,
+        "silhouette": 0.4592939488988454
+      },
+      {
+        "matrix": "numeric",
+        "algorithm": "agglomerative",
+        "k": 3,
+        "silhouette": 0.46172572516745825
+      },
+      {
+        "matrix": "numeric",
+        "algorithm": "kmeans",
+        "k": 4,
+        "silhouette": 0.4513432674333313
+      },
+      {
+        "matrix": "numeric",
+        "algorithm": "gaussian_mixture",
+        "k": 4,
+        "silhouette": 0.44460626012161225
+      },
+      {
+        "matrix": "numeric",
+        "algorithm": "agglomerative",
+        "k": 4,
+        "silhouette": 0.45712744426583696
+      },
+      {
+        "matrix": "numeric",
+        "algorithm": "kmeans",
+        "k": 5,
+        "silhouette": 0.36612523966688904
+      },
+      {
+        "matrix": "numeric",
+        "algorithm": "gaussian_mixture",
+        "k": 5,
+        "silhouette": 0.37144354248810657
+      },
+      {
+        "matrix": "numeric",
+        "algorithm": "agglomerative",
+        "k": 5,
+        "silhouette": 0.3803317909934469
+      },
+      {
+        "matrix": "numeric",
+        "algorithm": "kmeans",
+        "k": 6,
+        "silhouette": 0.3203093495704083
+      },
+      {
+        "matrix": "numeric",
+        "algorithm": "gaussian_mixture",
+        "k": 6,
+        "silhouette": 0.2649897097935378
+      },
+      {
+        "matrix": "numeric",
+        "algorithm": "agglomerative",
+        "k": 6,
+        "silhouette": 0.30733205524437124
+      },
+      {
+        "matrix": "numeric_categorical",
+        "algorithm": "kmeans",
+        "k": 2,
+        "silhouette": 0.3592940555642209
+      },
+      {
+        "matrix": "numeric_categorical",
+        "algorithm": "gaussian_mixture",
+        "k": 2,
+        "silhouette": 0.27477355583322294
+      },
+      {
+        "matrix": "numeric_categorical",
+        "algorithm": "agglomerative",
+        "k": 2,
+        "silhouette": 0.38310676311809877
+      },
+      {
+        "matrix": "numeric_categorical",
+        "algorithm": "kmeans",
+        "k": 3,
+        "silhouette": 0.2820468786978298
+      },
+      {
+        "matrix": "numeric_categorical",
+        "algorithm": "gaussian_mixture",
+        "k": 3,
+        "silhouette": 0.25431832346058597
+      },
+      {
+        "matrix": "numeric_categorical",
+        "algorithm": "agglomerative",
+        "k": 3,
+        "silhouette": 0.2820927394508405
+      },
+      {
+        "matrix": "numeric_categorical",
+        "algorithm": "kmeans",
+        "k": 4,
+        "silhouette": 0.2575745318812009
+      },
+      {
+        "matrix": "numeric_categorical",
+        "algorithm": "gaussian_mixture",
+        "k": 4,
+        "silhouette": 0.2330549070549037
+      },
+      {
+        "matrix": "numeric_categorical",
+        "algorithm": "agglomerative",
+        "k": 4,
+        "silhouette": 0.260793882357156
+      },
+      {
+        "matrix": "numeric_categorical",
+        "algorithm": "kmeans",
+        "k": 5,
+        "silhouette": 0.19705717521367924
+      },
+      {
+        "matrix": "numeric_categorical",
+        "algorithm": "gaussian_mixture",
+        "k": 5,
+        "silhouette": 0.15655807211160477
+      },
+      {
+        "matrix": "numeric_categorical",
+        "algorithm": "agglomerative",
+        "k": 5,
+        "silhouette": 0.16974547965247497
+      },
+      {
+        "matrix": "numeric_categorical",
+        "algorithm": "kmeans",
+        "k": 6,
+        "silhouette": 0.15045436814843896
+      },
+      {
+        "matrix": "numeric_categorical",
+        "algorithm": "gaussian_mixture",
+        "k": 6,
+        "silhouette": 0.1013410782455861
+      },
+      {
+        "matrix": "numeric_categorical",
+        "algorithm": "agglomerative",
+        "k": 6,
+        "silhouette": 0.12751789950156042
+      }
+    ]
+  }
+}

@@ -42,9 +42,9 @@ def test_pipeline_no_llm_produce_150_decisiones_con_scoring(monkeypatch, tmp_pat
     assert not df["risk_bucket"].isna().any()
     assert not df["risk_score"].isna().any()
     assert df["recomendacion_agente"].value_counts().to_dict() == {
-        "APROBAR": 60,
-        "ESCALAR": 59,
-        "RECHAZAR": 31,
+        "APROBAR": 62,
+        "ESCALAR": 58,
+        "RECHAZAR": 30,
     }
 
 
