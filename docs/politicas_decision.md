@@ -58,8 +58,8 @@ Las 5 señales top están fuertemente correlacionadas → forman **un solo eje d
 ## 3. Modelo de riesgo híbrido (Capa 0)
 
 Ajustado con `experiments/scoring/model_selection.py` y
-`python -m caso03.scoring.train_risk_model`; exportado a
-`src/caso03/scoring/artifacts/risk_model.json` (sin pickle — solo parámetros; la
+`python -m scoring.train_risk_model`; exportado a
+`src/scoring/artifacts/risk_model.json` (sin pickle — solo parámetros; la
 inferencia usa solo numpy). Combina **dos vistas** del mismo eje de abuso:
 
 1. **Score de riesgo (0-1):** suma ponderada por eta² de las 5 señales estandarizadas

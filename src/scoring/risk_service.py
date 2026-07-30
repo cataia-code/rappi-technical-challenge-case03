@@ -8,7 +8,7 @@ Loads fitted parameters from risk_model.json and evaluates each case with numpy:
 - agreement between both views; disagreement is treated as ambiguity.
 - top_contribuyentes: dominant risk contributors shown to CS.
 
-Fit the model with: python -m caso03.scoring.train_risk_model
+Fit the model with: python -m scoring.train_risk_model
 """
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from pathlib import Path
 
 import numpy as np
 
-from caso03.domain.models import CompensationCase
+from domain.models import CompensationCase
 
 _ARTIFACT = Path(__file__).resolve().parent / "artifacts" / "risk_model.json"
 
@@ -43,7 +43,7 @@ class RiskAssessment:
 
     @property
     def resolved_bucket(self) -> str:
-        """Bucket final: si score y cluster no coinciden, es ambigüedad -> AMBIGUO."""
+        """Final bucket: score and cluster disagreement is treated as ambiguity."""
         return self.score_bucket if self.agreement else "AMBIGUO"
 
 
@@ -73,7 +73,7 @@ def assess(case: CompensationCase) -> RiskAssessment:
     oriented = z * signs
     abuse_index = float(oriented @ weights)
 
-    # bucket por cortes del score
+    # Score bucket from abuse-index cuts.
     c0, c1 = p["score_cuts"]
     if abuse_index < c0:
         score_bucket = "LEGITIMO"

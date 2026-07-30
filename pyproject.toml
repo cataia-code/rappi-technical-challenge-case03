@@ -1,5 +1,5 @@
 [project]
-name = "caso03-compensaciones"
+name = "rappi-compensation-agent"
 version = "0.1.0"
 description = "Rappi AI Builder - Case 03 compensation review agent (Trust & Safety)"
 requires-python = ">=3.10"
@@ -7,3 +7,4 @@ requires-python = ">=3.10"
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+addopts = "--cov=src --cov-report=term-missing --cov-fail-under=80"

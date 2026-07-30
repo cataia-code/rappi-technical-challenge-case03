@@ -14,8 +14,8 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 
-from caso03.services.data_service import load_cases  # noqa: E402
-from caso03.scoring.risk_service import assess  # noqa: E402
+from services.data_service import load_cases  # noqa: E402
+from scoring.risk_service import assess  # noqa: E402
 
 OUTPUT = ROOT / "data" / "labels" / "manual_30_template.csv"
 

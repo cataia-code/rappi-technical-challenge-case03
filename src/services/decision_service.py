@@ -18,17 +18,17 @@ import json
 
 from pydantic import ValidationError
 
-from caso03.config import Settings
-from caso03.domain.models import CompensationCase, Decision, Recommendation
-from caso03.features.feature_service import (
+from config import Settings
+from domain.models import CompensationCase, Decision, Recommendation
+from features.feature_service import (
     compute_features,
     evaluate_guardrail,
     reconcile,
 )
-from caso03.llm.client import LLMClient
-from caso03.llm.prompts import SYSTEM_PROMPT, build_user_prompt
-from caso03.llm.schemas import LLMDecisionPayload
-from caso03.scoring.risk_service import assess
+from llm.client import LLMClient
+from llm.prompts import SYSTEM_PROMPT, build_user_prompt
+from llm.schemas import LLMDecisionPayload
+from scoring.risk_service import assess
 
 
 class DecisionService:

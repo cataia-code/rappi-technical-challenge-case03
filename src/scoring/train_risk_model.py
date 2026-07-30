@@ -8,8 +8,8 @@ over the numeric matrix. Since this algorithm has no native `predict()`, the
 artifact exports centroid proxies and `risk_service` assigns new cases to the
 nearest centroid in the same standardized space.
 
-Exports JSON only, no pickle, to src/caso03/scoring/artifacts/risk_model.json.
-Run with: python -m caso03.scoring.train_risk_model
+Exports JSON only, no pickle, to src/scoring/artifacts/risk_model.json.
+Run with: python -m scoring.train_risk_model
 """
 from __future__ import annotations
 
@@ -27,9 +27,9 @@ import pandas as pd
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.preprocessing import StandardScaler
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
-from caso03.services.data_service import load_cases  # noqa: E402
+from services.data_service import load_cases  # noqa: E402
 
 FEATURES = ["num_comp_90d", "flags", "tiempo_entrega", "antiguedad", "monto_comp_90d"]
 SIGNS = {
@@ -121,15 +121,15 @@ def main() -> None:
     ARTIFACT.parent.mkdir(parents=True, exist_ok=True)
     ARTIFACT.write_text(json.dumps(params, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    print("Modelo ganador: Agglomerative(k=3) + nearest-centroid proxy")
+    print("Winning model: Agglomerative(k=3) + nearest-centroid proxy")
     print("Normalized eta2 weights:")
     for feature, weight in sorted(zip(FEATURES, weights), key=lambda item: -item[1]):
         print(f"  {feature:16s} {weight:.3f}")
     print("\nCluster->bucket map:", cluster_to_bucket)
     print("Bucket sizes:", pd.Series(labels).map(cluster_to_bucket).value_counts().to_dict())
     print(f"Score cuts (abuse_index): {cuts[0]:.3f} | {cuts[1]:.3f}")
-    print(f"Rango abuse_index: [{abuse_index.min():.3f}, {abuse_index.max():.3f}]")
-    print(f"\nArtefacto: {ARTIFACT}")
+    print(f"Abuse-index range: [{abuse_index.min():.3f}, {abuse_index.max():.3f}]")
+    print(f"\nArtifact: {ARTIFACT}")
 
 
 if __name__ == "__main__":

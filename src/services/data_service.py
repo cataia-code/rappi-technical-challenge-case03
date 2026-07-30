@@ -11,8 +11,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from caso03.config import HEADER_ROW, RAW_DATA, SHEET_NAME
-from caso03.domain.models import CompensationCase
+from config import HEADER_ROW, RAW_DATA, SHEET_NAME
+from domain.models import CompensationCase
 
 # Numeric columns that Excel may load as object and must be coerced.
 _NUM_INT = [

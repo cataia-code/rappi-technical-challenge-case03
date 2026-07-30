@@ -1,5 +1,5 @@
 {
-  "selection_rule": "Preferir 3 clusters efectivos por definición del reto; desempatar por mayor silhouette. Si no hay 3 clusters válidos, usar mayor silhouette global.",
+  "selection_rule": "Prefer 3 effective clusters because the challenge defines 3 latent buckets; break ties by highest silhouette. If no valid 3-cluster solution exists, use the global highest silhouette.",
   "winner": {
     "matrix": "numeric",
     "algorithm": "agglomerative",

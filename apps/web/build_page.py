@@ -15,8 +15,8 @@ import pandas as pd
 WEB = Path(__file__).resolve().parent          # apps/web
 ROOT = WEB.parents[1]                           # project root
 XLSX = ROOT / "data" / "output" / "salida_150.xlsx"
-LOGO = ROOT / "docs" / "assets" / "images" / "Rappi_logo.svg.webp"
-FAVICON = ROOT / "docs" / "assets" / "images" / "rappi_faticon.png"
+LOGO = WEB / "assets" / "images" / "Rappi_logo.svg.webp"
+FAVICON = WEB / "assets" / "images" / "rappi_faticon.png"
 OUT = ROOT / "docs" / "index.html"              # GitHub Pages output (/docs)
 
 

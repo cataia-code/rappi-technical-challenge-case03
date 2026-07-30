@@ -41,8 +41,8 @@ try:
 except Exception:
     pass
 
-from caso03.features.feature_service import _clave  # noqa: E402
-from caso03.services.data_service import load_cases  # noqa: E402
+from features.feature_service import normalize_key  # noqa: E402
+from services.data_service import load_cases  # noqa: E402
 
 NUMERIC_FEATURES = [
     "num_comp_90d",
@@ -81,9 +81,9 @@ def _case_frame() -> pd.DataFrame:
                 "tiempo_entrega": c.tiempo_entrega_real_min,
                 "antiguedad": c.antiguedad_usuario_dias,
                 "monto_comp_90d": c.monto_compensado_90d_mxn,
-                "vertical": _clave(c.vertical),
-                "motivo_reclamo": _clave(c.motivo_reclamo),
-                "entrega_confirmada_gps": _clave(c.entrega_confirmada_gps),
+                "vertical": normalize_key(c.vertical),
+                "motivo_reclamo": normalize_key(c.motivo_reclamo),
+                "entrega_confirmada_gps": normalize_key(c.entrega_confirmada_gps),
             }
         )
     return pd.DataFrame(rows)

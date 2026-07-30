@@ -1,10 +1,10 @@
 """Tests for batch pipeline resilience."""
 from pathlib import Path
 
-from caso03 import pipeline
-from caso03.domain.models import Recommendation
-from caso03.services.data_service import load_cases
-from caso03.services.decision_service import DecisionService
+import pipeline
+from domain.models import Recommendation
+from services.data_service import load_cases
+from services.decision_service import DecisionService
 
 
 def test_safe_decide_llm_preserves_scoring_in_fail_safe():

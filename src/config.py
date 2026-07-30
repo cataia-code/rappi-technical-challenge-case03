@@ -14,8 +14,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# Project root = two levels above this file (src/caso03/config.py).
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+# Project root = one level above this file (src/config.py).
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 load_dotenv(PROJECT_ROOT / ".env")
 
 RAW_DATA = PROJECT_ROOT / "data" / "raw" / "Rappi_AI_Builder_Challenge_Dataset.xlsx"

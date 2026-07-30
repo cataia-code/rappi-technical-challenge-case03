@@ -40,18 +40,15 @@ Ver **`docs/politicas_decision.md`** para los criterios completos y el manejo de
 ## Organización del repo
 
 ```text
-src/caso03/        Código productivo: dominio, features, scoring, LLM, servicios y pipeline.
-apps/web/         Web estática y builder de `docs/index.html`.
+src/              Código productivo: dominio, features, scoring, LLM, servicios y pipeline.
+apps/web/         Web estática, builder y assets (`assets/images`) para `docs/index.html`.
 apps/mcp/         Servidor FastMCP para exponer revisión de casos como tool.
-apps/api/         Superficie FastAPI prevista para la demo/API.
+apps/api/         Superficie FastAPI para health-check y revisión de casos.
 challenge/        Enunciado original del reto y anexos de entrada.
 config/           Plantillas de configuración local, sin secretos reales.
-experiments/      POC y experimentación: scoring, evaluación manual y pruebas LLM.
-notebooks/        Notebooks de exploración, selección de modelo y evaluación.
-data/             raw/interim/processed/output/labels con datasets y artefactos derivados.
-docs/             GitHub Pages, assets del sitio, políticas, handoff y planeación.
-poc/              Prototipos aislados; no contiene el motor productivo.
-scripts/          Automatizaciones operativas futuras.
+experiments/      Experimentación reproducible: scoring y evaluación manual.
+data/             raw/processed/labels con datos versionados; output/ se genera localmente.
+docs/             GitHub Pages (`index.html`) y documentación técnica versionable.
 tests/            Pruebas unitarias e integración del pipeline.
 ```
 
@@ -77,13 +74,13 @@ py -3.10 -m venv .venv
 # 3. Seleccionar y ajustar el modelo de riesgo
 $env:PYTHONPATH="src"
 .\.venv\Scripts\python.exe experiments\scoring\model_selection.py
-.\.venv\Scripts\python.exe -m caso03.scoring.train_risk_model
+.\.venv\Scripts\python.exe -m scoring.train_risk_model
 
 # 4. Correr el agente sobre los 150 casos  ->  data/output/salida_150.xlsx
 $env:PYTHONPATH="src"
-.\.venv\Scripts\python.exe -m caso03.pipeline --no-llm             # entrega completa segura
-.\.venv\Scripts\python.exe -m caso03.pipeline --workers 1          # con LLM para ambiguos
-.\.venv\Scripts\python.exe -m caso03.pipeline --limit 15 --no-llm  # subconjunto demo
+.\.venv\Scripts\python.exe -m pipeline --no-llm             # entrega completa segura
+.\.venv\Scripts\python.exe -m pipeline --workers 1          # con LLM para ambiguos
+.\.venv\Scripts\python.exe -m pipeline --limit 15 --no-llm  # subconjunto demo
 
 # 5. Web estática de revisión
 .\.venv\Scripts\python.exe apps\web\build_page.py
@@ -93,8 +90,14 @@ $env:PYTHONPATH="src"
 $env:PYTHONPATH="src"
 .\.venv\Scripts\python.exe apps\mcp\server.py
 
+# 7. API HTTP local
+$env:PYTHONPATH="src"
+.\.venv\Scripts\uvicorn.exe apps.api.main:app --reload
+
 # Tests
 .\.venv\Scripts\python.exe -m pytest -q
+# La suite falla si la cobertura baja de 80% (`pyproject.toml` + CI).
+# CI/CD: `.github/workflows/ci.yml` ejecuta instalación, tests con coverage y build web.
 
 # Validación manual opcional
 .\.venv\Scripts\python.exe experiments\eval\prepare_manual_label_sample.py

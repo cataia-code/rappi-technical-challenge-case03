@@ -14,11 +14,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from fastmcp import FastMCP  # noqa: E402
 
-from caso03.domain.models import CompensationCase  # noqa: E402
-from caso03.services.data_service import load_cases  # noqa: E402
-from caso03.services.decision_service import DecisionService  # noqa: E402
+from domain.models import CompensationCase  # noqa: E402
+from services.data_service import load_cases  # noqa: E402
+from services.decision_service import DecisionService  # noqa: E402
 
-mcp = FastMCP("caso03-compensaciones")
+mcp = FastMCP("rappi-compensation-agent")
 _svc = DecisionService()
 _cases = {c.caso_id: c for c in load_cases()}
 

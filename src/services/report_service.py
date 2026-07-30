@@ -11,8 +11,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from caso03.config import OUTPUT_DIR
-from caso03.domain.models import CompensationCase, Decision
+from config import OUTPUT_DIR
+from domain.models import CompensationCase, Decision
 
 _DECISION_COLUMNS = [
     "recomendacion_agente",

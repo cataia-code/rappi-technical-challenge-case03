@@ -7,9 +7,9 @@ The live demo Cloudflare Worker must mirror SYSTEM_PROMPT and this version.
 """
 from __future__ import annotations
 
-from caso03.domain.models import CompensationCase
-from caso03.features.feature_service import CaseFeatures
-from caso03.scoring.risk_service import RiskAssessment
+from domain.models import CompensationCase
+from features.feature_service import CaseFeatures
+from scoring.risk_service import RiskAssessment
 
 PROMPT_VERSION = "2026-07-30.v1"
 

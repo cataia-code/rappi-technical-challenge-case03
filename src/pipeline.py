@@ -1,8 +1,8 @@
 """Batch pipeline: load cases, make decisions, and write reports.
 
 Run with:
-    python -m caso03.pipeline
-    python -m caso03.pipeline --limit 10
+    python -m pipeline
+    python -m pipeline --limit 10
 
 Resilience: if one case fails because of network errors or malformed LLM JSON,
 the batch does not fail. That case is marked ESCALAR with an audit trace.
@@ -14,14 +14,14 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 try:
-    sys.stdout.reconfigure(encoding="utf-8")  # consola Windows cp1252 -> UTF-8
+    sys.stdout.reconfigure(encoding="utf-8")
 except Exception:
     pass
 
-from caso03.domain.models import CompensationCase, Decision
-from caso03.services.data_service import load_cases
-from caso03.services.decision_service import DecisionService
-from caso03.services.report_service import build_summary, build_dataframe, write_excel
+from domain.models import CompensationCase, Decision
+from services.data_service import load_cases
+from services.decision_service import DecisionService
+from services.report_service import build_summary, build_dataframe, write_excel
 
 
 def _safe_decide_llm(svc: DecisionService, case: CompensationCase) -> Decision:

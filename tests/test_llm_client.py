@@ -1,8 +1,8 @@
 """Tests for multi-provider LLM fallback and traceability."""
 import pytest
 
-from caso03.config import Settings
-from caso03.llm.client import AllProvidersFailed, LLMClient
+from config import Settings
+from llm.client import AllProvidersFailed, LLMClient
 
 
 def _settings(order: tuple[str, ...]) -> Settings:

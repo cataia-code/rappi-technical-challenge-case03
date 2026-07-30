@@ -22,8 +22,8 @@ from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
-from caso03.services.data_service import load_cases  # noqa: E402
-from caso03.features.feature_service import compute_features  # noqa: E402
+from services.data_service import load_cases  # noqa: E402
+from features.feature_service import compute_features  # noqa: E402
 
 pd.set_option("display.width", 160)
 pd.set_option("display.max_columns", 30)

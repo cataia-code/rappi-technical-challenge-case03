@@ -9,14 +9,19 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
 .ipynb_checkpoints/
 
 # --- Generated outputs ---
 data/output/*
-!data/output/.gitkeep
 
 # --- Local leftovers from old paths ---
 /mcp/
+
+# --- Local planning / handoff notes ---
+.local/
 
 # --- Root dataset duplicate; canonical copy lives in data/raw/ ---
 /Rappi_AI_Builder_Challenge_Dataset.xlsx

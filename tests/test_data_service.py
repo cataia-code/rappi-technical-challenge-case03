@@ -1,6 +1,6 @@
 """Verify data_service loads and normalizes all 150 cases."""
-from caso03.domain.models import CompensationCase
-from caso03.services.data_service import load_cases
+from domain.models import CompensationCase
+from services.data_service import load_cases
 
 
 def test_loads_150_cases():

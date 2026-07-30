@@ -14,8 +14,8 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 
-from caso03.services.data_service import load_cases  # noqa: E402
-from caso03.services.decision_service import DecisionService  # noqa: E402
+from services.data_service import load_cases  # noqa: E402
+from services.decision_service import DecisionService  # noqa: E402
 
 LABELS = ROOT / "data" / "labels" / "manual_30.csv"
 VALID_LABELS = {"APROBAR", "RECHAZAR", "ESCALAR"}

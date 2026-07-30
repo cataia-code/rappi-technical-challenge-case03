@@ -1,11 +1,11 @@
 """Tests for decision_service routing, parsing, and no-LLM mode."""
 import json
 
-from caso03.config import Settings
-from caso03.domain.models import Decision, Recommendation
-from caso03.llm.prompts import SYSTEM_PROMPT
-from caso03.services.data_service import load_cases
-from caso03.services.decision_service import DecisionService
+from config import Settings
+from domain.models import Decision, Recommendation
+from llm.prompts import SYSTEM_PROMPT
+from services.data_service import load_cases
+from services.decision_service import DecisionService
 
 
 def _service_without_providers(threshold: float = 0.6) -> DecisionService:

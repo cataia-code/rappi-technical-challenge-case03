@@ -1,15 +1,15 @@
 """Tests for derived features, risk model, and hybrid guardrails."""
 import pytest
 
-from caso03.domain.models import Decision, Recommendation
-from caso03.services.data_service import load_cases
-from caso03.features.feature_service import (
+from domain.models import Decision, Recommendation
+from services.data_service import load_cases
+from features.feature_service import (
     GuardrailAction,
     compute_features,
     evaluate_guardrail,
     reconcile,
 )
-from caso03.scoring.risk_service import assess
+from scoring.risk_service import assess
 
 
 @pytest.fixture(scope="module")

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field, field_validator
 
-from caso03.domain.models import Recommendation
+from domain.models import Recommendation
 
 
 class LLMDecisionPayload(BaseModel):
