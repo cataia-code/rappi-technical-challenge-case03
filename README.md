@@ -41,14 +41,14 @@ Ver **`docs/politicas_decision.md`** para los criterios completos y el manejo de
 
 ```text
 src/              Código productivo: dominio, features, scoring, LLM, servicios y pipeline.
-apps/web/         Web estática, builder y assets (`assets/images`) para `docs/index.html`.
+apps/web/         Fuente de la web: template, builder y assets (`assets/images`).
 apps/mcp/         Servidor FastMCP para exponer revisión de casos como tool.
 apps/api/         Superficie FastAPI para health-check y revisión de casos.
 challenge/        Enunciado original del reto y anexos de entrada.
 config/           Plantillas de configuración local, sin secretos reales.
 experiments/      Experimentación reproducible: scoring y evaluación manual.
 data/             raw/processed/labels con datos versionados; output/ se genera localmente.
-docs/             GitHub Pages (`index.html`) y documentación técnica versionable.
+docs/             Salida publicada por GitHub Pages (`index.html`) y documentación técnica.
 tests/            Pruebas unitarias e integración del pipeline.
 ```
 
@@ -84,7 +84,7 @@ $env:PYTHONPATH="src"
 
 # 5. Web estática de revisión
 .\.venv\Scripts\python.exe apps\web\build_page.py
-# Abrir docs\index.html o servir /docs con GitHub Pages
+# Fuente: apps\web\templates\dashboard.html. Salida publicada: docs\index.html.
 
 # 6. (Bonus) Servidor MCP — expone el agente como tool
 $env:PYTHONPATH="src"

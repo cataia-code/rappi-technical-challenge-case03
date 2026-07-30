@@ -1,4 +1,4 @@
-"""Inject the 150 case results into index.template.html -> docs/index.html.
+"""Render the web dashboard template into the GitHub Pages entry point.
 
 Run after each pipeline execution:
     python apps/web/build_page.py
@@ -17,6 +17,7 @@ ROOT = WEB.parents[1]                           # project root
 XLSX = ROOT / "data" / "output" / "salida_150.xlsx"
 LOGO = WEB / "assets" / "images" / "Rappi_logo.svg.webp"
 FAVICON = WEB / "assets" / "images" / "rappi_faticon.png"
+TEMPLATE = WEB / "templates" / "dashboard.html"
 OUT = ROOT / "docs" / "index.html"              # GitHub Pages output (/docs)
 
 
@@ -55,7 +56,7 @@ def build_cases() -> list[dict]:
 def main() -> None:
     cases = build_cases()
     data = {"cases": cases}
-    template = (WEB / "index.template.html").read_text(encoding="utf-8")
+    template = TEMPLATE.read_text(encoding="utf-8")
     html = template.replace("/*__DATA__*/null", json.dumps(data, ensure_ascii=False))
     html = html.replace("__RAPPI_LOGO__", _data_uri(LOGO, "image/webp"))
     html = html.replace("__RAPPI_FAVICON__", _data_uri(FAVICON, "image/png"))
