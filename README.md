@@ -35,7 +35,28 @@ CompensationCase ┤
 - **Capa 2 — guardrails** (`feature_service`): acotan la salida del LLM a la política
   (FRAUDE no puede auto-aprobarse; LEGÍTIMO no puede rechazarse; ante duda, ESCALAR).
 
-Ver **`docs/politicas_decision.md`** para los criterios completos y el manejo de ambigüedad.
+Ver **`docs/politicas_decision.md`** para los criterios completos y el manejo de ambigüedad, y
+**`docs/arquitectura.md`** / **`docs/evaluacion_modelo.md`** para el detalle técnico (diagramas
+Mermaid, prompts versionados, métricas reales del último run) que también se ve en la web.
+
+## Web (`docs/index.html`, publicada por GitHub Pages)
+
+Un solo archivo autocontenido (assets embebidos en base64), con 5 pestañas:
+
+- **Exploración** — por qué se compararon modelos en vez de fijar umbrales a mano, y qué corrigió
+  la intuición (GPS secundario, ratio comp/orden nunca &gt;1).
+- **Modelo & Métricas** — las 32 combinaciones algoritmo×matriz×k probadas, el ganador resaltado,
+  los pesos reales por señal, y una proyección PCA de los 150 casos coloreada por bucket.
+- **Arquitectura** — 3 diagramas Mermaid (arquitectura, secuencia, árbol de decisión) en un modal
+  con zoom y descarga, más las métricas de evaluación del LLM del último run real.
+- **Dashboard** — los 150 casos, filtrables, con el detalle de cada decisión y —para los
+  escalados— los pasos concretos que el LLM (o el fallback) recomienda revisar.
+- **Demo** — genera un caso sintético y corre el modelo de riesgo **en el navegador** (mismos
+  pesos que Modelo & Métricas); si el caso es ambiguo, intenta una llamada real a un LLM vía un
+  Cloudflare Worker (código en `apps/web/worker/`, **no desplegado** por defecto — ver esa
+  carpeta para desplegarlo con tus propias API keys). Sin el Worker desplegado, el demo sigue
+  siendo 100% funcional: muestra el mismo aviso honesto que usaría en producción cuando el LLM
+  no está disponible, en vez de fingir una respuesta.
 
 ## Organización del repo
 
@@ -113,7 +134,9 @@ $env:PYTHONPATH="src"
 
 `data/output/salida_150.xlsx` — hoja **Casos** (150 casos con `recomendacion_agente`,
 `risk_bucket`, `risk_score`, `top_contribuyentes`, `senales_dominantes`, `resumen_cs`,
-`razonamiento` como justificación breve, `override_guardrail`) + hoja **Resumen**
+`razonamiento` como justificación breve, `override_guardrail`, `modelo_usado` cuando responde un
+LLM, y `pasos_recomendados` — 2-4 pasos concretos que el LLM escribe solo para los casos que
+terminan en ESCALAR, o un checklist genérico si nunca llegó a tocar un LLM) + hoja **Resumen**
 (reparto de decisiones).
 
 Reparto sobre los 150 (modo `--no-llm`, backbone de datos): **APROBAR 62 (41.3%) ·
@@ -133,12 +156,25 @@ RECHAZAR 30 (20.0%) · ESCALAR 58 (38.7%)**. Con presupuesto LLM disponible, cor
   reserva para donde aporta: el texto de los casos ambiguos.
 - **Sesgo FP>FN:** rechazar a un legítimo (churn) cuesta más que aprobar un fraude puntual
   (monto acotado) → RECHAZAR conservador, la incertidumbre va a ESCALAR.
-- **Fronteras de servicio (no monorepo):** se mantienen las fronteras de la referencia
-  air_travel (SDK/data, MCP, decisión) pero en-proceso; sin Postgres/FastAPI para 150 filas.
+- **Fronteras de servicio, en-proceso:** `apps/api` (FastAPI) y `apps/mcp` (FastMCP) son
+  adaptadores delgados sobre el mismo `DecisionService` — sin base de datos ni cola de mensajes
+  para 150-200 filas/día; el motor de decisión no sabe ni le importa qué lo invoca.
+- **Prompts versionados, no un string suelto:** `llm/prompts.py::PROMPT_VERSION` viaja con cada
+  corrida (visible en la web y en `experiments/llm/eval_runs/`), para poder comparar qué versión
+  del prompt produjo qué decisiones.
+- **El demo en vivo corre el modelo de riesgo en JS, no solo en Python:** `apps/web/assets/js/scoring.js`
+  es un port 1:1 de `risk_service.py`, verificado contra Python con un test de paridad real
+  (`tests/test_scoring_js_parity.py`, corre con Node) — la demo no podría mentir sobre cómo
+  decide sin que ese test lo detecte.
 
 ## Con más tiempo
 
 - Etiquetar a mano ~30 casos para medir precisión de RECHAZAR y afinar cortes.
 - Persistir el modelo de riesgo y reentrenarlo con feedback de los CS (aprendizaje continuo).
 - Caché de decisiones + batching de tokens para exprimir el rate limit.
-- Exponer el pipeline tras una FastAPI/MCP real cuando el volumen (200+/día) lo justifique.
+- Desplegar el Cloudflare Worker (`apps/web/worker/`) para que el demo llame a un LLM real de
+  punta a punta, y agregar telemetría real de latencia/alucinación por proveedor (hoy el batch
+  de referencia corrió con `--no-llm`, así que esas métricas no existen todavía — ver
+  `docs/evaluacion_modelo.md`).
+- Sincronizar automáticamente el prompt entre `llm/prompts.py` y `apps/web/worker/index.js` (hoy
+  es una copia manual con un aviso en el código; un JSON/JS compartido lo eliminaría).

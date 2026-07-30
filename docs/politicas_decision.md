@@ -132,3 +132,9 @@ aporta valor real; si el texto no desambigua, escala con el contexto ya procesad
   `--workers 1` (~12 casos/min). El artefacto persistido (Excel) evita recomputar en la demo.
 - **Fail-safe:** si un caso no se puede procesar (red/LLM), se marca ESCALAR con la traza
   del error — nunca se pierde un caso ni se aprueba/rechaza a ciegas.
+- **Escalados con pasos concretos:** todo caso ESCALAR trae `pasos_recomendados` (2-4 ítems
+  cortos, en imperativo) — qué revisar puntualmente y qué le impidió al modelo decidir. Los
+  escribe el LLM cuando él mismo elige ESCALAR; si el pipeline corrió sin LLM, o si un
+  guardrail de Capa 2 degradó una decisión del LLM a ESCALAR, se usa un checklist genérico
+  (`features/feature_service.GENERIC_ESCALATION_STEPS`) para que el CS nunca reciba un caso
+  escalado sin ningún punto de partida.
