@@ -18,6 +18,7 @@ XLSX = ROOT / "data" / "output" / "salida_150.xlsx"
 LOGO = WEB / "assets" / "images" / "Rappi_logo.svg.webp"
 FAVICON = WEB / "assets" / "images" / "rappi_faticon.png"
 TEMPLATE = WEB / "templates" / "dashboard.html"
+MODEL_SELECTION = ROOT / "data" / "processed" / "model_selection.json"
 OUT = ROOT / "docs" / "index.html"              # GitHub Pages output (/docs)
 
 
@@ -53,16 +54,22 @@ def build_cases() -> list[dict]:
     return out
 
 
+def load_model_selection() -> dict:
+    return json.loads(MODEL_SELECTION.read_text(encoding="utf-8"))
+
+
 def main() -> None:
     cases = build_cases()
     data = {"cases": cases}
+    model = load_model_selection()
     template = TEMPLATE.read_text(encoding="utf-8")
     html = template.replace("/*__DATA__*/null", json.dumps(data, ensure_ascii=False))
+    html = html.replace("/*__MODEL__*/null", json.dumps(model, ensure_ascii=False))
     html = html.replace("__RAPPI_LOGO__", _data_uri(LOGO, "image/webp"))
     html = html.replace("__RAPPI_FAVICON__", _data_uri(FAVICON, "image/png"))
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(html, encoding="utf-8")
-    print(f"{OUT} generated with {len(cases)} cases.")
+    print(f"{OUT} generated with {len(cases)} cases and model-selection metrics.")
 
 
 if __name__ == "__main__":

@@ -40,12 +40,19 @@ h2.title{font-size:clamp(30px,4vw,46px);margin:14px 0 10px}
 .nav .wrap{display:flex;align-items:center;gap:18px;height:62px}
 .brand{display:flex;align-items:center;gap:10px;font-family:'Fredoka';font-weight:700;font-size:20px}
 .brand .dot{width:26px;height:26px;border-radius:50%;background:var(--rappi);display:grid;place-items:center;color:#fff;font-size:15px}
-.brand-logo{height:26px;width:auto;display:block}
+.brand-logo{height:30px;width:auto;display:block}
 .nav-links{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
-.nav-links a{font-size:14px;font-weight:500;color:var(--muted);text-decoration:none;padding:7px 12px;border-radius:99px}
-.nav-links a:hover{color:var(--ink);background:var(--rappi-soft)}
+.nav-links button{font:inherit;font-size:14px;font-weight:500;color:var(--muted);text-decoration:none;
+  padding:7px 12px;border-radius:99px;background:none;border:none;cursor:pointer}
+.nav-links button:hover{color:var(--ink);background:var(--rappi-soft)}
+.nav-links button.active{color:var(--ink);background:var(--rappi-soft);font-weight:600}
 .nav-cta{background:var(--rappi);color:#fff!important;font-weight:600}
 .nav-cta:hover{background:var(--rappi-dark)!important}
+.nav-cta.active{background:var(--rappi-dark)!important;color:#fff!important}
+
+/* TABS */
+.view{display:none}
+.view.active{display:block}
 
 /* HERO */
 .hero{padding:70px 0 60px;background:
@@ -95,14 +102,35 @@ h2.title{font-size:clamp(30px,4vw,46px);margin:14px 0 10px}
 /* scoring: eta bars */
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;margin-top:26px}
 @media(max-width:820px){.two-col{grid-template-columns:1fr}}
-.bars{display:flex;flex-direction:column;gap:10px}
-.bar-row{display:grid;grid-template-columns:150px 1fr 46px;align-items:center;gap:12px;font-size:14px}
-.bar-row .lab{color:var(--ink);font-weight:500}
+.bars{display:flex;flex-direction:column;gap:14px}
+.bar-row{display:grid;grid-template-columns:1fr;gap:5px;font-size:14px}
+.bar-row .lab-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.bar-row .lab{color:var(--ink);font-weight:500;overflow-wrap:anywhere}
 .bar-track{height:14px;background:var(--surface-2);border-radius:99px;overflow:hidden}
 .bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--rappi),#ff7a5c)}
-.bar-row .val{font-family:'JetBrains Mono';font-size:13px;color:var(--muted);text-align:right}
+.bar-row .val{font-family:'JetBrains Mono';font-size:13px;color:var(--muted);white-space:nowrap;flex-shrink:0}
 .bar-row.weak .bar-fill{background:var(--line-strong)}
 .bar-row.weak .val{color:#b3a9a4}
+
+/* Model comparison table + PCA scatter (Modelo & Métricas tab) */
+table.cmp{width:100%;border-collapse:collapse;font-size:13px}
+table.cmp th{position:sticky;top:0;background:var(--surface-2);text-align:left;padding:9px 10px;font-size:11.5px;
+  text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+table.cmp td{padding:8px 10px;border-top:1px solid var(--line);font-family:'JetBrains Mono'}
+table.cmp td.algo{font-family:'Inter';font-weight:500}
+table.cmp tr.winner{background:var(--aprobar-bg)}
+table.cmp tr.winner td{font-weight:700}
+#pca-scatter{width:100%;height:340px;display:block}
+.pca-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;font-size:13px;color:var(--muted)}
+.pca-legend .it{display:flex;align-items:center;gap:7px}
+.pca-legend .d{width:10px;height:10px;border-radius:50%}
+.metric-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0}
+.mcard{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:16px}
+.mcard .n{font-family:'Fredoka';font-weight:700;font-size:26px;color:var(--rappi)}
+.mcard .l{font-size:12.5px;color:var(--muted);margin-top:4px}
+.soon{background:#fff;border:1px dashed var(--line-strong);border-radius:var(--r-lg);padding:60px 32px;
+  text-align:center;color:var(--muted);margin-top:24px}
+.soon h3{color:var(--ink);margin:0 0 8px}
 
 /* bucket profile cards */
 .buckets{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
@@ -219,11 +247,11 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
 <nav class="nav"><div class="wrap">
   <div class="brand"><img class="brand-logo" src="__RAPPI_LOGO__" alt="Rappi"> <span style="color:var(--muted);font-weight:500;font-size:15px">· AI&nbsp;Platform&nbsp;&amp;&nbsp;Innovation</span></div>
   <div class="nav-links">
-    <a href="#problema">Problema</a>
-    <a href="#arquitectura">Arquitectura</a>
-    <a href="#scoring">Scoring</a>
-    <a href="#llm">Cuándo el LLM</a>
-    <a href="#dashboard" class="nav-cta">Dashboard</a>
+    <button data-tab="exploracion">Exploración</button>
+    <button data-tab="modelo">Modelo &amp; Métricas</button>
+    <button data-tab="arquitectura">Arquitectura</button>
+    <button data-tab="dashboard" class="nav-cta">Dashboard</button>
+    <button data-tab="demo">Demo</button>
   </div>
 </div></nav>
 
@@ -235,8 +263,8 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
        en segundos, no en 15–25 minutos. Recomienda <b>APROBAR</b>, <b>RECHAZAR</b> o <b>ESCALAR</b> con
        una justificación que el agente CS entiende de un vistazo.</p>
     <div class="hero-cta">
-      <a href="#dashboard" class="btn btn-primary">Ver el dashboard →</a>
-      <a href="#scoring" class="btn btn-ghost">Cómo se decidió el scoring</a>
+      <button class="btn btn-primary" data-tab="dashboard">Ver el dashboard →</button>
+      <button class="btn btn-ghost" data-tab="modelo">Cómo se decidió el scoring</button>
     </div>
   </div>
   <div class="hero-card">
@@ -251,7 +279,9 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
   </div>
 </div></header>
 
-<!-- PROBLEMA -->
+<!-- ============ TAB: EXPLORACIÓN ============ -->
+<div class="view" id="view-exploracion">
+
 <section class="section" id="problema"><div class="wrap">
   <span class="eyebrow">El problema operativo</span>
   <h2 class="title">Revisar a mano no escala</h2>
@@ -268,46 +298,60 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
     Por eso el agente <b>rechaza solo con evidencia fuerte</b> y ante la duda <b>escala</b>, en vez de forzar un binario.</div>
 </div></section>
 
-<!-- ARQUITECTURA -->
-<section class="section section-2" id="arquitectura"><div class="wrap">
-  <span class="eyebrow">Arquitectura de la solución</span>
-  <h2 class="title">Tres capas, con un backbone de datos</h2>
-  <p class="lead">El scoring resuelve de forma determinística lo que los datos ya separan. El LLM se reserva
-    para lo que el score no puede determinar: los casos ambiguos, donde hay que leer el texto del reclamo.</p>
-  <div class="flow reveal">
-    <div class="layer det"><span class="badge">92/150 casos</span>
-      <div class="tag">Capa 0 · determinística</div>
-      <h3>Modelo de riesgo</h3>
-      <p>Score 0–1 ponderado por la importancia real de cada señal (eta²) + clustering. Clasifica
-         legítimo / ambiguo / fraude. 100% reproducible y auditable.</p></div>
-    <div class="layer"><span class="badge">solo ambiguos</span>
-      <div class="tag">Capa 1 · interpretativa</div>
-      <h3>LLM con JSON validado</h3>
-      <p>Fallback multi-proveedor (Groq/Gemini/OpenRouter). Recibe el bucket + el texto del reclamo
-         como dato no confiable y desambigua por coherencia. Solo se invoca cuando el score no alcanza.</p></div>
-    <div class="layer"><span class="badge">política</span>
-      <div class="tag">Capa 2 · guardrails</div>
-      <h3>Reconciliación</h3>
-      <p>Acota la salida del LLM a la política: un caso de fraude nunca se auto-aprueba; uno legítimo
-         nunca se rechaza por error; ante la duda, escala.</p></div>
-  </div>
-  <div class="flow-note reveal"><span class="pill">flujo</span>
-    <span>Caso → <b>Capa 0</b> asigna bucket. Si es claro (legítimo/fraude) se decide sin LLM.
-      Si es ambiguo → <b>Capa 1</b> lee el texto → <b>Capa 2</b> reconcilia con la política → decisión + resumen.</span></div>
+<section class="section section-2" id="hallazgos"><div class="wrap">
+  <span class="eyebrow">Análisis exploratorio</span>
+  <h2 class="title">No inventamos umbrales. Los sacamos de los datos.</h2>
+  <p class="lead">El dataset no viene etiquetado, pero el reto afirma que los 150 casos están en 3 grupos latentes
+    (legítimo, ambiguo, fraude). En vez de fijar cortes a ojo, dejamos que un análisis no supervisado los recupere.</p>
+  <div class="callout reveal"><b>1. Normalización antes de comparar modelos.</b> Las 5 señales numéricas del eje de
+    abuso se estandarizan (<span class="mono">StandardScaler</span>: media 0, desvío 1) para que ninguna domine por
+    su escala. Las categóricas —<span class="mono">vertical</span>, <span class="mono">entrega_confirmada_gps</span>,
+    <span class="mono">motivo_reclamo</span>— se codifican one-hot y se prueban en una matriz aparte
+    (<span class="mono">numeric_categorical</span>) frente a la matriz solo-numérica, para medir si agregan o
+    diluyen la separación de los clusters.</div>
+  <div class="callout reveal" style="margin-top:14px"><b>2. Comparación real, no una sola corrida.</b> Se entrenaron
+    <b>KMeans</b>, <b>Gaussian Mixture</b>, <b>Agglomerative</b> y <b>DBSCAN</b> sobre ambas matrices, barriendo
+    k=2..6 (DBSCAN barre <span class="mono">eps</span> en su lugar), y se midieron con tres métricas técnicas
+    independientes: <span class="mono">silhouette</span> (cohesión/separación), <span class="mono">davies_bouldin</span>
+    (menor es mejor) y <span class="mono">calinski_harabasz</span> (mayor es mejor). El detalle completo —con los
+    pesos reales por señal y la comparación de las 32 combinaciones— está en la pestaña
+    <b>Modelo &amp; Métricas</b>.</div>
+  <div class="callout reveal" style="margin-top:14px"><b>3. Hallazgos que corrigieron la intuición.</b>
+    La reincidencia (<span class="mono">num_compensaciones_90d</span>) y los flags previos son las señales más
+    separadoras — no el monto, como se podría suponer. El GPS, que parecía una señal primaria, resultó
+    <b>secundario</b>: útil como desempate cuando contradice el reclamo, pero no determina el bucket por sí solo.
+    Y la compensación solicitada <b>nunca</b> supera el valor de la orden en los 150 casos: un ratio &gt;1 no es una
+    señal utilizable aquí, porque no ocurre.</div>
+  <div class="callout reveal" style="margin-top:14px">Esto es lo que justifica el modelo híbrido: los datos separan
+    con claridad un núcleo legítimo y un núcleo de fraude — ahí la decisión es determinística y auditable. Lo que
+    queda en el medio es <b>ambigüedad real</b>, y ahí es donde vale la pena gastar una llamada a un LLM que lea el
+    texto del reclamo, en vez de forzar un umbral arbitrario.</div>
 </div></section>
 
-<!-- SCORING -->
+</div>
+<!-- ============ /TAB: EXPLORACIÓN ============ -->
+
+<!-- ============ TAB: MODELO & MÉTRICAS ============ -->
+<div class="view" id="view-modelo">
+
 <section class="section" id="scoring"><div class="wrap">
   <span class="eyebrow">Lo más importante · cómo se decidió el scoring</span>
   <h2 class="title">No inventamos umbrales. Los sacamos de los datos.</h2>
-  <p class="lead">El dataset no viene etiquetado, pero el reto afirma que los 150 casos están en 3 grupos latentes.
-    Comparamos KMeans, Gaussian Mixture, Agglomerative y DBSCAN; ganó Agglomerative(k=3) sobre matriz numérica
-    (silhouette&nbsp;0.462). Eso —no la intuición— define el modelo productivo, pesos y cortes.</p>
+  <p class="lead" id="model-lead">Comparamos KMeans, Gaussian Mixture, Agglomerative y DBSCAN sobre matriz
+    solo-numérica y numérica+categórica. Ganó <b id="winner-name">Agglomerative(k=3)</b> sobre matriz
+    <span class="mono" id="winner-matrix">numeric</span>. Eso —no la intuición— define el modelo productivo,
+    pesos y cortes.</p>
+
+  <div class="metric-row reveal">
+    <div class="mcard"><div class="n" id="m-sil">0.462</div><div class="l">Silhouette (cohesión/separación, mayor mejor)</div></div>
+    <div class="mcard"><div class="n" id="m-db">0.810</div><div class="l">Davies-Bouldin (menor mejor)</div></div>
+    <div class="mcard"><div class="n" id="m-ch">212.9</div><div class="l">Calinski-Harabasz (mayor mejor)</div></div>
+  </div>
 
   <div class="two-col">
     <div>
       <h3 style="font-size:18px;margin:0 0 4px">Qué pesa más (eta², derivado de datos)</h3>
-      <p style="font-size:13.5px;color:var(--muted);margin:0 0 16px">Las 5 señales fuertes están correlacionadas: son un mismo <b>eje de abuso</b>.</p>
+      <p style="font-size:13.5px;color:var(--muted);margin:0 0 16px">Pesos reales del modelo ganador. Las 5 señales están correlacionadas: son un mismo <b>eje de abuso</b>.</p>
       <div class="bars" id="eta-bars"></div>
       <div class="callout" style="margin-top:20px">Dos correcciones que impusieron los datos:
         <b>la reincidencia y flags previos</b> son las señales más separadoras, y <b>el GPS</b> —que parecía clave—
@@ -331,12 +375,72 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
   </div>
 </div></section>
 
-<!-- LLM -->
-<section class="section section-2" id="llm"><div class="wrap">
+<section class="section section-2" id="comparacion"><div class="wrap">
+  <span class="eyebrow">Selección de modelo</span>
+  <h2 class="title">32 combinaciones probadas, una ganadora</h2>
+  <p class="lead">Regla de selección: preferimos 3 clusters efectivos porque el reto define 3 buckets latentes;
+    desempatamos por mayor silhouette. La fila resaltada es la que quedó en producción.</p>
+  <div class="panel" style="margin-top:20px">
+    <h3>Comparación de algoritmos</h3>
+    <div class="sub">Ordenado por silhouette (mayor a menor). k = número de clusters solicitado; DBSCAN no usa k.</div>
+    <div class="tbl-scroll" style="max-height:340px">
+      <table class="cmp">
+        <thead><tr><th>Matriz</th><th>Algoritmo</th><th>k</th><th>Clusters</th><th>Silhouette</th><th>Davies-Bouldin</th><th>Calinski-Harabasz</th></tr></thead>
+        <tbody id="cmp-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:20px">
+    <h3>Proyección PCA de los 150 casos</h3>
+    <div class="sub">Los 5 features estandarizados, proyectados a 2D. Color = bucket asignado por el modelo ganador.</div>
+    <svg id="pca-scatter" role="img" aria-label="Proyección PCA de los casos coloreada por bucket"></svg>
+    <div class="pca-legend">
+      <span class="it"><span class="d" style="background:var(--aprobar)"></span>Legítimo</span>
+      <span class="it"><span class="d" style="background:var(--escalar)"></span>Ambiguo</span>
+      <span class="it"><span class="d" style="background:var(--rechazar)"></span>Fraude</span>
+    </div>
+  </div>
+</div></section>
+
+</div>
+<!-- ============ /TAB: MODELO & MÉTRICAS ============ -->
+
+<!-- ============ TAB: ARQUITECTURA ============ -->
+<div class="view" id="view-arquitectura">
+
+<section class="section" id="arquitectura"><div class="wrap">
+  <span class="eyebrow">Arquitectura de la solución</span>
+  <h2 class="title">Tres capas, con un backbone de datos</h2>
+  <p class="lead">El scoring resuelve de forma determinística lo que los datos ya separan. El LLM se reserva
+    para lo que el score no puede determinar: los casos ambiguos, donde hay que leer el texto del reclamo.</p>
+  <div class="flow reveal">
+    <div class="layer det"><span class="badge" id="det-badge">92/150 casos</span>
+      <div class="tag">Capa 0 · determinística</div>
+      <h3>Modelo de riesgo</h3>
+      <p>Score 0–1 ponderado por la importancia real de cada señal (eta²) + clustering. Clasifica
+         legítimo / ambiguo / fraude. 100% reproducible y auditable.</p></div>
+    <div class="layer"><span class="badge">solo ambiguos</span>
+      <div class="tag">Capa 1 · interpretativa</div>
+      <h3>LLM con JSON validado</h3>
+      <p>Fallback multi-proveedor (Groq/Gemini/OpenRouter). Recibe el bucket + el texto del reclamo
+         como dato no confiable y desambigua por coherencia. Solo se invoca cuando el score no alcanza.</p></div>
+    <div class="layer"><span class="badge">política</span>
+      <div class="tag">Capa 2 · guardrails</div>
+      <h3>Reconciliación</h3>
+      <p>Acota la salida del LLM a la política: un caso de fraude nunca se auto-aprueba; uno legítimo
+         nunca se rechaza por error; ante la duda, escala.</p></div>
+  </div>
+  <div class="flow-note reveal"><span class="pill">flujo</span>
+    <span>Caso → <b>Capa 0</b> asigna bucket. Si es claro (legítimo/fraude) se decide sin LLM.
+      Si es ambiguo → <b>Capa 1</b> lee el texto → <b>Capa 2</b> reconcilia con la política → decisión + resumen.</span></div>
+</div></section>
+
+<section class="section section-2" id="arquitectura-detail"><div class="wrap">
   <span class="eyebrow">Cuándo se usa el LLM</span>
   <h2 class="title">Solo donde aporta juicio</h2>
-  <p class="lead">Gastar un LLM en los 150 casos sería caro, lento y menos auditable. El score ya resuelve 92 casos.
-    El LLM entra únicamente en los ambiguos, para leer algo que los números no ven: el relato del reclamo.</p>
+  <p class="lead">Gastar un LLM en los 150 casos sería caro, lento y menos auditable. El score ya resuelve la mayoría
+    de los casos. El LLM entra únicamente en los ambiguos, para leer algo que los números no ven: el relato del reclamo.</p>
   <div class="route reveal">
     <div class="rcard a"><div class="ico">🟢</div><h4>Legítimo → sin LLM</h4>
       <p>Riesgo bajo por el score. Se <b>aprueba</b> de forma determinística con su resumen. <code>0 tokens</code></p></div>
@@ -348,9 +452,17 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
   </div>
   <div class="callout reveal">Este ruteo baja el batch de 150 a ~58 llamadas y hace el sistema
     <b>escalable a 200+/día</b>: el costo del LLM crece solo con la ambigüedad real, no con el volumen total.</div>
+  <div class="soon"><h3>Diagramas Mermaid — próximamente</h3>
+    <p>Arquitectura de 3 capas, diagrama de secuencia y árbol de decisión, en ventanas emergentes con zoom y
+       descarga (siguiente fase del proyecto).</p></div>
 </div></section>
 
-<!-- DASHBOARD -->
+</div>
+<!-- ============ /TAB: ARQUITECTURA ============ -->
+
+<!-- ============ TAB: DASHBOARD ============ -->
+<div class="view" id="view-dashboard">
+
 <section class="section" id="dashboard"><div class="wrap">
   <span class="eyebrow">Resultados · dashboard interactivo</span>
   <h2 class="title">Los 150 casos, revisables en segundos</h2>
@@ -395,6 +507,25 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
   </div>
 </div></section>
 
+</div>
+<!-- ============ /TAB: DASHBOARD ============ -->
+
+<!-- ============ TAB: DEMO ============ -->
+<div class="view" id="view-demo">
+<section class="section" id="demo"><div class="wrap">
+  <span class="eyebrow">Demo en vivo</span>
+  <h2 class="title">Un caso sintético, de punta a punta</h2>
+  <p class="lead">Generá una fila de datos aleatorios, corré el mismo pipeline que corrió sobre los 150 casos
+    —normalización, modelo de riesgo en el navegador y, si el caso es ambiguo, una llamada real al LLM— y mirá
+    la decisión salir en segundos.</p>
+  <div class="soon"><h3>En construcción</h3>
+    <p>Esta pestaña va a correr el modelo de riesgo directamente en el navegador (los mismos pesos que ves en
+       <b>Modelo &amp; Métricas</b>) y, para los casos ambiguos, va a llamar a un LLM real a través de un proxy
+       serverless. Todavía no está conectada — es la siguiente fase del proyecto.</p></div>
+</div></section>
+</div>
+<!-- ============ /TAB: DEMO ============ -->
+
 <footer><div class="wrap">
   <div class="foot-left">
     <img class="foot-logo" src="__RAPPI_LOGO__" alt="Rappi">
@@ -414,16 +545,98 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
 
 <script>
 const DASHBOARD_DATA = /*__DATA__*/null;
+const MODEL_DATA = /*__MODEL__*/null;
 const DEC_COLOR = {APROBAR:'#1F9D57', ESCALAR:'#E8A400', RECHAZAR:'#D93A3A'};
+const BUCKET_COLOR = {LEGITIMO:'#1F9D57', AMBIGUO:'#E8A400', FRAUDE:'#D93A3A'};
 const cases = (DASHBOARD_DATA && DASHBOARD_DATA.cases) || [];
+const FEATURE_LABEL = {
+  num_comp_90d:'num_compensaciones_90d', flags:'flags_fraude_previos', antiguedad:'antiguedad_usuario_dias',
+  monto_comp_90d:'monto_compensado_90d_mxn', tiempo_entrega:'tiempo_entrega_real_min',
+};
+let PCA_POINTS = [];
 
-/* eta² bars (data-derived importance) */
-const ETA = [['num_compensaciones_90d',0.214],['flags_fraude_previos',0.203],['antiguedad',0.196],
-  ['monto_compensado_90d',0.194],['tiempo_entrega',0.193]];
-(function(){const el=document.getElementById('eta-bars');el.innerHTML=ETA.map(([n,v])=>{
-  const weak=v<0.08?'weak':'';return `<div class="bar-row ${weak}"><span class="lab">${n}</span>
-    <span class="bar-track"><span class="bar-fill" style="width:${Math.round(v*100)}%"></span></span>
-    <span class="val">${v.toFixed(2)}</span></div>`;}).join('');})();
+/* ---------- TABS ---------- */
+const TABS = ['exploracion','modelo','arquitectura','dashboard','demo'];
+function showTab(name){
+  if(!TABS.includes(name)) name = TABS[0];
+  TABS.forEach(t=>{
+    const view=document.getElementById('view-'+t);
+    if(view) view.classList.toggle('active', t===name);
+  });
+  document.querySelectorAll('.nav-links button').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+  history.replaceState(null,'','#'+name);
+  window.scrollTo(0,0);
+  /* .reveal elements inside a tab hidden via display:none never get a real bounding box, so the
+     IntersectionObserver below never fires for them. Reveal immediately on tab switch instead. */
+  document.querySelectorAll('#view-'+name+' .reveal').forEach(el=>el.classList.add('in'));
+  /* SVGs painted while their tab was hidden used a fallback width; repaint now that it's visible. */
+  if(name==='dashboard' && typeof renderSpectrum==='function') renderSpectrum();
+  if(name==='modelo') drawScatter(document.getElementById('pca-scatter'), PCA_POINTS);
+}
+document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>showTab(el.dataset.tab)));
+
+/* ---------- Model & Metrics tab: real weights, comparison table, PCA scatter ---------- */
+(function(){
+  if(!MODEL_DATA) return;
+  const w = MODEL_DATA.winner || {};
+  const charts = MODEL_DATA.charts || {};
+  document.getElementById('winner-name').textContent = `${cap(w.algorithm)}(k=${w.k ?? '—'})`;
+  document.getElementById('winner-matrix').textContent = w.matrix || '—';
+  document.getElementById('m-sil').textContent = (w.silhouette ?? 0).toFixed(3);
+  document.getElementById('m-db').textContent = (w.davies_bouldin ?? 0).toFixed(3);
+  document.getElementById('m-ch').textContent = (w.calinski_harabasz ?? 0).toFixed(1);
+  const total = cases.length || 150;
+  const detCount = cases.filter(c=>c.bkt==='LEGITIMO'||c.bkt==='FRAUDE').length;
+  const badge = document.getElementById('det-badge');
+  if(badge) badge.textContent = `${detCount}/${total} casos`;
+  document.getElementById('model-lead').innerHTML =
+    `Comparamos KMeans, Gaussian Mixture, Agglomerative y DBSCAN sobre matriz solo-numérica y numérica+categórica. ` +
+    `Ganó <b id="winner-name">${cap(w.algorithm)}(k=${w.k ?? '—'})</b> sobre matriz ` +
+    `<span class="mono">${w.matrix || '—'}</span> (silhouette&nbsp;${(w.silhouette ?? 0).toFixed(3)}). ` +
+    `Eso —no la intuición— define el modelo productivo, pesos y cortes.`;
+
+  /* real per-feature weights (winner_weights, sums to 1) */
+  const weights = Object.entries(charts.winner_weights || {}).sort((a,b)=>b[1]-a[1]);
+  const wMax = Math.max(1e-6, ...weights.map(([,v])=>v));
+  document.getElementById('eta-bars').innerHTML = weights.map(([key,v])=>{
+    const label = FEATURE_LABEL[key] || key;
+    const weak = v < wMax*0.5 ? 'weak' : '';
+    return `<div class="bar-row ${weak}"><div class="lab-row"><span class="lab">${label}</span><span class="val">${v.toFixed(3)}</span></div>
+      <span class="bar-track"><span class="bar-fill" style="width:${Math.round(v/wMax*100)}%"></span></span></div>`;
+  }).join('');
+
+  /* algorithm comparison table, sorted by silhouette desc, winner row highlighted */
+  const rows = (MODEL_DATA.results || []).slice().sort((a,b)=>(b.silhouette??-1)-(a.silhouette??-1));
+  document.getElementById('cmp-body').innerHTML = rows.map(r=>{
+    const isWinner = r.matrix===w.matrix && r.algorithm===w.algorithm && r.k===w.k;
+    return `<tr class="${isWinner?'winner':''}">
+      <td>${r.matrix}</td><td class="algo">${cap(r.algorithm)}</td><td>${r.k ?? '—'}</td>
+      <td>${r.effective_clusters}</td><td>${(r.silhouette??0).toFixed(3)}</td>
+      <td>${(r.davies_bouldin??0).toFixed(3)}</td><td>${(r.calinski_harabasz??0).toFixed(1)}</td></tr>`;
+  }).join('');
+
+  /* PCA scatter, colored by bucket */
+  PCA_POINTS = charts.pca || [];
+  drawScatter(document.getElementById('pca-scatter'), PCA_POINTS);
+  window.addEventListener('resize', ()=>drawScatter(document.getElementById('pca-scatter'), PCA_POINTS));
+})();
+
+function cap(s){return s ? s.charAt(0).toUpperCase()+s.slice(1).replace(/_/g,' ') : '—';}
+
+function drawScatter(svg, pts){
+  if(!svg || !pts.length) return;
+  const W=svg.clientWidth||700, H=340, pad=28;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const xs=pts.map(p=>p.x), ys=pts.map(p=>p.y);
+  const xMin=Math.min(...xs), xMax=Math.max(...xs), yMin=Math.min(...ys), yMax=Math.max(...ys);
+  const X=x=>pad+(x-xMin)/(xMax-xMin||1)*(W-2*pad);
+  const Y=y=>H-pad-(y-yMin)/(yMax-yMin||1)*(H-2*pad);
+  let dots = pts.map(p=>{
+    const color = BUCKET_COLOR[p.bucket] || '#9a908a';
+    return `<circle cx="${X(p.x).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" r="5" fill="${color}" opacity=".82" stroke="#fff" stroke-width="1"><title>${p.caso_id} · ${p.bucket}</title></circle>`;
+  }).join('');
+  svg.innerHTML = dots;
+}
 
 /* tooltip helpers */
 const tip=document.getElementById('tip');
@@ -555,6 +768,7 @@ document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
 window.addEventListener('resize',()=>{drawStrip(document.getElementById('hero-spec'),cases,120,3.2);renderSpectrum();});
 refresh();
+showTab((location.hash||'').replace('#','') || 'exploracion');
 </script>
 </body>
 </html>
