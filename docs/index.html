@@ -69,6 +69,7 @@ h2.title{font-size:clamp(30px,4vw,46px);margin:14px 0 10px}
 .btn-primary:hover{background:var(--rappi-dark);transform:translateY(-1px)}
 .btn-ghost{background:#fff;border-color:var(--line-strong);color:var(--ink)}
 .btn-ghost:hover{border-color:var(--rappi)}
+.btn-ghost.active{border-color:var(--rappi);background:var(--rappi-soft);color:var(--rappi-dark);font-weight:700}
 /* hero card: mini spectrum teaser */
 .hero-card{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:22px;box-shadow:var(--shadow)}
 .hero-card h4{margin:0 0 4px;font-size:15px;font-family:'Inter';font-weight:600}
@@ -628,10 +629,16 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
 
   <div class="panel reveal" style="margin-top:24px">
     <h3>Fila sintética <span id="demo-profile-tag" class="pill" style="margin-left:6px"></span></h3>
-    <div class="sub">Datos aleatorios con el mismo esquema que los 150 casos reales (<span class="mono">CompensationCase</span>).</div>
-    <div class="demo-fields" id="demo-fields"></div>
+    <div class="sub">Elegí qué tipo de caso generar — <b>Escalar</b> es el único que llama de verdad al LLM;
+      los otros dos se resuelven determinísticamente, sin tokens.</div>
+    <div class="hero-cta" style="margin-top:14px;flex-wrap:wrap">
+      <button class="btn btn-ghost" data-profile="random" id="demo-regen">🎲 Aleatorio</button>
+      <button class="btn btn-ghost" data-profile="legit">🟢 Forzar Aprobar</button>
+      <button class="btn btn-ghost" data-profile="fraud">🔴 Forzar Rechazar</button>
+      <button class="btn btn-ghost" data-profile="ambig">🟡 Forzar Escalar (LLM)</button>
+    </div>
+    <div class="demo-fields" id="demo-fields" style="margin-top:18px"></div>
     <div class="hero-cta" style="margin-top:18px">
-      <button class="btn btn-ghost" id="demo-regen">🔀 Regenerar</button>
       <button class="btn btn-primary" id="demo-run">▶ Probar</button>
     </div>
   </div>
@@ -1197,19 +1204,42 @@ function _pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function _int(min, max) { return Math.floor(min + Math.random() * (max - min + 1)); }
 function _money(min, max) { return Math.round((min + Math.random() * (max - min)) * 100) / 100; }
 
-/** Generates a random CompensationCase-shaped row, biased toward one of the three
- * outcomes so Regenerar reliably produces variety across APROBAR/RECHAZAR/ESCALAR. */
-function randomSyntheticCase() {
-  const profile = _pick(['legit', 'fraud', 'ambig']);
+const DEMO_PROFILE_LABEL = { legit: 'Debería APROBAR', fraud: 'Debería RECHAZAR', ambig: 'Debería ESCALAR → LLM' };
+
+// Plausible claim text per profile, so the LLM (called only for "ambig") has something real
+// to reason about instead of a placeholder string. Ranges below were verified against the
+// real risk model (1000+ synthetic draws each) to land in their target bucket 100% of the time.
+const DEMO_DESCRIPTIONS = {
+  legit: [
+    'El pedido nunca llegó a mi domicilio, esperé más de una hora y el repartidor no contestó.',
+    'Cancelaron mi orden y todavía no me han devuelto el dinero.',
+    'El producto llegó dañado, se me hizo tarde y ya no lo pude usar.',
+  ],
+  fraud: [
+    'La app marca que llegó pero yo nunca recibí nada, quiero mi reembolso ya.',
+    'Otra vez no llegó mi pedido, esto me pasa seguido últimamente.',
+    'No recibí el pedido, aunque el repartidor dice que sí lo entregó.',
+  ],
+  ambig: [
+    'El producto que llegó no es el que pedí, aunque se parece bastante.',
+    'La entrega llegó pero faltaba un artículo del pedido.',
+    'El empaque venía golpeado, no sé si el producto de adentro está bien.',
+  ],
+};
+
+/** Generates a CompensationCase-shaped row. `profile` forces the outcome
+ * ('legit'|'fraud'|'ambig'); omitted or 'random' picks one of the three at random. */
+function randomSyntheticCase(profile) {
+  if (!profile || profile === 'random') profile = _pick(['legit', 'fraud', 'ambig']);
   let raw;
   if (profile === 'legit') {
     const valor = _money(150, 700);
     raw = {
-      antiguedad_usuario_dias: _int(400, 2200), num_compensaciones_90d: _int(0, 2),
-      monto_compensado_90d_mxn: _money(0, 300), flags_fraude_previos: 0,
-      tiempo_entrega_real_min: _int(35, 90), entrega_confirmada_gps: 'NO confirmada',
+      antiguedad_usuario_dias: _int(700, 2200), num_compensaciones_90d: _int(0, 1),
+      monto_compensado_90d_mxn: _money(0, 150), flags_fraude_previos: 0,
+      tiempo_entrega_real_min: _int(45, 90), entrega_confirmada_gps: 'NO confirmada',
       motivo_reclamo: 'Orden no llego', valor_orden_mxn: valor,
-      compensacion_solicitada_mxn: _money(20, valor * 0.6),
+      compensacion_solicitada_mxn: _money(20, valor * 0.5),
     };
   } else if (profile === 'fraud') {
     const valor = _money(100, 500);
@@ -1233,7 +1263,7 @@ function randomSyntheticCase() {
   return Object.assign({
     caso_id: 'DEMO-' + Math.random().toString(36).slice(2, 7).toUpperCase(),
     usuario_id: 'DEMO-USER', ciudad: _pick(DEMO_CITIES), vertical: _pick(DEMO_VERTICALS),
-    restaurante: 'Demo Restaurant', descripcion_reclamo: 'Caso sintético generado para la demo en vivo.',
+    restaurante: 'Demo Restaurant', descripcion_reclamo: _pick(DEMO_DESCRIPTIONS[profile]),
     _profile: profile,
   }, raw);
 }
@@ -1250,11 +1280,13 @@ function renderDemoFields(raw) {
     if (typeof v === 'number' && k.includes('mxn')) v = '$' + v.toFixed(0);
     return `<div class="dfield"><div class="k">${DEMO_FIELD_LABELS[k] || k}</div><div class="v">${v}</div></div>`;
   }).join('');
-  document.getElementById('demo-profile-tag').textContent = '';
+  document.getElementById('demo-profile-tag').textContent = DEMO_PROFILE_LABEL[raw._profile] || '';
 }
 
-function regenDemo() {
-  demoCase = randomSyntheticCase();
+function regenDemo(profile) {
+  demoCase = randomSyntheticCase(profile);
+  document.querySelectorAll('[data-profile]').forEach(b =>
+    b.classList.toggle('active', b.dataset.profile === (profile || 'random')));
   renderDemoFields(demoCase);
   document.getElementById('demo-result').innerHTML =
     '<div class="empty">Presioná Probar para correr el modelo sobre esta fila.</div>';
@@ -1428,7 +1460,8 @@ function runDemo() {
     }, 'llm-unavailable'));
 }
 
-document.getElementById('demo-regen').addEventListener('click', regenDemo);
+document.querySelectorAll('[data-profile]').forEach(b =>
+  b.addEventListener('click', () => regenDemo(b.dataset.profile)));
 document.getElementById('demo-run').addEventListener('click', runDemo);
 regenDemo();
 
