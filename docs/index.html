@@ -366,7 +366,7 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
     <span class="mono">motivo_reclamo</span>— se codifican one-hot y se prueban en una matriz aparte
     (<span class="mono">numeric_categorical</span>) frente a la matriz solo-numérica, para medir si agregan o
     diluyen la separación de los clusters.</div>
-  <div class="callout reveal" style="margin-top:14px"><b>2. Comparación real, no una sola corrida.</b> Se entrenaron
+  <div class="callout reveal" style="margin-top:14px"><b>2. Comparación real, no una sola ejecución.</b> Se entrenaron
     <b>KMeans</b>, <b>Gaussian Mixture</b>, <b>Agglomerative</b> y <b>DBSCAN</b> sobre ambas matrices, barriendo
     k=2..6 (DBSCAN barre <span class="mono">eps</span> en su lugar), y se midieron con tres métricas técnicas
     independientes: <span class="mono">silhouette</span> (cohesión/separación), <span class="mono">davies_bouldin</span>
@@ -528,7 +528,7 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
 <section class="section" id="evaluacion"><div class="wrap">
   <span class="eyebrow">Evaluación del LLM</span>
   <h2 class="title">Cómo sabemos que el sistema funciona</h2>
-  <p class="lead">Prompts versionados (<span class="mono" id="prompt-version">—</span>) para poder comparar corridas.
+  <p class="lead">Prompts versionados (<span class="mono" id="prompt-version">—</span>) para poder comparar ejecuciones.
     Las métricas de abajo son las que este batch permite medir <b>hoy, con datos reales</b> del run que generó el
     dashboard — no proyecciones.</p>
   <div class="metric-row reveal">
@@ -1365,6 +1365,26 @@ function drawDemoScatter(svg, point, bucket) {
   svg.innerHTML = dots;
 }
 
+/** Turns a raw JS/network error into a sentence a non-technical reviewer can read,
+ * instead of leaking "Failed to fetch" or an HTTP status code verbatim. */
+function humanizeLlmError(rawMessage) {
+  if (!rawMessage) return 'El LLM no pudo responder en este intento.';
+  const msg = String(rawMessage);
+  if (/no hay proxy configurado/i.test(msg)) {
+    return 'El LLM no respondió porque este despliegue no tiene un proxy configurado.';
+  }
+  if (/failed to fetch|networkerror|load failed/i.test(msg)) {
+    return 'El LLM no respondió: no se pudo conectar con el proxy (revisá tu conexión o, si estás probando fuera de la web publicada, una restricción de CORS).';
+  }
+  if (/^HTTP 5\d\d/.test(msg)) {
+    return `El LLM no respondió: el proxy tuvo un error interno (${msg}).`;
+  }
+  if (/^HTTP 4\d\d/.test(msg)) {
+    return `El LLM no respondió: el proxy rechazó la solicitud (${msg}).`;
+  }
+  return `El LLM no pudo responder en este intento (${msg}).`;
+}
+
 function renderDemoDecision(risk, features, guardrail, decision, source) {
   const el = document.getElementById('demo-result');
   const color = DEC_COLOR[decision.recomendacion];
@@ -1390,13 +1410,12 @@ function renderDemoDecision(risk, features, guardrail, decision, source) {
       Recibió el bucket, el score, las señales dominantes y la descripción del reclamo, y devolvió el veredicto de abajo con su propia justificación.`;
   } else {
     // Ambiguous case, but the LLM didn't answer (no endpoint configured, network error, etc).
-    // Explain how it WOULD reason instead of just saying "unavailable".
-    llmStepHtml = `El LLM no pudo responder en este intento${decision._llm_error ? ` (${decision._llm_error})` : ''}.
-      Así es como <b>operaría</b> con estos datos: recibiría "bucket ${risk.resolved_bucket}, score ${risk.risk_score},
-      señales: ${risk.top_contribuyentes.join(', ')}" más la descripción del reclamo, y aplicaría la política —
-      RECHAZAR solo con evidencia fuerte de contradicción, APROBAR si el relato es específico y coherente con GPS ${gpsWord.replace(/<[^>]+>/g,'')} el motivo,
-      o ESCALAR si la duda persiste. Mientras tanto, este caso se resuelve con el mismo fallback conservador que usa
-      el pipeline sin LLM: <b>ESCALAR</b>.`;
+    // Explain how it WOULD reason instead of just saying "unavailable". The final "so it's
+    // ESCALAR" conclusion lives only in resumen_cs below -- no need to repeat it here too.
+    llmStepHtml = `${humanizeLlmError(decision._llm_error)} Así es como <b>operaría</b> con estos datos:
+      recibiría "bucket ${risk.resolved_bucket}, score ${risk.risk_score}, señales: ${risk.top_contribuyentes.join(', ')}"
+      más la descripción del reclamo, y aplicaría la política — RECHAZAR solo con evidencia fuerte de contradicción,
+      APROBAR si el relato es específico y coherente con GPS ${gpsWord.replace(/<[^>]+>/g,'')} el motivo, o ESCALAR si la duda persiste.`;
   }
 
   el.innerHTML = `
@@ -1454,7 +1473,7 @@ function runDemo() {
     .then(decision => renderDemoDecision(risk, features, guardrail, decision, 'llm'))
     .catch(err => renderDemoDecision(risk, features, guardrail, {
       recomendacion: 'ESCALAR',
-      resumen_cs: `El LLM no respondió. Se aplica el fallback conservador: requiere revisión humana.`,
+      resumen_cs: `Caso ambiguo (score ${risk.risk_score}): ${risk.top_contribuyentes.join(', ')}. Sin respuesta del LLM, se escala con el mismo criterio conservador que el pipeline sin LLM.`,
       pasos_recomendados: ['Reintentar más tarde o revisar el caso manualmente.'],
       _llm_error: err.message,
     }, 'llm-unavailable'));

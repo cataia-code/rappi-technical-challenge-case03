@@ -3,7 +3,7 @@
 > Espejo en texto de la pestaña **Arquitectura → Evaluación del LLM** del dashboard.
 > Regenerado automáticamente por `apps/web/build_page.py` a partir de `data/output/salida_150.xlsx`
 > y `data/processed/model_selection.json` — los números de abajo son los del último run, no una
-> proyección fija. Correr `python apps/web/build_page.py` tras cada corrida del pipeline.
+> proyección fija. Correr `python apps/web/build_page.py` tras cada ejecución del pipeline.
 
 ## Selección del modelo de clustering
 
@@ -45,7 +45,7 @@ texto una parte de esos casos ambiguos y **baja la tasa de escalamiento** — qu
 objetivo del sistema: el LLM existe para reducir cuánto llega a un humano, no para decidir todo.
 
 La telemetría de latencia y tasa de fallback entre proveedores se captura corriendo con LLM activo;
-los resultados de esas corridas van a `experiments/llm/eval_runs/`.
+los resultados de esas ejecuciones van a `experiments/llm/eval_runs/`.
 
 ## Qué cuenta como "alucinación" acá
 

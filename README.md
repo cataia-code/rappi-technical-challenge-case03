@@ -158,7 +158,7 @@ RECHAZAR 30 (20.0%) · ESCALAR 58 (38.7%)**. Con presupuesto LLM disponible, cor
   adaptadores delgados sobre el mismo `DecisionService` — sin base de datos ni cola de mensajes
   para 150-200 filas/día; el motor de decisión no sabe ni le importa qué lo invoca.
 - **Prompts versionados, no un string suelto:** `llm/prompts.py::PROMPT_VERSION` viaja con cada
-  corrida (visible en la web y en `experiments/llm/eval_runs/`), para poder comparar qué versión
+  ejecución (visible en la web y en `experiments/llm/eval_runs/`), para poder comparar qué versión
   del prompt produjo qué decisiones.
 - **El demo en vivo corre el modelo de riesgo en JS, no solo en Python:** `apps/web/assets/js/scoring.js`
   es un port 1:1 de `risk_service.py`, verificado contra Python con un test de paridad real
