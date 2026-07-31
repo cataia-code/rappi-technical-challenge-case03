@@ -116,68 +116,106 @@ incluso con más evidencia.
 
 ```mermaid
 flowchart TB
-    subgraph Backbone["Backbone de datos"]
-        RAW[("Excel / API · caso")] --> DS["data_service<br/>normaliza NFC + valida (pydantic)"]
+    subgraph Backbone["📊 Backbone de datos"]
+        RAW[("🧾 Excel / API · caso")] --> DS["⚙️ data_service<br/>normaliza NFC + valida (pydantic)"]
     end
-    DS --> FS["features/feature_service<br/>señales derivadas + guardrails"]
-    DS --> RS["scoring/risk_service<br/>modelo de riesgo (Capa 0, sin cambios)"]
+    DS --> FS["🛡️ features/feature_service<br/>señales derivadas + guardrails"]
+    DS --> RS["🧠 scoring/risk_service<br/>modelo de riesgo (Capa 0, sin cambios)"]
     RS --> DEC{"¿bucket claro?"}
-    DEC -- "sí · determinístico" --> OUT1["Decision<br/>0 tokens"]
-    DEC -- "no · AMBIGUO" --> AGENT["Agente multimodal (Capa 1 evolucionada)"]
-    IMG[("Imagen adjunta<br/>del reclamo")] -.-> AGENT
-    GPSDB[("Base de datos<br/>de tracking GPS")] -.-> AGENT
-    HIST[("Historial de<br/>reclamos previos")] -.-> AGENT
-    AGENT --> GR["feature_service.reconcile<br/>guardrails Capa 2 (sin cambios)"]
-    GR --> OUT2["Decision + resumen + pasos<br/>+ evidencia consultada"]
-    OUT1 --> API["apps/api · FastAPI"]
+    DEC -- "sí · determinístico" --> OUT1["✅ Decision<br/>0 tokens"]
+    DEC -- "no · AMBIGUO" --> AGENT["🤖 Agente multimodal<br/>(Capa 1 evolucionada)"]
+    IMG[("📷 Imagen adjunta<br/>del reclamo")] -.-> AGENT
+    GPSDB[("📍 Base de datos<br/>de tracking GPS")] -.-> AGENT
+    HIST[("🗂️ Historial de<br/>reclamos previos")] -.-> AGENT
+    AGENT --> GR["🛡️ feature_service.reconcile<br/>guardrails Capa 2 (sin cambios)"]
+    GR --> OUT2["📝 Decision + resumen + pasos<br/>+ evidencia consultada"]
+    OUT1 --> API["🔌 apps/api · FastAPI"]
     OUT2 --> API
-    OUT1 --> WEBAPP["apps/web · dashboard"]
+    OUT1 --> WEBAPP["🖥️ apps/web · dashboard"]
     OUT2 --> WEBAPP
+    classDef agent fill:#FF441F,color:#fff,stroke:#E0360F,stroke-width:2px
+    classDef evidence fill:#FFE9E2,color:#2E2C36,stroke:#FF441F,stroke-width:1.5px
+    classDef done fill:#E7F5EC,color:#14663a,stroke:#1F9D57
+    class AGENT agent
+    class IMG,GPSDB,HIST evidence
+    class OUT1,OUT2 done
 ```
 
 ### Secuencia — caso ambiguo con foto adjunta
 
 ```mermaid
 sequenceDiagram
-    participant U as Usuario (app Rappi)
-    participant API as apps/api
-    participant RS as risk_service
-    participant AG as Agente multimodal
-    participant VIS as Modelo de visión
-    participant GPS as GPS tracking DB
-    U->>API: reclamo + foto del producto
+    participant U as 👤 Usuario (app Rappi)
+    participant API as 🔌 apps/api
+    participant RS as 🧠 risk_service
+    participant AG as 🤖 Agente multimodal
+    participant VIS as 👁️ Modelo de visión
+    participant GPS as 📍 GPS tracking DB
+    U->>API: 📷 reclamo + foto del producto
     API->>RS: assess(case)
     RS-->>API: bucket AMBIGUO, score, señales
     API->>AG: caso + señales + foto + descripción
-    AG->>VIS: analizar foto vs. catálogo del pedido
+    AG->>VIS: 🔍 analizar foto vs. catálogo del pedido
     VIS-->>AG: "producto SÍ coincide" / "SÍ hay daño visible"
-    AG->>GPS: consultar traza real del repartidor
+    AG->>GPS: 📍 consultar traza real del repartidor
     GPS-->>AG: distancia mínima, tiempo detenido cerca del domicilio
-    AG->>AG: combina evidencia visual + GPS + texto
-    AG-->>API: veredicto + justificación fundamentada en evidencia
-    API-->>U: decisión + resumen para CS
+    AG->>AG: 🧩 combina evidencia visual + GPS + texto
+    AG-->>API: ✅ veredicto + justificación fundamentada en evidencia
+    API-->>U: 📝 decisión + resumen para CS
 ```
 
 ### Árbol de decisión evolucionado
 
 ```mermaid
 flowchart TD
-    A["Caso AMBIGUO"] --> B{"¿Tiene foto adjunta?"}
-    B -- Sí --> C["Modelo de visión analiza la foto"]
+    A["🟡 Caso AMBIGUO"] --> B{"📷 ¿Tiene foto adjunta?"}
+    B -- Sí --> C["👁️ Modelo de visión analiza la foto"]
     C --> D{"¿Evidencia visual es concluyente?"}
-    D -- "Sí, confirma daño/error" --> E["APROBAR (evidencia directa)"]
-    D -- "Sí, contradice el reclamo" --> F["RECHAZAR (evidencia directa)"]
+    D -- "Sí, confirma daño/error" --> E["✅ APROBAR (evidencia directa)"]
+    D -- "Sí, contradice el reclamo" --> F["❌ RECHAZAR (evidencia directa)"]
     D -- No concluyente --> G
-    B -- No --> G{"¿Traza GPS disponible?"}
+    B -- No --> G{"📍 ¿Traza GPS disponible?"}
     G -- Sí --> H["Consultar distancia mínima y tiempo cerca del domicilio"]
     H --> I{"¿Traza corrobora o contradice?"}
     I -- Corrobora --> E
     I -- Contradice --> F
-    I -- No concluyente --> J["Agente decide por texto (como hoy)"]
+    I -- No concluyente --> J["🤖 Agente decide por texto (como hoy)"]
     G -- No --> J
     J --> K{"¿Viola un guardrail de política?"}
-    K -- Sí --> L["ESCALAR (override registrado)"]
-    K -- No --> M["Decisión del agente"]
+    K -- Sí --> L["🔁 ESCALAR (override registrado)"]
+    K -- No --> M["📝 Decisión del agente"]
+    classDef approve fill:#E7F5EC,color:#14663a,stroke:#1F9D57
+    classDef reject fill:#FBE6E6,color:#932528,stroke:#D93A3A
+    classDef escalate fill:#FBF0D6,color:#8a6200,stroke:#E8A400
+    class E approve
+    class F reject
+    class L escalate
+```
+
+### Cómo el agente analiza una imagen del reclamo
+
+```mermaid
+flowchart LR
+    U["📤 Usuario sube foto<br/>del producto/paquete"] --> PRE["🖼️ Preprocesa la imagen<br/>(orientación, recorte, calidad mínima)"]
+    PRE --> VIS["👁️ Modelo de visión<br/>(Gemini / GPT-4V / Claude)"]
+    CAT[("🛒 Catálogo del pedido<br/>foto de referencia + descripción")] -.-> VIS
+    VIS --> ATTR["🔍 Extrae atributos:<br/>objeto detectado · ¿daño visible? · color/modelo"]
+    ATTR --> CMP{"¿Coincide con lo que se pidió?"}
+    CMP -- "Sí, coincide y sin daño" --> R1["✅ Evidencia visual: reclamo NO se sostiene"]
+    CMP -- "No coincide / daño visible" --> R2["❌ Evidencia visual: reclamo SÍ se sostiene"]
+    CMP -- "Imagen borrosa / no concluyente" --> R3["🤔 Evidencia visual: no concluyente"]
+    R1 --> COMB["🧩 Se combina con señales de riesgo + GPS + texto"]
+    R2 --> COMB
+    R3 --> COMB
+    COMB --> OUT["📝 Veredicto final con justificación basada en evidencia"]
+    classDef vision fill:#FF441F,color:#fff,stroke:#E0360F,stroke-width:2px
+    classDef good fill:#E7F5EC,color:#14663a,stroke:#1F9D57
+    classDef bad fill:#FBE6E6,color:#932528,stroke:#D93A3A
+    classDef unclear fill:#FBF0D6,color:#8a6200,stroke:#E8A400
+    class VIS vision
+    class R1 good
+    class R2 bad
+    class R3 unclear
 ```
 
 ### Qué falta para implementarlo
