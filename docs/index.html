@@ -46,9 +46,9 @@ h2.title{font-size:clamp(30px,4vw,46px);margin:14px 0 10px}
   padding:7px 12px;border-radius:99px;background:none;border:none;cursor:pointer}
 .nav-links button:hover{color:var(--ink);background:var(--rappi-soft)}
 .nav-links button.active{color:var(--ink);background:var(--rappi-soft);font-weight:600}
-.nav-cta{background:var(--rappi);color:#fff!important;font-weight:600}
-.nav-cta:hover{background:var(--rappi-dark)!important}
-.nav-cta.active{background:var(--rappi-dark)!important;color:#fff!important}
+.nav-links button.nav-cta{background:var(--rappi);color:#fff!important;font-weight:600}
+.nav-links button.nav-cta:hover{background:var(--rappi-dark)!important}
+.nav-links button.nav-cta.active{background:var(--rappi-dark)!important;color:#fff!important}
 
 /* TABS */
 .view{display:none}
@@ -307,6 +307,7 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
     <button data-tab="exploracion">Exploración</button>
     <button data-tab="modelo">Modelo &amp; Métricas</button>
     <button data-tab="arquitectura">Arquitectura</button>
+    <button data-tab="escalamiento">Escalamiento</button>
     <button data-tab="dashboard" class="nav-cta">Dashboard</button>
     <button data-tab="demo">Demo</button>
   </div>
@@ -553,7 +554,71 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
 </div>
 <!-- ============ /TAB: ARQUITECTURA ============ -->
 
-<!-- Diagram modal (shared by the 3 diagram cards above) -->
+<!-- ============ TAB: ESCALAMIENTO ============ -->
+<div class="view" id="view-escalamiento">
+
+<section class="section" id="escalamiento-hoy"><div class="wrap">
+  <span class="eyebrow">Evolución de la arquitectura</span>
+  <h2 class="title">Hoy escalamos a un LLM que solo lee texto</h2>
+  <p class="lead">El LLM de Capa 1 recibe el bucket, el score, las señales dominantes y la
+    <span class="mono">descripcion_reclamo</span> — texto solamente. Eso resuelve la mayoría de los
+    casos ambiguos, pero hay un techo real: un reclamo como <i>"el producto llegó dañado"</i> o
+    <i>"me enviaron otra cosa"</i> es mucho más fácil de verificar con una <b>foto</b> que con una frase,
+    y el flag de GPS hoy es un estado agregado (confirmada / no confirmada / parcial / señal perdida) —
+    no la traza real del repartidor.</p>
+  <div class="callout reveal"><b>Qué no puede ver el sistema hoy.</b> Aunque el usuario adjunte una foto
+    del producto en la app, esa imagen no llega al agente de decisión. Y aunque exista una traza GPS
+    completa en el sistema de logística, Capa 0 solo consume el flag resumido — no la distancia mínima
+    al domicilio, ni cuánto tiempo se quedó el repartidor cerca de la dirección.</div>
+</div></section>
+
+<section class="section section-2" id="escalamiento-propuesta"><div class="wrap">
+  <span class="eyebrow">Propuesta</span>
+  <h2 class="title">Escalar a un agente multimodal, no a un LLM de texto</h2>
+  <p class="lead">La Capa 1 evoluciona de "LLM que lee un resumen de texto" a un <b>agente multimodal</b>
+    que puede consultar evidencia real antes de decidir — sin tocar Capa 0 (el modelo de riesgo sigue
+    siendo el mismo backbone determinístico) ni Capa 2 (los guardrails siguen acotando la salida igual).</p>
+  <div class="route reveal">
+    <div class="rcard a"><div class="ico">🖼️</div><h4>Visión sobre la imagen del usuario</h4>
+      <p>Si el reclamo incluye una foto (producto dañado, incorrecto, empaque abierto), un modelo con
+         visión la analiza y contrasta contra el catálogo del pedido — evidencia directa, no un relato.</p></div>
+    <div class="rcard b"><div class="ico">📍</div><h4>Traza real de GPS, no el flag agregado</h4>
+      <p>Consulta la base de datos de tracking del repartidor: distancia mínima alcanzada al domicilio,
+         tiempo detenido cerca de la dirección, coherencia de la ruta — no solo "confirmada/no confirmada".</p></div>
+    <div class="rcard c"><div class="ico">🗂️</div><h4>Historial ampliado</h4>
+      <p>Reclamos previos del mismo usuario con foto adjunta, conversaciones de soporte anteriores —
+         contexto que hoy el LLM de texto no recibe.</p></div>
+  </div>
+  <div class="callout reveal"><b>Por qué esto baja aún más el escalamiento a humano.</b> Hoy, un caso
+    con relato plausible pero sin forma de verificarlo objetivamente tiende a ESCALAR (ante la duda, no
+    se fuerza un binario). Con evidencia visual y de tracking real, una parte de esos casos deja de ser
+    ambigua — la foto o la traza GPS los resuelve directamente, y el humano solo ve lo que sigue siendo
+    genuinamente incierto incluso con más evidencia.</div>
+
+  <h3 style="font-size:18px;margin:32px 0 4px">Diagramas de la arquitectura evolucionada</h3>
+  <p style="font-size:13.5px;color:var(--muted);margin:0 0 16px">Mismo estilo y mismo modal que los diagramas de Arquitectura — clic para abrir con zoom y descarga.</p>
+  <div class="diagrams reveal">
+    <button class="dcard" data-diagram="arch2"><div class="ico">🏗️</div><h4>Arquitectura evolucionada</h4>
+      <p>Dónde se conectan el análisis de imagen y la base de datos de GPS dentro de las 3 capas actuales.</p>
+      <div class="open">Abrir diagrama →</div></button>
+    <button class="dcard" data-diagram="seq2"><div class="ico">🔁</div><h4>Secuencia con evidencia multimodal</h4>
+      <p>El recorrido de un caso ambiguo cuando el usuario adjunta una foto del reclamo.</p>
+      <div class="open">Abrir diagrama →</div></button>
+    <button class="dcard" data-diagram="tree2"><div class="ico">🌳</div><h4>Árbol de decisión evolucionado</h4>
+      <p>Las nuevas ramas: evidencia visual y traza GPS, antes de llegar al mismo veredicto de siempre.</p>
+      <div class="open">Abrir diagrama →</div></button>
+  </div>
+  <div class="soon"><h3>Todavía no implementado</h3>
+    <p>Esta pestaña documenta el diseño propuesto para el próximo paso del proyecto — hoy Capa 1 sigue
+       siendo el LLM de solo texto descrito en la pestaña Arquitectura. Implementarlo requiere elegir un
+       proveedor con visión (Gemini, GPT-4V, Claude), definir el contrato de subida de imagen en el
+       formulario de reclamo, y exponer un endpoint de lectura sobre la base de datos de GPS real.</p></div>
+</div></section>
+
+</div>
+<!-- ============ /TAB: ESCALAMIENTO ============ -->
+
+<!-- Diagram modal (shared by the diagram cards above) -->
 <div class="modal-overlay" id="diagram-modal">
   <div class="modal-box">
     <div class="modal-head">
@@ -860,7 +925,7 @@ const FEATURE_LABEL = {
 let PCA_POINTS = [];
 
 /* ---------- TABS ---------- */
-const TABS = ['exploracion','modelo','arquitectura','dashboard','demo'];
+const TABS = ['exploracion','modelo','arquitectura','escalamiento','dashboard','demo'];
 function showTab(name){
   if(!TABS.includes(name)) name = TABS[0];
   TABS.forEach(t=>{
@@ -1135,6 +1200,59 @@ const DIAGRAMS = {
     H -- No --> J{"confianza menor al umbral?"}
     J -- Sí --> I
     J -- No --> K["Decisión del LLM"]` },
+  arch2: { title: 'Arquitectura evolucionada — Capa 1 como agente multimodal', def: `flowchart TB
+    subgraph Backbone["Backbone de datos"]
+        RAW[("Excel / API · caso")] --> DS["data_service<br/>normaliza NFC + valida (pydantic)"]
+    end
+    DS --> FS["features/feature_service<br/>señales derivadas + guardrails"]
+    DS --> RS["scoring/risk_service<br/>modelo de riesgo (Capa 0, sin cambios)"]
+    RS --> DEC{"¿bucket claro?"}
+    DEC -- "sí · determinístico" --> OUT1["Decision<br/>0 tokens"]
+    DEC -- "no · AMBIGUO" --> AGENT["Agente multimodal (Capa 1 evolucionada)"]
+    IMG[("Imagen adjunta<br/>del reclamo")] -.-> AGENT
+    GPSDB[("Base de datos<br/>de tracking GPS")] -.-> AGENT
+    HIST[("Historial de<br/>reclamos previos")] -.-> AGENT
+    AGENT --> GR["feature_service.reconcile<br/>guardrails Capa 2 (sin cambios)"]
+    GR --> OUT2["Decision + resumen + pasos<br/>+ evidencia consultada"]
+    OUT1 --> API["apps/api · FastAPI"]
+    OUT2 --> API
+    OUT1 --> WEBAPP["apps/web · dashboard"]
+    OUT2 --> WEBAPP` },
+  seq2: { title: 'Secuencia evolucionada — caso ambiguo con foto adjunta', def: `sequenceDiagram
+    participant U as Usuario (app Rappi)
+    participant API as apps/api
+    participant RS as risk_service
+    participant AG as Agente multimodal
+    participant VIS as Modelo de visión
+    participant GPS as GPS tracking DB
+    U->>API: reclamo + foto del producto
+    API->>RS: assess(case)
+    RS-->>API: bucket AMBIGUO, score, señales
+    API->>AG: caso + señales + foto + descripción
+    AG->>VIS: analizar foto vs. catálogo del pedido
+    VIS-->>AG: "producto SÍ coincide" / "SÍ hay daño visible"
+    AG->>GPS: consultar traza real del repartidor
+    GPS-->>AG: distancia mínima, tiempo detenido cerca del domicilio
+    AG->>AG: combina evidencia visual + GPS + texto
+    AG-->>API: veredicto + justificación fundamentada en evidencia
+    API-->>U: decisión + resumen para CS` },
+  tree2: { title: 'Árbol de decisión evolucionado — con evidencia visual y GPS', def: `flowchart TD
+    A["Caso AMBIGUO"] --> B{"¿Tiene foto adjunta?"}
+    B -- Sí --> C["Modelo de visión analiza la foto"]
+    C --> D{"¿Evidencia visual es concluyente?"}
+    D -- "Sí, confirma daño/error" --> E["APROBAR (evidencia directa)"]
+    D -- "Sí, contradice el reclamo" --> F["RECHAZAR (evidencia directa)"]
+    D -- No concluyente --> G
+    B -- No --> G{"¿Traza GPS disponible?"}
+    G -- Sí --> H["Consultar distancia mínima y tiempo cerca del domicilio"]
+    H --> I{"¿Traza corrobora o contradice?"}
+    I -- Corrobora --> E
+    I -- Contradice --> F
+    I -- No concluyente --> J["Agente decide por texto (como hoy)"]
+    G -- No --> J
+    J --> K{"¿Viola un guardrail de política?"}
+    K -- Sí --> L["ESCALAR (override registrado)"]
+    K -- No --> M["Decisión del agente"]` },
 };
 
 const modal = document.getElementById('diagram-modal');
