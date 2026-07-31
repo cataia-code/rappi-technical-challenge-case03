@@ -40,7 +40,7 @@ Calculadas por `apps/web/build_page.py` (`build_meta`) directamente desde
 El Excel actual se generó con `--no-llm` (por presupuesto de tokens): los casos AMBIGUOS cayeron al
 fallback determinístico "AMBIGUO → ESCALAR" **sin invocar ningún proveedor** — por eso su confianza
 registrada es un valor fijo (0.5), no una salida real de LLM, y `modelo_usado` queda vacío en las 150
-filas. Con presupuesto disponible, correr `python -m caso03.pipeline` (sin `--no-llm`) resuelve por
+filas. Con presupuesto disponible, correr `python -m pipeline` (sin `--no-llm`) resuelve por
 texto una parte de esos casos ambiguos y **baja la tasa de escalamiento** — que es exactamente el
 objetivo del sistema: el LLM existe para reducir cuánto llega a un humano, no para decidir todo.
 

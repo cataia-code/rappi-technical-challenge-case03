@@ -143,8 +143,11 @@ table.cmp tr.winner td{font-weight:700}
   color:var(--rappi-dark);font-size:12px;font-weight:700;display:grid;place-items:center;font-family:'JetBrains Mono'}
 .demo-step .body{font-size:13.5px}
 .demo-step .body b{color:var(--ink)}
+.demo-step-title{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--rappi-dark);margin-bottom:6px;font-family:'JetBrains Mono'}
 .demo-note{background:var(--surface-2);border-radius:var(--r-md);padding:12px 14px;font-size:13px;
   color:var(--muted);margin-top:12px}
+#demo-scatter{width:100%;height:260px;display:block;background:var(--surface-2);border-radius:var(--r-md);margin-top:8px}
 
 /* diagram cards + modal (Arquitectura tab) */
 .diagrams{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
@@ -1088,31 +1091,131 @@ function regenDemo() {
     '<div class="empty">Presioná Probar para correr el modelo sobre esta fila.</div>';
 }
 
-function _demoStep(n, html) {
-  return `<div class="demo-step"><span class="n">${n}</span><div class="body">${html}</div></div>`;
+function _demoStep(n, title, html) {
+  return `<div class="demo-step"><span class="n">${n}</span><div class="body"><b class="demo-step-title">${title}</b>${html}</div></div>`;
 }
 
-function renderDemoDecision(risk, features, decision, source) {
+const DEMO_FEATURE_LABEL = {
+  num_comp_90d: 'num_compensaciones_90d', flags: 'flags_fraude_previos', tiempo_entrega: 'tiempo_entrega_real_min',
+  antiguedad: 'antiguedad_usuario_dias', monto_comp_90d: 'monto_compensado_90d_mxn',
+};
+
+/** Renders the raw -> standardized (z-score) table for the model's 5 numeric features,
+ * using the exact scaler_mean/scaler_scale that risk_service.py fit on the 150 cases. */
+function renderNormalizationTable(raw) {
+  const feats = RISK_MODEL.features;
+  const mapping = {
+    num_comp_90d: raw.num_compensaciones_90d, flags: raw.flags_fraude_previos,
+    tiempo_entrega: raw.tiempo_entrega_real_min, antiguedad: raw.antiguedad_usuario_dias,
+    monto_comp_90d: raw.monto_compensado_90d_mxn,
+  };
+  const rows = feats.map((f, i) => {
+    const x = mapping[f];
+    const mean = RISK_MODEL.scaler_mean[i], scale = RISK_MODEL.scaler_scale[i];
+    const z = (x - mean) / scale;
+    return `<tr><td>${DEMO_FEATURE_LABEL[f]}</td><td class="mono">${x}</td>
+      <td class="mono">${mean.toFixed(1)}</td><td class="mono">${scale.toFixed(1)}</td>
+      <td class="mono" style="color:${z >= 0 ? 'var(--rechazar)' : 'var(--aprobar)'}">${z >= 0 ? '+' : ''}${z.toFixed(2)}</td></tr>`;
+  }).join('');
+  return `<div class="tbl-scroll" style="max-height:none;margin-top:8px">
+    <table class="cmp"><thead><tr><th>Señal</th><th>Valor crudo</th><th>Media (150 casos)</th>
+      <th>Desvío</th><th>z-score</th></tr></thead><tbody>${rows}</tbody></table>
+  </div><div class="demo-note" style="margin-top:8px">z-score = (valor − media) / desvío. Un z-score
+    positivo empuja el caso hacia el lado de mayor riesgo del eje de abuso; uno negativo, hacia el lado legítimo.</div>`;
+}
+
+/** Projects the standardized case onto the same 2D PCA space as the Modelo & Métricas scatter,
+ * using the real components_/mean_ exported by experiments/scoring/model_selection.py — not an
+ * approximation. Returns null if the winning model isn't the "numeric" matrix (rare edge case;
+ * the projection only makes sense for the matrix the PCA was actually fit on). */
+function projectDemoToPCA(raw) {
+  const proj = MODEL_DATA && MODEL_DATA.charts && MODEL_DATA.charts.pca_projection;
+  if (!proj || proj.matrix !== 'numeric') return null;
+  const mapping = {
+    num_comp_90d: raw.num_compensaciones_90d, flags: raw.flags_fraude_previos,
+    tiempo_entrega: raw.tiempo_entrega_real_min, antiguedad: raw.antiguedad_usuario_dias,
+    monto_comp_90d: raw.monto_compensado_90d_mxn,
+  };
+  const z = proj.features.map((f, i) => (mapping[f] - RISK_MODEL.scaler_mean[i]) / RISK_MODEL.scaler_scale[i]);
+  const centered = z.map((v, i) => v - proj.mean[i]);
+  const x = proj.components[0].reduce((s, c, i) => s + c * centered[i], 0);
+  const y = proj.components[1].reduce((s, c, i) => s + c * centered[i], 0);
+  return { x, y };
+}
+
+/** Draws the 150-case PCA scatter (muted) plus the synthetic case as a large highlighted point,
+ * so the user sees exactly where the new case lands relative to the trained clusters. */
+function drawDemoScatter(svg, point, bucket) {
+  const pts = (MODEL_DATA && MODEL_DATA.charts && MODEL_DATA.charts.pca) || [];
+  if (!pts.length) { svg.parentElement.style.display = 'none'; return; }
+  const W = svg.clientWidth || 640, H = 260, pad = 24;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const allX = pts.map(p => p.x).concat(point ? [point.x] : []);
+  const allY = pts.map(p => p.y).concat(point ? [point.y] : []);
+  const xMin = Math.min(...allX), xMax = Math.max(...allX), yMin = Math.min(...allY), yMax = Math.max(...allY);
+  const X = x => pad + (x - xMin) / (xMax - xMin || 1) * (W - 2 * pad);
+  const Y = y => H - pad - (y - yMin) / (yMax - yMin || 1) * (H - 2 * pad);
+  let dots = pts.map(p => `<circle cx="${X(p.x).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" r="3.5"
+    fill="${BUCKET_COLOR[p.bucket] || '#9a908a'}" opacity=".35"/>`).join('');
+  if (point) {
+    dots += `<circle cx="${X(point.x).toFixed(1)}" cy="${Y(point.y).toFixed(1)}" r="9"
+      fill="${BUCKET_COLOR[bucket] || '#9a908a'}" stroke="#1B1B1F" stroke-width="2.5"/>`;
+  }
+  svg.innerHTML = dots;
+}
+
+function renderDemoDecision(risk, features, guardrail, decision, source) {
   const el = document.getElementById('demo-result');
   const color = DEC_COLOR[decision.recomendacion];
   const stepsHtml = (decision.pasos_recomendados || []).length
     ? `<div class="demo-note"><b>Pasos recomendados:</b><ol style="margin:6px 0 0 18px">${
         decision.pasos_recomendados.map(p => `<li>${p}</li>`).join('')}</ol></div>` : '';
+
+  const gpsWord = features.gps_contradice_reclamo ? '<b style="color:var(--rechazar)">contradice</b>'
+    : (features.gps_corrobora_reclamo ? '<b style="color:var(--aprobar)">corrobora</b>' : 'no concluyente sobre');
+  const guardrailText = guardrail.action === 'NONE' ? 'ningún guardrail se activa; el bucket no fuerza el veredicto.'
+    : `guardrail <span class="mono">${guardrail.action}</span> activo (${guardrail.reason}) — acota lo que puede decidir el paso siguiente.`;
+
+  const pcaPoint = projectDemoToPCA(demoCase);
+  const scatterHtml = pcaPoint
+    ? `<svg id="demo-scatter" role="img" aria-label="Ubicación del caso sintético en la proyección PCA"></svg>
+       <div class="demo-note" style="margin-top:6px">El punto grande con borde oscuro es este caso; los puntos tenues son los 150 reales,
+       coloreados por su bucket. Coordenadas PCA: (${pcaPoint.x.toFixed(2)}, ${pcaPoint.y.toFixed(2)}).</div>`
+    : `<div class="demo-note">La proyección 2D no está disponible para el modelo ganador actual (usa señales fuera de la matriz numérica).</div>`;
+
+  let llmStepHtml;
+  if (source === 'llm') {
+    llmStepHtml = `Se llamó al LLM real (<span class="mono">${decision.modelo_usado || decision.prompt_version ? (decision.modelo_usado || 'proveedor') : 'proveedor'}</span>).
+      Recibió el bucket, el score, las señales dominantes y la descripción del reclamo, y devolvió el veredicto de abajo con su propia justificación.`;
+  } else {
+    // Ambiguous case, but the LLM didn't answer (no endpoint configured, network error, etc).
+    // Explain how it WOULD reason instead of just saying "unavailable".
+    llmStepHtml = `El LLM no pudo responder en este intento${decision._llm_error ? ` (${decision._llm_error})` : ''}.
+      Así es como <b>operaría</b> con estos datos: recibiría "bucket ${risk.resolved_bucket}, score ${risk.risk_score},
+      señales: ${risk.top_contribuyentes.join(', ')}" más la descripción del reclamo, y aplicaría la política —
+      RECHAZAR solo con evidencia fuerte de contradicción, APROBAR si el relato es específico y coherente con GPS ${gpsWord.replace(/<[^>]+>/g,'')} el motivo,
+      o ESCALAR si la duda persiste. Mientras tanto, este caso se resuelve con el mismo fallback conservador que usa
+      el pipeline sin LLM: <b>ESCALAR</b>.`;
+  }
+
   el.innerHTML = `
     <div class="cid">${demoCase.caso_id} · ${demoCase.ciudad} · ${demoCase.vertical}</div>
     <div class="dec" style="color:${color}">${decision.recomendacion}</div>
-    ${_demoStep(1, `Normalización + <span class="mono">features derivadas</span>: ratio comp/orden ${features.ratio_comp_orden}, GPS ${features.gps_contradice_reclamo ? '<b>contradice</b>' : (features.gps_corrobora_reclamo ? 'corrobora' : 'no concluyente')} el reclamo.`)}
-    ${_demoStep(2, `Modelo de riesgo (navegador): <span class="mono">risk_score ${risk.risk_score}</span>, bucket <b>${risk.resolved_bucket}</b>. Señales: ${risk.top_contribuyentes.join(', ')}.`)}
-    ${_demoStep(3, source === 'llm'
-        ? `Bucket AMBIGUO → se llamó al LLM (<span class="mono">${decision.modelo_usado || 'proveedor'}</span>).`
-        : source === 'llm-unavailable'
-        ? `Bucket AMBIGUO → correspondía llamar al LLM, pero <b>no hay proxy configurado</b> en este despliegue (ver nota abajo).`
-        : `Bucket claro → decisión <b>determinística, 0 tokens</b> (no hizo falta el LLM).`)}
+    ${_demoStep(1, 'Normalización (z-score)', renderNormalizationTable(demoCase))}
+    ${_demoStep(2, 'Features derivadas + guardrail',
+        `Ratio compensación/orden ${features.ratio_comp_orden}. El GPS ${gpsWord} el reclamo. Capa 2: ${guardrailText}`)}
+    ${_demoStep(3, 'Modelo de riesgo y clustering (en el navegador)',
+        `<span class="mono">risk_score ${risk.risk_score}</span> · bucket <b>${risk.resolved_bucket}</b>
+         (score_bucket=${risk.score_bucket}, cluster_bucket=${risk.cluster_bucket}${risk.agreement ? ', coinciden' : ', <b>no coinciden → ambigüedad</b>'}).
+         Señales que más pesaron: ${risk.top_contribuyentes.join(', ')}.<br>${scatterHtml}`)}
+    ${_demoStep(4, source === 'fast-path' ? 'Ruteo — resuelto sin LLM' : 'Ruteo — cómo opera el LLM',
+        source === 'fast-path'
+          ? `Bucket claro (${risk.resolved_bucket}) → decisión <b>determinística, 0 tokens</b>. No hizo falta el LLM.`
+          : llmStepHtml)}
     <div class="res">${decision.resumen_cs}</div>
-    ${stepsHtml}
-    ${source === 'llm-unavailable' ? `<div class="demo-note">Para conectar un LLM real acá, desplegá el Cloudflare Worker en
-      <span class="mono">apps/web/worker/</span> y configurá <span class="mono">DEMO_LLM_ENDPOINT</span> en este archivo con su URL.
-      Mientras tanto, este caso se muestra como <b>ESCALAR</b> (el mismo fallback conservador que usa el pipeline sin LLM).</div>` : ''}`;
+    ${stepsHtml}`;
+
+  if (pcaPoint) drawDemoScatter(document.getElementById('demo-scatter'), pcaPoint, risk.resolved_bucket);
 }
 
 function runDemo() {
@@ -1123,19 +1226,20 @@ function runDemo() {
   const fast = RappiScoring.fastPathWithRisk(demoCase, risk, features);
 
   if (fast) {
-    renderDemoDecision(risk, features, { ...fast, pasos_recomendados: [] }, 'fast-path');
+    renderDemoDecision(risk, features, guardrail, { ...fast, pasos_recomendados: [] }, 'fast-path');
     return;
   }
 
   // AMBIGUO: would go to the LLM in production. Call the configured Worker if present.
   if (!DEMO_LLM_ENDPOINT) {
-    renderDemoDecision(risk, features, {
+    renderDemoDecision(risk, features, guardrail, {
       recomendacion: 'ESCALAR',
       resumen_cs: `Caso ambiguo (score ${risk.risk_score}): ${risk.top_contribuyentes.join(', ')}. Requiere revisión humana.`,
       pasos_recomendados: [
         'Revisar el texto del reclamo contra el motivo y el estado del GPS.',
         'Confirmar el historial de compensaciones del usuario en los últimos 90 días.',
       ],
+      _llm_error: 'no hay proxy configurado en este despliegue',
     }, 'llm-unavailable');
     return;
   }
@@ -1146,11 +1250,12 @@ function runDemo() {
     body: JSON.stringify({ case: demoCase, features, risk, guardrail }),
   })
     .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(decision => renderDemoDecision(risk, features, decision, 'llm'))
-    .catch(err => renderDemoDecision(risk, features, {
+    .then(decision => renderDemoDecision(risk, features, guardrail, decision, 'llm'))
+    .catch(err => renderDemoDecision(risk, features, guardrail, {
       recomendacion: 'ESCALAR',
-      resumen_cs: `El LLM no respondió (${err.message}). Requiere revisión humana.`,
+      resumen_cs: `El LLM no respondió. Se aplica el fallback conservador: requiere revisión humana.`,
       pasos_recomendados: ['Reintentar más tarde o revisar el caso manualmente.'],
+      _llm_error: err.message,
     }, 'llm-unavailable'));
 }
 

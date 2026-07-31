@@ -18,7 +18,7 @@ CompensationCase ┤
 - **Capa 0 — `scoring/risk_service`**: score de riesgo 0–1 ponderado por el poder discriminante real
   (eta²) de cada señal + clustering (modelo ganador: Agglomerative k=3, ver
   `data/processed/model_selection.json`). Si score y clúster coinciden → bucket; si discrepan →
-  AMBIGUO. 100% determinístico y auditable. Entrenar: `python -m caso03.scoring.train_risk_model`
+  AMBIGUO. 100% determinístico y auditable. Entrenar: `python -m scoring.train_risk_model`
   (ejecutar con `PYTHONPATH=src`).
 - **Capa 1 — `llm/client` + `llm/prompts`**: LLM multi-proveedor (Groq → Gemini → OpenRouter, en ese
   orden de fallback) con salida JSON validada (`llm/schemas.py`). Solo se invoca en casos ambiguos;
@@ -40,6 +40,7 @@ CompensationCase ┤
 | API | `apps/api/main.py` (FastAPI) | `POST /decisions`, `POST /cases/{id}/decisions`, `GET /health` |
 | MCP | `apps/mcp/server.py` (FastMCP) | Tools `review_case` / `review_payload` |
 | Web | `apps/web/build_page.py` + `apps/web/templates/dashboard.html` | Genera `docs/index.html` (GitHub Pages) |
+| Worker LLM | `apps/web/worker/index.js` | Proxy público para la demo: `GET /health`, `POST /` para casos ambiguos; CORS restringido a GitHub Pages |
 
 ## Diagrama de secuencia
 

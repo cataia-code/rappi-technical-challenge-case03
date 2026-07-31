@@ -232,8 +232,20 @@ def _choose_winner(rows: list[dict]) -> dict:
 
 def _chart_payload(df: pd.DataFrame, spec: MatrixSpec, winner: dict) -> dict:
     labels = np.array(winner["labels"])
-    coords = PCA(n_components=2, random_state=42).fit_transform(spec.X)
+    pca = PCA(n_components=2, random_state=42).fit(spec.X)
+    coords = pca.transform(spec.X)
     _abuse, weights = _abuse_index(spec.numeric_df, labels)
+    # Only the "numeric" matrix (5 standardized features, same order as risk_model.json)
+    # can be projected for an ad-hoc case without re-deriving one-hot categoricals. The
+    # live demo checks pca_matrix before attempting to plot a synthetic point.
+    pca_projection = None
+    if spec.name == "numeric":
+        pca_projection = {
+            "matrix": spec.name,
+            "features": spec.feature_names,
+            "mean": pca.mean_.tolist(),
+            "components": pca.components_.tolist(),
+        }
     return {
         "winner_weights": weights,
         "pca": [
@@ -246,6 +258,7 @@ def _chart_payload(df: pd.DataFrame, spec: MatrixSpec, winner: dict) -> dict:
             }
             for row, (x, y), label in zip(df.itertuples(index=False), coords, labels)
         ],
+        "pca_projection": pca_projection,
         "silhouette_by_k": [
             {
                 "matrix": row["matrix"],
