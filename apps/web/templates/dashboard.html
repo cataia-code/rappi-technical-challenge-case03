@@ -1249,9 +1249,15 @@ function renderDemoDecision(risk, features, guardrail, decision, source) {
       APROBAR si el relato es específico y coherente con GPS ${gpsWord.replace(/<[^>]+>/g,'')} el motivo, o ESCALAR si la duda persiste.`;
   }
 
+  // Same field block the Dashboard tab shows per case (score meter, raw fields, top
+  // signals) so a demo case reads exactly like a real one, plus the step-by-step
+  // walkthrough of how the browser + LLM got to that verdict.
   el.innerHTML = `
     <div class="cid">${demoCase.caso_id} · ${demoCase.ciudad} · ${demoCase.vertical}</div>
     <div class="dec" style="color:${color}">${decision.recomendacion}</div>
+    <div class="scoremeter-wrap"><div class="scoremeter"></div>
+      <div class="scoremeter-pin" style="left:${Math.round(risk.risk_score * 100)}%"></div></div>
+    <div style="font-size:12.5px;color:var(--muted);margin:-8px 0 12px" class="mono">risk_score ${risk.risk_score} · bucket ${risk.resolved_bucket}</div>
     ${_demoStep(1, 'Normalización (z-score)', renderNormalizationTable(demoCase))}
     ${_demoStep(2, 'Features derivadas + guardrail',
         `Ratio compensación/orden ${features.ratio_comp_orden}. El GPS ${gpsWord} el reclamo. Capa 2: ${guardrailText}`)}
@@ -1264,7 +1270,19 @@ function renderDemoDecision(risk, features, guardrail, decision, source) {
           ? `Bucket claro (${risk.resolved_bucket}) → decisión <b>determinística, 0 tokens</b>. No hizo falta el LLM.`
           : llmStepHtml)}
     <div class="res">${decision.resumen_cs}</div>
-    ${stepsHtml}`;
+    ${stepsHtml}
+    <dl>
+      <dt>Antigüedad</dt><dd>${demoCase.antiguedad_usuario_dias} d</dd>
+      <dt>Compensaciones 90d</dt><dd>${demoCase.num_compensaciones_90d}</dd>
+      <dt>Monto compensado 90d</dt><dd>$${Math.round(demoCase.monto_compensado_90d_mxn)}</dd>
+      <dt>Flags de fraude</dt><dd>${demoCase.flags_fraude_previos}</dd>
+      <dt>Valor orden / pedido</dt><dd>$${Math.round(demoCase.valor_orden_mxn)} / $${Math.round(demoCase.compensacion_solicitada_mxn)}</dd>
+      <dt>GPS entrega</dt><dd>${demoCase.entrega_confirmada_gps}</dd>
+      <dt>Tiempo entrega</dt><dd>${demoCase.tiempo_entrega_real_min} min</dd>
+      <dt>Motivo</dt><dd style="font-family:Inter;text-align:right;max-width:180px">${demoCase.motivo_reclamo}</dd>
+    </dl>
+    <div class="why"><div class="t">Señales que más pesaron</div>
+      ${(risk.top_contribuyentes || []).map(t => `<span>${t}</span>`).join('') || '<span>—</span>'}</div>`;
 
   if (pcaPoint) drawDemoScatter(document.getElementById('demo-scatter'), pcaPoint, risk.resolved_bucket);
 }
