@@ -272,6 +272,26 @@ def _chart_payload(df: pd.DataFrame, spec: MatrixSpec, winner: dict) -> dict:
     }
 
 
+def _matrix_examples(df: pd.DataFrame, specs: list[MatrixSpec], n: int = 5) -> dict:
+    """A few real rows of each design matrix, exactly as sklearn sees them --
+    so the web can show "this is literally what fit()/predict() received"
+    instead of describing it in prose. Raw values are included for the numeric
+    columns so the standardization step (already explained in the Demo tab) is
+    visibly the same transformation, not a separate concept."""
+    examples = {}
+    for spec in specs:
+        rows = []
+        for i in range(min(n, spec.X.shape[0])):
+            raw = {f: round(float(spec.numeric_df.iloc[i][f]), 2) for f in NUMERIC_FEATURES}
+            rows.append({
+                "caso_id": df.iloc[i]["caso_id"],
+                "raw": raw,
+                "values": [round(float(v), 3) for v in spec.X[i]],
+            })
+        examples[spec.name] = {"columns": spec.feature_names, "rows": rows}
+    return examples
+
+
 def main() -> None:
     df = _case_frame()
     specs = _matrices(df)
@@ -292,6 +312,7 @@ def main() -> None:
         "winner": payload_winner,
         "results": [{k: v for k, v in row.items() if k != "labels"} for row in rows],
         "charts": charts,
+        "matrix_examples": _matrix_examples(df, specs),
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")

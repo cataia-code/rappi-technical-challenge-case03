@@ -450,6 +450,37 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
   </div>
 
   <div class="panel" style="margin-top:20px">
+    <h3>Las matrices que realmente entrenaron cada modelo</h3>
+    <div class="sub">5 casos reales, tal cual los recibe <span class="mono">sklearn.fit()</span> — no una descripción, los números.</div>
+    <div class="two-col" style="margin-top:14px;align-items:start">
+      <div>
+        <h4 style="font-size:14px;margin:0 0 4px">Matriz "numeric" (5 columnas)</h4>
+        <p style="font-size:12.5px;color:var(--muted);margin:0 0 10px">Las 5 señales del eje de abuso, estandarizadas (z-score). Esta es la matriz ganadora.</p>
+        <div class="tbl-scroll" style="max-height:none">
+          <table class="cmp" id="matrix-numeric"><thead></thead><tbody></tbody></table>
+        </div>
+      </div>
+      <div>
+        <h4 style="font-size:14px;margin:0 0 4px">Matriz "numeric_categorical" (19 columnas)</h4>
+        <p style="font-size:12.5px;color:var(--muted);margin:0 0 10px">Las mismas 5 + one-hot de vertical/motivo/GPS. Compitió y perdió por silhouette más bajo.</p>
+        <div class="tbl-scroll" style="max-height:none;overflow-x:auto">
+          <table class="cmp" id="matrix-categorical"><thead></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:20px">
+    <h3>¿Por qué 3 clusters y no 2?</h3>
+    <div class="sub">La respuesta honesta usa las métricas reales, no solo la regla de selección.</div>
+    <div class="metric-row reveal" id="k-metrics" style="margin-top:14px"></div>
+    <div class="callout" style="margin-top:4px" id="k-explain"></div>
+    <div class="tbl-scroll" style="max-height:none;margin-top:14px">
+      <table class="cmp" id="k-table"><thead><tr><th>k</th><th>Clusters</th><th>Silhouette</th><th>Davies-Bouldin</th><th>Calinski-Harabasz</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:20px">
     <h3>Proyección PCA de los 150 casos</h3>
     <div class="sub">Los 5 features estandarizados, proyectados a 2D. Color = bucket asignado por el modelo ganador.</div>
     <svg id="pca-scatter" role="img" aria-label="Proyección PCA de los casos coloreada por bucket"></svg>
@@ -838,6 +869,56 @@ document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',
       <td>${r.effective_clusters}</td><td>${(r.silhouette??0).toFixed(3)}</td>
       <td>${(r.davies_bouldin??0).toFixed(3)}</td><td>${(r.calinski_harabasz??0).toFixed(1)}</td></tr>`;
   }).join('');
+
+  /* matrix examples: literally what sklearn.fit() received, 5 real rows per matrix */
+  const examples = MODEL_DATA.matrix_examples || {};
+  function renderMatrixTable(elId, ex, opts){
+    if(!ex) return;
+    const el = document.getElementById(elId);
+    const headCols = opts.raw
+      ? ['Caso', ...ex.columns.map(c => FEATURE_LABEL[c] || c)]
+      : ['Caso', ...ex.columns];
+    el.querySelector('thead').innerHTML = '<tr>' + headCols.map(c=>`<th>${c}</th>`).join('') + '</tr>';
+    el.querySelector('tbody').innerHTML = ex.rows.map(r=>{
+      const cells = ex.columns.map((col, i)=>{
+        const z = r.values[i].toFixed(2);
+        if(opts.raw && r.raw && col in r.raw) return `<td>${r.raw[col]} <span style="color:var(--muted)">(${z})</span></td>`;
+        return `<td>${z}</td>`;
+      }).join('');
+      return `<tr><td class="algo">${r.caso_id}</td>${cells}</tr>`;
+    }).join('');
+  }
+  renderMatrixTable('matrix-numeric', examples.numeric, {raw:true});
+  renderMatrixTable('matrix-categorical', examples.numeric_categorical, {raw:false});
+
+  /* why k=3 and not k=2: real metrics, not just the selection rule */
+  const sameAlgoByK = (MODEL_DATA.results || [])
+    .filter(r => r.matrix === w.matrix && r.algorithm === w.algorithm && r.k != null)
+    .sort((a,b) => a.k - b.k);
+  const bestK2 = (MODEL_DATA.results || [])
+    .filter(r => r.effective_clusters === 2 && r.silhouette != null)
+    .sort((a,b) => b.silhouette - a.silhouette)[0];
+  const winnerAtK3 = sameAlgoByK.find(r => r.k === 3) || w;
+  if(bestK2 && winnerAtK3){
+    document.getElementById('k-metrics').innerHTML = `
+      <div class="mcard"><div class="n">${bestK2.silhouette.toFixed(3)}</div><div class="l">Mejor silhouette con k=2 (${cap(bestK2.algorithm)}, matriz ${bestK2.matrix}) — matemáticamente el más "limpio" en 2 grupos</div></div>
+      <div class="mcard"><div class="n">${winnerAtK3.silhouette.toFixed(3)}</div><div class="l">Silhouette del ganador con k=3 (${cap(w.algorithm)}) — más bajo, pero es el mejor entre las soluciones de 3 clusters</div></div>
+      <div class="mcard"><div class="n">3</div><div class="l">Buckets de negocio: legítimo / ambiguo / fraude — colapsar a 2 fusiona "ambiguo" con otro bucket</div></div>`;
+    document.getElementById('k-explain').innerHTML =
+      `<b>La verdad incómoda:</b> si eligiéramos puramente por mayor silhouette, ganaría
+       <span class="mono">${bestK2.algorithm}</span> con <b>k=2</b> (silhouette ${bestK2.silhouette.toFixed(3)}) —
+       matemáticamente separa mejor en 2 grupos que en 3. Pero el reto define <b>3 buckets latentes de negocio</b>
+       (legítimo / ambiguo / fraude), y con k=2 el bucket "ambiguo" — el que enruta al LLM — desaparece,
+       fusionado dentro de uno de los otros dos. Eso rompe exactamente lo que este sistema necesita: distinguir
+       "es claro" de "hay que leer el texto". Por eso la regla de selección prefiere 3 clusters cuando existe una
+       solución válida, y <em>dentro de esas soluciones de 3</em>, ${cap(w.algorithm)} es la de mejor silhouette,
+       mejor Davies-Bouldin y mejor Calinski-Harabasz — no es solo la regla de negocio, también gana en su propio terreno.`;
+    document.getElementById('k-table').querySelector('tbody').innerHTML = sameAlgoByK.map(r=>{
+      const isWinner = r.k === w.k;
+      return `<tr class="${isWinner?'winner':''}"><td>${r.k}</td><td>${r.effective_clusters}</td>
+        <td>${r.silhouette.toFixed(3)}</td><td>${r.davies_bouldin.toFixed(3)}</td><td>${r.calinski_harabasz.toFixed(1)}</td></tr>`;
+    }).join('');
+  }
 
   /* PCA scatter, colored by bucket */
   PCA_POINTS = charts.pca || [];

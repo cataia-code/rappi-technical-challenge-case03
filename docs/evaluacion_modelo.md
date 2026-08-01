@@ -16,7 +16,25 @@ desempatar por mayor silhouette.
 **Ganador: Agglomerative(k=3) sobre matriz numérica** — silhouette 0.462, Davies-Bouldin 0.810,
 Calinski-Harabasz 212.9. Los pesos reales por señal (normalizados por eta²) y la tabla completa de
 32 combinaciones están en `data/processed/model_selection.json` y se ven en la pestaña
-**Modelo & Métricas** de la web.
+**Modelo & Métricas** de la web, junto con un ejemplo de 5 casos reales de cada matriz de
+entrenamiento (`matrix_examples` en el mismo JSON) — la matriz "numeric" (5 columnas estandarizadas)
+y la "numeric_categorical" (las mismas 5 + 14 columnas one-hot de vertical/motivo/GPS).
+
+### Por qué k=3 y no k=2
+
+La respuesta honesta usa las métricas reales, no solo la regla de selección. Si se eligiera
+puramente por mayor silhouette, **ganaría Gaussian Mixture con k=2** (silhouette 0.505) —
+matemáticamente separa mejor en 2 grupos que Agglomerative en 3 (silhouette 0.462). Pero el reto
+define **3 buckets latentes de negocio** (legítimo / ambiguo / fraude), y con k=2 el bucket
+"ambiguo" — el que enruta al LLM — desaparece, fusionado dentro de uno de los otros dos. Eso rompe
+exactamente lo que el sistema necesita: distinguir "es claro" de "hay que leer el texto".
+
+Por eso la regla de selección prefiere 3 clusters cuando existe una solución válida. Y *dentro* de
+esas soluciones de 3 clusters, Agglomerative no gana solo por la regla de negocio — también gana en
+su propio terreno: comparado contra k=2, 4, 5 y 6 para el mismo algoritmo y matriz, k=3 tiene el
+mejor silhouette (0.462 vs. 0.436 en k=2, 0.457 en k=4, 0.380 en k=5, 0.307 en k=6), el mejor
+Davies-Bouldin (0.810, menor es mejor) y el mejor Calinski-Harabasz (212.9, mayor es mejor) de toda
+su propia curva por k.
 
 ## Prompts versionados
 
