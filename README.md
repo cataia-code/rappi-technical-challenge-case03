@@ -6,6 +6,20 @@ las revise **en segundos** en vez de 15-25 min.
 
 > **Stack:** Python 3.10 · LLM multi-proveedor (Groq/Gemini/OpenRouter) · scikit-learn · web estática · FastMCP
 
+**Demo desplegada:** https://cataia-code.github.io/rappi-technical-challenge-case03/
+(corre el modelo de riesgo real en el navegador y, en casos ambiguos, llama a un LLM real vía
+Cloudflare Worker — ver pestaña **Demo**).
+
+## Entregables del reto (Caso 03)
+
+| Pedido | Dónde está |
+|---|---|
+| Agente funcional que procese los 150 casos y emita recomendación + resumen | `python -m pipeline` → `data/output/salida_150.xlsx`; pestaña **Dashboard** de la web |
+| Output final: 150 casos con recomendación, justificación y señales usadas | Hoja **Casos** del Excel (`recomendacion_agente`, `risk_bucket`, `senales_dominantes`, `resumen_cs`, `razonamiento`) |
+| Documento de políticas de decisión y manejo de ambigüedad | `docs/politicas_decision.md` + [Manejo de ambigüedad](#manejo-de-ambigüedad-el-caso-que-más-importa) abajo |
+| Demo en vivo ejecutable durante la presentación | Web pública (link arriba) — botón **Regenerar/Probar** en la pestaña Demo, o `python -m pipeline --limit 15` en terminal |
+| Repositorio con instrucciones mínimas para correrlo | Este repo — sección [Cómo correr](#cómo-correr) |
+
 ---
 
 ## Idea en una línea
@@ -39,16 +53,41 @@ Ver **`docs/politicas_decision.md`** para los criterios completos y el manejo de
 **`docs/arquitectura.md`** / **`docs/evaluacion_modelo.md`** para el detalle técnico (diagramas
 Mermaid, prompts versionados, métricas reales del último run) que también se ve en la web.
 
+## Manejo de ambigüedad (el caso que más importa)
+
+El sistema no fuerza APROBAR/RECHAZAR donde no hay evidencia suficiente — ni por regla fija ni
+por default del LLM:
+
+- **Cómo se detecta:** un caso es AMBIGUO cuando el **score de riesgo** (ponderado por eta² real)
+  y el **cluster** al que pertenece (`AgglomerativeClustering(k=3)`) **no coinciden** — dos señales
+  independientes del modelo de datos discrepan entre sí. No es "el LLM no supo": es una condición
+  matemática explícita sobre los dos outputs de Capa 0.
+- **Quién decide en ese caso:** solo ahí se invoca el LLM, con el texto del reclamo tratado como
+  dato no confiable (nunca fuente única de verdad).
+- **Si el LLM tampoco resuelve con confianza** (respuesta ambigua, error de proveedor, JSON
+  inválido): fallback conservador → **ESCALAR**, nunca se adivina un veredicto binario.
+- **Última barrera:** los guardrails de Capa 2 pueden degradar a ESCALAR incluso una decisión del
+  LLM que ya pasó validación de esquema, si contradice la política (ej. LLM aprueba un caso que
+  el modelo de riesgo marcó FRAUDE). Auditable caso por caso en `override_guardrail`.
+- **Resultado medible:** tasa de escalamiento real del último run — ver métricas en la pestaña
+  **Arquitectura** de la web y en `docs/evaluacion_modelo.md`.
+
 ## Web (`docs/index.html`, publicada por GitHub Pages)
 
-Un solo archivo autocontenido (assets embebidos en base64), con 5 pestañas:
+Un solo archivo autocontenido (assets embebidos en base64), con 6 pestañas:
 
 - **Exploración** — por qué se compararon modelos en vez de fijar umbrales a mano, y qué corrigió
   la intuición (GPS secundario, ratio comp/orden nunca &gt;1).
-- **Modelo & Métricas** — las 32 combinaciones algoritmo×matriz×k probadas, el ganador resaltado,
-  los pesos reales por señal, y una proyección PCA de los 150 casos coloreada por bucket.
+- **Modelo & Métricas** — las 52 combinaciones algoritmo×matriz×k/eps probadas, el ganador
+  resaltado, los pesos reales por señal, ejemplos reales de las matrices de entrenamiento
+  (numérica vs. numérica+categórica) y por qué se eligieron 3 clusters y no 2, y una proyección
+  PCA de los 150 casos coloreada por bucket.
 - **Arquitectura** — 3 diagramas Mermaid (arquitectura, secuencia, árbol de decisión) en un modal
   con zoom y descarga, más las métricas de evaluación del LLM del último run real.
+- **Escalamiento** — evolución propuesta: en vez de escalar a un LLM de solo texto, escalar a un
+  agente multimodal que analiza la imagen del reclamo y consulta una base de datos GPS real
+  (diagramas de arquitectura/secuencia/árbol de decisión + consideraciones de ingeniería: qué
+  modelo escalable usar, cómo mejorar latencia, qué guardrails aplicar). Diseñado, no implementado.
 - **Dashboard** — los 150 casos, filtrables, con el detalle de cada decisión y —para los
   escalados— los pasos concretos que el LLM (o el fallback) recomienda revisar.
 - **Demo** — genera un caso sintético y corre el modelo de riesgo **en el navegador** (mismos
