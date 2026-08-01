@@ -173,7 +173,7 @@ table.cmp tr.winner td{font-weight:700}
 .modal-btn.wide{width:auto;padding:0 14px;font-size:13px;font-weight:600;gap:6px}
 .modal-body{flex:1;overflow:auto;padding:20px;background:var(--surface-2)}
 .modal-canvas{min-height:100%;display:flex;align-items:center;justify-content:center}
-.modal-canvas svg{transition:transform .12s ease}
+.modal-canvas svg,.modal-canvas .modal-table-wrap{transition:transform .12s ease;transform-origin:top left}
 .modal-canvas .loading{color:var(--muted);font-size:14px}
 
 /* bucket profile cards */
@@ -451,22 +451,14 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
 
   <div class="panel" style="margin-top:20px">
     <h3>Las matrices que realmente entrenaron cada modelo</h3>
-    <div class="sub">5 casos reales, tal cual los recibe <span class="mono">sklearn.fit()</span> — no una descripción, los números.</div>
-    <div class="two-col" style="margin-top:14px;align-items:start">
-      <div>
-        <h4 style="font-size:14px;margin:0 0 4px">Matriz "numeric" (5 columnas)</h4>
-        <p style="font-size:12.5px;color:var(--muted);margin:0 0 10px">Las 5 señales del eje de abuso, estandarizadas (z-score). Esta es la matriz ganadora.</p>
-        <div class="tbl-scroll" style="max-height:none">
-          <table class="cmp" id="matrix-numeric"><thead></thead><tbody></tbody></table>
-        </div>
-      </div>
-      <div>
-        <h4 style="font-size:14px;margin:0 0 4px">Matriz "numeric_categorical" (19 columnas)</h4>
-        <p style="font-size:12.5px;color:var(--muted);margin:0 0 10px">Las mismas 5 + one-hot de vertical/motivo/GPS. Compitió y perdió por silhouette más bajo.</p>
-        <div class="tbl-scroll" style="max-height:none;overflow-x:auto">
-          <table class="cmp" id="matrix-categorical"><thead></thead><tbody></tbody></table>
-        </div>
-      </div>
+    <div class="sub">5 casos reales, tal cual los recibe <span class="mono">sklearn.fit()</span> — no una descripción, los números. Clic para abrir en una ventana con zoom y descarga.</div>
+    <div class="diagrams reveal" style="margin-top:14px">
+      <button class="dcard" data-matrix="numeric"><div class="ico">🔢</div><h4>Matriz "numeric" (5 columnas)</h4>
+        <p>Las 5 señales del eje de abuso, estandarizadas (z-score). Esta es la matriz ganadora.</p>
+        <div class="open">Abrir matriz →</div></button>
+      <button class="dcard" data-matrix="numeric_categorical"><div class="ico">🧮</div><h4>Matriz "numeric_categorical" (19 columnas)</h4>
+        <p>Las mismas 5 + one-hot de vertical/motivo/GPS. Compitió y perdió por silhouette más bajo.</p>
+        <div class="open">Abrir matriz →</div></button>
     </div>
   </div>
 
@@ -978,6 +970,7 @@ const FEATURE_LABEL = {
   monto_comp_90d:'monto_compensado_90d_mxn', tiempo_entrega:'tiempo_entrega_real_min',
 };
 let PCA_POINTS = [];
+let MATRIX_EXAMPLES = {};
 
 /* ---------- TABS ---------- */
 const TABS = ['exploracion','modelo','arquitectura','escalamiento','dashboard','demo'];
@@ -1039,26 +1032,9 @@ document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',
       <td>${(r.davies_bouldin??0).toFixed(3)}</td><td>${(r.calinski_harabasz??0).toFixed(1)}</td></tr>`;
   }).join('');
 
-  /* matrix examples: literally what sklearn.fit() received, 5 real rows per matrix */
-  const examples = MODEL_DATA.matrix_examples || {};
-  function renderMatrixTable(elId, ex, opts){
-    if(!ex) return;
-    const el = document.getElementById(elId);
-    const headCols = opts.raw
-      ? ['Caso', ...ex.columns.map(c => FEATURE_LABEL[c] || c)]
-      : ['Caso', ...ex.columns];
-    el.querySelector('thead').innerHTML = '<tr>' + headCols.map(c=>`<th>${c}</th>`).join('') + '</tr>';
-    el.querySelector('tbody').innerHTML = ex.rows.map(r=>{
-      const cells = ex.columns.map((col, i)=>{
-        const z = r.values[i].toFixed(2);
-        if(opts.raw && r.raw && col in r.raw) return `<td>${r.raw[col]} <span style="color:var(--muted)">(${z})</span></td>`;
-        return `<td>${z}</td>`;
-      }).join('');
-      return `<tr><td class="algo">${r.caso_id}</td>${cells}</tr>`;
-    }).join('');
-  }
-  renderMatrixTable('matrix-numeric', examples.numeric, {raw:true});
-  renderMatrixTable('matrix-categorical', examples.numeric_categorical, {raw:false});
+  /* matrix examples: literally what sklearn.fit() received, 5 real rows per matrix.
+     Stored globally so the shared modal (openMatrix, below) can render them on demand. */
+  MATRIX_EXAMPLES = MODEL_DATA.matrix_examples || {};
 
   /* why k=3 and not k=2: real metrics, not just the selection rule */
   const sameAlgoByK = (MODEL_DATA.results || [])
@@ -1374,7 +1350,9 @@ const DIAGRAMS = {
 
 const modal = document.getElementById('diagram-modal');
 const modalCanvas = document.getElementById('modal-canvas');
+const modalDownloadBtn = document.getElementById('modal-download');
 let modalZoom = 1;
+let modalCsvExport = null; // set when the modal shows a table instead of a diagram
 
 async function openDiagram(name){
   const d = DIAGRAMS[name];
@@ -1382,6 +1360,8 @@ async function openDiagram(name){
   document.getElementById('modal-title').textContent = d.title;
   modal.classList.add('open');
   modalZoom = 1;
+  modalCsvExport = null;
+  modalDownloadBtn.textContent = '⬇ SVG';
   modalCanvas.innerHTML = '<span class="loading">Cargando diagrama…</span>';
   try{
     const { svg } = await window.mermaid.render('mermaid-' + name, d.def);
@@ -1392,18 +1372,62 @@ async function openDiagram(name){
     modalCanvas.innerHTML = '<span class="loading">No se pudo renderizar el diagrama: ' + err.message + '</span>';
   }
 }
+
+/** Opens the same modal used for diagrams, but renders a data table (with a real
+ * CSV export) instead of an SVG. Reuses zoom/close/overlay so matrices and
+ * diagrams feel like the same feature, not two different UI patterns. */
+function openMatrix(key){
+  const ex = MATRIX_EXAMPLES[key];
+  if(!ex) return;
+  const isRaw = key === 'numeric';
+  const title = key === 'numeric' ? 'Matriz "numeric" (5 columnas, estandarizada)'
+    : 'Matriz "numeric_categorical" (19 columnas, con one-hot)';
+  document.getElementById('modal-title').textContent = title;
+  modal.classList.add('open');
+  modalZoom = 1;
+  modalDownloadBtn.textContent = '⬇ CSV';
+
+  const headCols = isRaw ? ex.columns.map(c => FEATURE_LABEL[c] || c) : ex.columns;
+  const theadHtml = '<tr><th>Caso</th>' + headCols.map(c=>`<th>${c}</th>`).join('') + '</tr>';
+  const tbodyHtml = ex.rows.map(r=>{
+    const cells = ex.columns.map((col, i)=>{
+      const z = r.values[i].toFixed(2);
+      if(isRaw && r.raw && col in r.raw) return `<td>${r.raw[col]} <span style="color:var(--muted)">(${z})</span></td>`;
+      return `<td>${z}</td>`;
+    }).join('');
+    return `<tr><td class="algo">${r.caso_id}</td>${cells}</tr>`;
+  }).join('');
+  modalCanvas.innerHTML = `<div class="modal-table-wrap tbl-scroll" style="max-height:none">
+    <table class="cmp">${'<thead>'+theadHtml+'</thead>'}<tbody>${tbodyHtml}</tbody></table></div>`;
+
+  const csvHeader = ['caso_id', ...headCols].join(',');
+  const csvRows = ex.rows.map(r => [r.caso_id, ...r.values].join(','));
+  modalCsvExport = { filename: key + '_matrix_example.csv', content: [csvHeader, ...csvRows].join('\n') };
+}
+
 function closeDiagram(){ modal.classList.remove('open'); }
-function applyZoom(){ const el = modalCanvas.querySelector('svg'); if(el) el.style.transform = 'scale(' + modalZoom + ')'; }
+function applyZoom(){ const el = modalCanvas.firstElementChild; if(el) el.style.transform = 'scale(' + modalZoom + ')'; }
 
 document.querySelectorAll('[data-diagram]').forEach(btn =>
   btn.addEventListener('click', () => openDiagram(btn.dataset.diagram)));
+document.querySelectorAll('[data-matrix]').forEach(btn =>
+  btn.addEventListener('click', () => openMatrix(btn.dataset.matrix)));
 document.getElementById('modal-close').addEventListener('click', closeDiagram);
 modal.addEventListener('click', e => { if(e.target === modal) closeDiagram(); });
 document.addEventListener('keydown', e => { if(e.key === 'Escape' && modal.classList.contains('open')) closeDiagram(); });
 document.getElementById('modal-zoom-in').addEventListener('click', () => { modalZoom = Math.min(3, modalZoom + .2); applyZoom(); });
 document.getElementById('modal-zoom-out').addEventListener('click', () => { modalZoom = Math.max(.4, modalZoom - .2); applyZoom(); });
 document.getElementById('modal-zoom-reset').addEventListener('click', () => { modalZoom = 1; applyZoom(); });
-document.getElementById('modal-download').addEventListener('click', () => {
+modalDownloadBtn.addEventListener('click', () => {
+  if(modalCsvExport){
+    const blob = new Blob([modalCsvExport.content], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = modalCsvExport.filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    return;
+  }
   const el = modalCanvas.querySelector('svg');
   if(!el) return;
   const clone = el.cloneNode(true);
