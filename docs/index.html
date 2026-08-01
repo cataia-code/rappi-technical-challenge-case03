@@ -452,12 +452,18 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
   <div class="panel" style="margin-top:20px">
     <h3>Las matrices que realmente entrenaron cada modelo</h3>
     <div class="sub">5 casos reales, tal cual los recibe <span class="mono">sklearn.fit()</span> — no una descripción, los números. Clic para abrir en una ventana con zoom y descarga.</div>
+    <div class="callout" style="margin-top:12px"><b>Las dos tienen las mismas 150 filas (casos) — nunca se entrena con menos datos.</b>
+      La diferencia es de <b>columnas (features)</b>, no de casos: son dos experimentos distintos sobre el mismo
+      dataset completo. <span class="mono">numeric</span> prueba con 5 columnas (solo el eje de abuso numérico);
+      <span class="mono">numeric_categorical</span> prueba con 19 (esas 5 + one-hot de vertical/motivo/GPS) para
+      ver si agregar categóricas mejora el clustering. No mejoró — silhouette más bajo — por eso el modelo
+      productivo usa la matriz de 5 columnas, no la de 19.</div>
     <div class="diagrams reveal" style="margin-top:14px">
-      <button class="dcard" data-matrix="numeric"><div class="ico">🔢</div><h4>Matriz "numeric" (5 columnas)</h4>
+      <button class="dcard" data-matrix="numeric"><div class="ico">🔢</div><h4>Matriz "numeric" — 150 casos × 5 columnas</h4>
         <p>Las 5 señales del eje de abuso, estandarizadas (z-score). Esta es la matriz ganadora.</p>
         <div class="open">Abrir matriz →</div></button>
-      <button class="dcard" data-matrix="numeric_categorical"><div class="ico">🧮</div><h4>Matriz "numeric_categorical" (19 columnas)</h4>
-        <p>Las mismas 5 + one-hot de vertical/motivo/GPS. Compitió y perdió por silhouette más bajo.</p>
+      <button class="dcard" data-matrix="numeric_categorical"><div class="ico">🧮</div><h4>Matriz "numeric_categorical" — 150 casos × 19 columnas</h4>
+        <p>Los mismos 150 casos, con 14 columnas más (one-hot de vertical/motivo/GPS). Compitió y perdió por silhouette más bajo.</p>
         <div class="open">Abrir matriz →</div></button>
     </div>
   </div>
