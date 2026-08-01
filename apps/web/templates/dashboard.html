@@ -607,10 +607,31 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
     <button class="dcard" data-diagram="tree2"><div class="ico">🌳</div><h4>Árbol de decisión evolucionado</h4>
       <p>Las nuevas ramas: evidencia visual y traza GPS, antes de llegar al mismo veredicto de siempre.</p>
       <div class="open">Abrir diagrama →</div></button>
-    <button class="dcard" data-diagram="imgflow"><div class="ico">🔍</div><h4>Cómo analiza una imagen</h4>
-      <p>El detalle del paso de visión: de la foto subida al veredicto — qué extrae y contra qué la compara.</p>
-      <div class="open">Abrir diagrama →</div></button>
   </div>
+
+  <h3 style="font-size:18px;margin:36px 0 4px">Consideraciones de ingeniería</h3>
+  <p style="font-size:13.5px;color:var(--muted);margin:0 0 16px">Las decisiones que importan antes de escribir código: qué modelo, cómo no volverlo lento, y cómo no dejar que alucine sin control.</p>
+  <div class="route reveal">
+    <div class="rcard a"><div class="ico">⚖️</div><h4>Qué modelo — escalable, no el más grande</h4>
+      <p>Un modelo "flagship" de visión (GPT-4V full, Claude Opus) es demasiado caro y lento a 200+/día.
+         Misma estrategia que ya usa el LLM de texto: un modelo <b>mini/flash</b> multimodal como primario
+         (Gemini 2.0 Flash o GPT-4o-mini — visión nativa, ~10x más barato) y el modelo grande solo como
+         <b>reintento</b> cuando la confianza sale baja. Cascada de costo, no cascada de calidad fija.</p></div>
+    <div class="rcard c"><div class="ico">⚡</div><h4>Latencia — paralelo, comprimido, con timeout</h4>
+      <p>Visión y consulta GPS corren en <b>paralelo</b> (<span class="mono">asyncio.gather</span>), no en
+         serie. La imagen se redimensiona/comprime antes de enviarla (menos tokens de imagen = menos
+         latencia y costo). <b>Timeout agresivo</b> (~8s) con el mismo fail-safe que ya existe: si el
+         proveedor de visión no responde a tiempo, se resuelve por texto y ESCALA — nunca bloquea al
+         usuario. Cachear la comparación contra el catálogo si el mismo producto se reclama seguido.</p></div>
+    <div class="rcard b"><div class="ico">🛡️</div><h4>Guardrails — la evidencia visual nunca es la última palabra</h4>
+      <p>Sigue siendo <b>una señal más</b>, no reemplaza Capa 2: un bucket FRAUDE derivado de datos no se
+         auto-aprueba aunque la foto "parezca" consistente. Validar EXIF/timestamp de la imagen (que no
+         sea una foto vieja o de otro pedido). Confianza baja del modelo de visión → se trata como no
+         concluyente, mismo criterio "ante la duda, escala". Se persiste la imagen + la conclusión del
+         modelo junto con la decisión, para auditoría humana. Rate-limit de subidas por usuario — es la
+         parte más cara del pipeline.</p></div>
+  </div>
+
   <div class="soon"><h3>Todavía no implementado</h3>
     <p>Esta pestaña documenta el diseño propuesto para el próximo paso del proyecto — hoy Capa 1 sigue
        siendo el LLM de solo texto descrito en la pestaña Arquitectura. Implementarlo requiere elegir un
@@ -1099,27 +1120,6 @@ const DIAGRAMS = {
     class E approve
     class F reject
     class L escalate` },
-  imgflow: { title: 'Cómo el agente analiza una imagen del reclamo', def: `flowchart LR
-    U["📤 Usuario sube foto<br/>del producto/paquete"] --> PRE["🖼️ Preprocesa la imagen<br/>(orientación, recorte, calidad mínima)"]
-    PRE --> VIS["👁️ Modelo de visión<br/>(Gemini / GPT-4V / Claude)"]
-    CAT[("🛒 Catálogo del pedido<br/>foto de referencia + descripción")] -.-> VIS
-    VIS --> ATTR["🔍 Extrae atributos:<br/>objeto detectado · ¿daño visible? · color/modelo"]
-    ATTR --> CMP{"¿Coincide con lo que se pidió?"}
-    CMP -- "Sí, coincide y sin daño" --> R1["✅ Evidencia visual: reclamo NO se sostiene"]
-    CMP -- "No coincide / daño visible" --> R2["❌ Evidencia visual: reclamo SÍ se sostiene"]
-    CMP -- "Imagen borrosa / no concluyente" --> R3["🤔 Evidencia visual: no concluyente"]
-    R1 --> COMB["🧩 Se combina con señales de riesgo + GPS + texto"]
-    R2 --> COMB
-    R3 --> COMB
-    COMB --> OUT["📝 Veredicto final con justificación basada en evidencia"]
-    classDef vision fill:#FF441F,color:#fff,stroke:#E0360F,stroke-width:2px
-    classDef good fill:#E7F5EC,color:#14663a,stroke:#1F9D57
-    classDef bad fill:#FBE6E6,color:#932528,stroke:#D93A3A
-    classDef unclear fill:#FBF0D6,color:#8a6200,stroke:#E8A400
-    class VIS vision
-    class R1 good
-    class R2 bad
-    class R3 unclear` },
 };
 
 const modal = document.getElementById('diagram-modal');

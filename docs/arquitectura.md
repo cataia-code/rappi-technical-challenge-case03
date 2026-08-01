@@ -192,31 +192,32 @@ flowchart TD
     class L escalate
 ```
 
-### Cómo el agente analiza una imagen del reclamo
+### Consideraciones de ingeniería
 
-```mermaid
-flowchart LR
-    U["📤 Usuario sube foto<br/>del producto/paquete"] --> PRE["🖼️ Preprocesa la imagen<br/>(orientación, recorte, calidad mínima)"]
-    PRE --> VIS["👁️ Modelo de visión<br/>(Gemini / GPT-4V / Claude)"]
-    CAT[("🛒 Catálogo del pedido<br/>foto de referencia + descripción")] -.-> VIS
-    VIS --> ATTR["🔍 Extrae atributos:<br/>objeto detectado · ¿daño visible? · color/modelo"]
-    ATTR --> CMP{"¿Coincide con lo que se pidió?"}
-    CMP -- "Sí, coincide y sin daño" --> R1["✅ Evidencia visual: reclamo NO se sostiene"]
-    CMP -- "No coincide / daño visible" --> R2["❌ Evidencia visual: reclamo SÍ se sostiene"]
-    CMP -- "Imagen borrosa / no concluyente" --> R3["🤔 Evidencia visual: no concluyente"]
-    R1 --> COMB["🧩 Se combina con señales de riesgo + GPS + texto"]
-    R2 --> COMB
-    R3 --> COMB
-    COMB --> OUT["📝 Veredicto final con justificación basada en evidencia"]
-    classDef vision fill:#FF441F,color:#fff,stroke:#E0360F,stroke-width:2px
-    classDef good fill:#E7F5EC,color:#14663a,stroke:#1F9D57
-    classDef bad fill:#FBE6E6,color:#932528,stroke:#D93A3A
-    classDef unclear fill:#FBF0D6,color:#8a6200,stroke:#E8A400
-    class VIS vision
-    class R1 good
-    class R2 bad
-    class R3 unclear
-```
+Las decisiones que importan antes de escribir código: qué modelo, cómo no volverlo lento, y cómo no
+dejar que alucine sin control.
+
+**Qué modelo — escalable, no el más grande.** Un modelo "flagship" de visión (GPT-4V full, Claude
+Opus) es demasiado caro y lento a 200+/día. Misma estrategia que ya usa el LLM de texto
+(`llm/client.py`): un modelo **mini/flash** multimodal como primario (Gemini 2.0 Flash o
+GPT-4o-mini — visión nativa, ~10x más barato que el flagship) y el modelo grande solo como
+**reintento** cuando la confianza sale baja. Cascada de costo, no cascada de calidad fija.
+
+**Latencia — paralelo, comprimido, con timeout.** Visión y consulta GPS corren en **paralelo**
+(`asyncio.gather`), no en serie — el diagrama de secuencia las muestra secuenciales solo por
+claridad narrativa. La imagen se redimensiona/comprime antes de enviarla (menos tokens de imagen =
+menos latencia y costo). **Timeout agresivo** (~8s) con el mismo fail-safe que ya existe en
+`pipeline._safe_decide_llm`: si el proveedor de visión no responde a tiempo, se resuelve por texto
+y ESCALA — nunca bloquea al usuario. Cachear la comparación contra el catálogo si el mismo producto
+se reclama seguido.
+
+**Guardrails — la evidencia visual nunca es la última palabra.** Sigue siendo una señal más, no
+reemplaza Capa 2: un bucket FRAUDE derivado de datos no se auto-aprueba aunque la foto "parezca"
+consistente (`feature_service.evaluate_guardrail` sigue mandando). Validar EXIF/timestamp de la
+imagen para que no sea una foto vieja o de otro pedido. Confianza baja del modelo de visión → se
+trata como no concluyente, mismo criterio "ante la duda, escala" que ya rige el resto del sistema.
+Se persiste la imagen + la conclusión del modelo junto con la decisión, para auditoría humana.
+Rate-limit de subidas por usuario — es la parte más cara del pipeline y la más fácil de abusar.
 
 ### Qué falta para implementarlo
 
