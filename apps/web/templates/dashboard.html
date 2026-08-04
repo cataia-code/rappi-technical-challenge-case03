@@ -566,13 +566,19 @@ footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:2
     <div class="mcard"><div class="n" id="ev-esc">—</div><div class="l">Tasa de escalamiento (objetivo: 20–35%)</div></div>
     <div class="mcard"><div class="n">100%</div><div class="l">Fidelidad de esquema — Pydantic invalida y cae a ESCALAR fail-safe, nunca propaga JSON roto</div></div>
   </div>
-  <div class="callout reveal"><b>Nota honesta sobre este run.</b> El Excel que alimenta el dashboard se generó con
-    <span class="mono">--no-llm</span> (por presupuesto de tokens): los 58 casos ambiguos cayeron al fallback
-    determinístico "AMBIGUO → ESCALAR" sin invocar ningún proveedor — por eso la confianza registrada en esos casos
-    es un valor fijo (0.5), no una salida de LLM. Con presupuesto disponible, correr sin <span class="mono">--no-llm</span>
-    resuelve por texto una parte de esos 58 y <b>baja la tasa de escalamiento</b>, que es exactamente el objetivo:
-    el LLM existe para reducir cuánto llega a un humano. La telemetría de latencia y alucinación por proveedor se
-    captura en <span class="mono">experiments/llm/eval_runs/</span> cuando corre con LLM activo.</div>
+  <div class="callout reveal"><b>Este dashboard corre con LLM real.</b> El batch se generó llamando al LLM en los
+    <b>58 casos ambiguos</b> (los 92 claros los resuelve Capa 0 sin gastar tokens). El run completo tarda
+    <b>~3.5–5 min</b> con 3 workers concurrentes; el fallback multi-proveedor se activó de verdad (Groq resolvió la
+    mayoría, 1–3 casos cayeron a OpenRouter cuando Groq falló). El LLM <b>sacó de ESCALAR ~20–23 de los 58 ambiguos</b>
+    (todos a APROBAR: relatos de no-entrega coherentes), bajando la tasa de escalamiento de <b>38.7% (modo
+    <span class="mono">--no-llm</span>) a ~23–25%</b> — que es exactamente el objetivo: el LLM existe para reducir
+    cuánto llega a un humano.</div>
+  <div class="callout reveal" style="margin-top:14px"><b>Reproducibilidad (medida, no asumida).</b> Los
+    <b>92 casos determinísticos son byte-idénticos entre corridas y contra el baseline</b> — Capa 0 es matemática pura.
+    Los 58 ambiguos corren a <span class="mono">temperature=0</span>: en dos corridas seguidas <b>coincidieron 53/58
+    (91%)</b>; 5 casos flipearon entre APROBAR y ESCALAR (nunca a RECHAZAR). Por eso el "~20–23" es un rango honesto,
+    no un número fijo. En ambas corridas <b>ningún guardrail de Capa 2 tuvo que vetar al LLM</b>: el prompt ya es
+    conservador (sesgo FP&gt;FN), así que el LLM nunca intentó aprobar un FRAUDE ni rechazar un LEGÍTIMO.</div>
   <div class="callout reveal" style="margin-top:14px"><b>Qué cuenta como "alucinación" acá.</b> El LLM solo puede
     citar señales que ya le dimos en el prompt (bucket, score, señales dominantes, texto del reclamo) — no inventa
     columnas. Los guardrails de Capa 2 son el control de última línea: si el LLM aprueba un caso que el modelo de

@@ -37,6 +37,7 @@ def build_cases() -> list[dict]:
         top = str(r.get("top_contribuyentes", "") or "")
         pasos = str(r.get("pasos_recomendados", "") or "")
         out.append({
+            "mu": str(r["modelo_usado"]).strip() if pd.notna(r.get("modelo_usado")) else "",
             "id": r["caso_id"],
             "ciu": r["ciudad"],
             "ver": r["vertical"],
@@ -72,10 +73,17 @@ def prompt_version() -> str:
 def build_meta(cases: list[dict]) -> dict:
     total = len(cases) or 1
     escalated = sum(1 for c in cases if c["rec"] == "ESCALAR")
+    # Deterministic coverage = cases Capa 0 resolved without ever calling the LLM
+    # (empty modelo_usado). This is structural (92/150) and must NOT be derived
+    # from the escalation count: with the LLM active, non-escalated no longer
+    # implies "resolved by Capa 0" — the LLM resolves some ambiguous cases too.
+    deterministic = sum(1 for c in cases if not c.get("mu"))
+    llm_calls = total - deterministic
     return {
         "prompt_version": prompt_version(),
-        "det_pct": round((total - escalated) / total * 100, 1),
+        "det_pct": round(deterministic / total * 100, 1),
         "esc_pct": round(escalated / total * 100, 1),
+        "llm_calls": llm_calls,
     }
 
 
